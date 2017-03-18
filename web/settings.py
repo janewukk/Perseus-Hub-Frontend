@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'app.apps.AppConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -74,10 +75,21 @@ WSGI_APPLICATION = 'web.wsgi.application'
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    'sqlite': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    },
+    # development specific database config
+    'default' : {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'data_visualization_website',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'OPTIONS': {
+            'unix_socket': '/Applications/MAMP/tmp/mysql/mysql.sock',
+            'init_command': 'SET sql_mode=STRICT_TRANS_TABLES',
+        }
+    } 
 }
 
 
