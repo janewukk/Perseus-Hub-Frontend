@@ -16,6 +16,15 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
+# import controllers
+from app.controllers.auth import LoginController
+from app.controllers.auth import RegisterController
+from app.controllers.dashboard import DashboardController
+from app.controllers.file import FileUploadController
+
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+	url(r'^login/$', LoginController.as_view()),
+	url(r'^register/$', RegisterController.as_view()),
+    url(r'^dashboard/$', DashboardController.as_view()),
+    url(r'^dataset/upload/$', FileUploadController.as_view())
 ]
