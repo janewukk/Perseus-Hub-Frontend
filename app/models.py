@@ -3,7 +3,17 @@ from __future__ import unicode_literals
 # base model class
 from django.db import models
 # just in case we need to customize user
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User as BaseUser
+
+"""
+Abstract representation of a site user
+
+Extends:
+	models.User
+"""
+class User(BaseUser):
+	class Meta:
+		proxy = True
 
 """
 Abstract representation of a dataset 

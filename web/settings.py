@@ -55,7 +55,7 @@ ROOT_URLCONF = 'app.routes'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'app', 'views')], # use base directory to search for views
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
