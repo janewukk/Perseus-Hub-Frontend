@@ -14,14 +14,14 @@ def login_with_authentication(request, email, password):
 		# login the user with session
 		login(request, user)
 		# redirect to dashboard with success message
-		return render('dashboard/index.html', {
+		return render(request, 'dashboard/index.html', {
 				'status' : 'success',
 				'message' : 'Welcome!'
 			})
 	else:
 		# user existed, but password is not right
 		# redirect to signin page with error message
-		return render('auth/login', {
+		return render(request, 'auth/login.html', {
 				'status' : 'error',
 				'message' : 'Your password is not correct! Please try again!'
 			})
@@ -53,7 +53,7 @@ class LoginController(View):
 			return login_with_authentication(request, email, password)
 		else:
 			# user does not exist, redirect to signin page with error message
-			return render('auth/login', {
+			return render(request, 'auth/login.html', {
 					'status' : 'error',
 					'message' : 'Your email does not exist! Please try again!'
 				});
@@ -91,7 +91,7 @@ class RegisterController(View):
 			# login the user
 			login(request, user)
 			# redirect to dashboard with success message
-			return render('dashboard/index.html', {
+			return render(request, 'dashboard/index.html', {
 				'status' : 'success',
 				'message' : 'Welcome!'
 			})
