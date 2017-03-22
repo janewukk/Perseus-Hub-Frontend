@@ -58,6 +58,13 @@ class LoginController(View):
 					'message' : 'Your email does not exist! Please try again!'
 				});
 
+class LogoutController(View):
+
+	def post(self):
+		logout(request)
+		return redirect('/login/')
+
+
 class RegisterController(View):
 
 	def get(self, request):
@@ -96,4 +103,3 @@ class RegisterController(View):
 				'message' : 'Welcome!'
 			})
 			
-

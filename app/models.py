@@ -13,7 +13,27 @@ Extends:
 """
 class User(BaseUser):
 	class Meta:
+		# proxy all available function calls 
+		# to the super base user class
 		proxy = True
+
+	def datasets(self):
+		"""
+		Helper method to get user's datasets
+		
+		Returns:
+			RelationObject -- datasets
+		"""
+		return self.dataset_set
+
+	def bookmarks(self):
+		"""
+		Helper method to get user's bookmarks
+		
+		Returns:
+			RelationObject -- bookmarks
+		"""
+		return self.bookmark_set
 
 """
 Abstract representation of a dataset 
@@ -35,7 +55,6 @@ Extends:
 class Property(models.Model):
 	# dataset that this property belongs to
 	dataset = models.ForeignKey(Dataset, on_delete = models.CASCADE)
-
 
 """
 Bookmark user can make on properties/datasets
