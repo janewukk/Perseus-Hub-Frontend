@@ -17,11 +17,12 @@ from django.conf.urls import url
 from django.contrib import admin
 
 # import controllers
-from app.controllers.auth import LoginController, RegisterController
+from app.controllers.auth import LoginController, LogoutController, RegisterController
 from app.controllers.dashboard import DashboardController
 from app.controllers.file import FileUploadController
 
 urlpatterns = [
+    url(r'^$', DashboardController.as_view()),
 	url(r'^login/$', LoginController.as_view()),
     url(r'^logout/$', LogoutController.as_view()),
 	url(r'^register/$', RegisterController.as_view()),

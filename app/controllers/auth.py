@@ -1,7 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from django.views import View
-from django.shortcuts import render
-from django.contrib.auth import authenticate
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
 from app.models import User
 
 """
@@ -14,10 +14,7 @@ def login_with_authentication(request, email, password):
 		# login the user with session
 		login(request, user)
 		# redirect to dashboard with success message
-		return render(request, 'dashboard/index.html', {
-				'status' : 'success',
-				'message' : 'Welcome!'
-			})
+		return redirect('/dashboard/')
 	else:
 		# user existed, but password is not right
 		# redirect to signin page with error message
@@ -48,7 +45,7 @@ class LoginController(View):
 		email = request.POST['email']
 		password = request.POST['password']
 		# check if user already exists
-		user = User.objects.filter(email = email)
+		user = User.objects.filter(username = email)
 		if len(user) > 0:
 			return login_with_authentication(request, email, password)
 		else:
@@ -60,7 +57,7 @@ class LoginController(View):
 
 class LogoutController(View):
 
-	def post(self):
+	def get(self, request):
 		logout(request)
 		return redirect('/login/')
 
@@ -87,9 +84,12 @@ class RegisterController(View):
 		email = request.POST['email']
 		password = request.POST['password']
 		# check if user already exists
-		user = User.objects.filter(email = email)
+		user = User.objects.filter(username = email)
 		if len(user) > 0:
-			return login_with_authentication(request, email, password)
+			return render(request, 'auth/login.html', {
+					'status' : "warning",
+					'message' : "Please login instead!"
+				})
 		else:
 			# create new user
 			user = User.objects.create_user(username = email, password = password)
