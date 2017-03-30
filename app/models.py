@@ -13,7 +13,7 @@ Extends:
 """
 class User(BaseUser):
 	class Meta:
-		# proxy all available function calls 
+		# map all available function calls 
 		# to the super base user class
 		proxy = True
 
@@ -43,18 +43,10 @@ Extends:
 	models.Model
 """
 class Dataset(models.Model):
+	# whether this dataset should be publicize
+	publicized = models.BooleanField()
 	# the user who uploads this dataset
 	uploader = models.ForeignKey(User, on_delete = models.CASCADE)
-
-"""
-Properties associated with specific datasets
-
-Extends:
-	models.Model
-"""
-class Property(models.Model):
-	# dataset that this property belongs to
-	dataset = models.ForeignKey(Dataset, on_delete = models.CASCADE)
 
 """
 Bookmark user can make on properties/datasets
@@ -65,7 +57,7 @@ Extends:
 class Bookmark(models.Model):
 	# bookmark's creator (User)
 	creator = models.ForeignKey(User, on_delete = models.CASCADE)
-	# bookmark's associated dataset property
-	associated_property = models.OneToOneField(Property, on_delete = models.CASCADE)
-	# a numerical reporesentation of this bookmark, assigned by user
+	# bookmark's associated dataset node
+	# associated_node = models.OneToOneField(Node, on_delete = models.CASCADE)
+	# a numerical representation of this bookmark's color, assigned by user
 	priority = models.IntegerField()

@@ -102,4 +102,3 @@ class RegisterController(View):
 				'status' : 'success',
 				'message' : 'Welcome!'
 			})
-			
