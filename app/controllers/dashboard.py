@@ -14,7 +14,7 @@ class DashboardController(LoginRequiredResource, View):
 		# with all datasets 
 		# TODO: Pagination
 		return render(request, 'dashboard/datasets.html', {
-				'datasets' : Dataset.object.all()
+				'datasets' : Dataset.objects.all()
 			})
 
 class DatasetViewController(LoginRequiredResource, View):
