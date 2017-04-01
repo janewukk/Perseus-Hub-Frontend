@@ -2,26 +2,28 @@ from django.http import HttpResponse, JsonResponse
 from django.views import View
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
+
 from app.models import User
+from app.services.utils import flash_session_message
 
 """
 Helper to login in a user
 """
 def login_with_authentication(request, email, password):
 	# authenticate user
-	user = authenticate(username = email, password = password)
+	user = authenticate(username = email, email = email, password = password)
 	if user is not None:
 		# login the user with session
 		login(request, user)
 		# redirect to dashboard with success message
+		flash_session_message(request, 'success', "Welcome!")
 		return redirect('/dashboard/')
 	else:
 		# user existed, but password is not right
 		# redirect to signin page with error message
-		return render(request, 'auth/login.html', {
-				'status' : 'error',
-				'message' : 'Your password is not correct! Please try again!'
-			})
+		flash_session_message(request, 'error', 'Your password is not correct! Please try again!')
+		return redirect('/login/')
+
 
 class LoginController(View):
 
@@ -45,20 +47,29 @@ class LoginController(View):
 		email = request.POST['email']
 		password = request.POST['password']
 		# check if user already exists
-		user = User.objects.filter(username = email)
+		user = User.objects.filter(email = email)
 		if len(user) > 0:
 			return login_with_authentication(request, email, password)
 		else:
 			# user does not exist, redirect to signin page with error message
-			return render(request, 'auth/login.html', {
-					'status' : 'error',
-					'message' : 'Your email does not exist! Please try again!'
-				});
+			flash_session_message(request, 'error', "Your email does not exist!")
+
+			return redirect('/login');
 
 class LogoutController(View):
 
 	def get(self, request):
+		"""
+		Logout the current user
+		
+		Arguments:
+			request {HTTPRequest} -- Request Object
+		
+		Returns:
+			HTTPResponse -- Redirect request
+		"""
 		logout(request)
+		flash_session_message(request, 'info', 'Logged out!')
 		return redirect('/login/')
 
 
@@ -83,22 +94,20 @@ class RegisterController(View):
 		# retrieve auth credentials
 		email = request.POST['email']
 		password = request.POST['password']
+
 		# check if user already exists
-		user = User.objects.filter(username = email)
+		user = User.objects.filter(email = email)
+
 		if len(user) > 0:
-			return render(request, 'auth/login.html', {
-					'status' : "warning",
-					'message' : "Please login instead!"
-				})
+			flash_session_message(request, 'warning', "Please login instead")
+			return redirect('/login/')
 		else:
 			# create new user
-			user = User.objects.create_user(username = email, password = password)
+			user = User.objects.create_user(email = email, password = password, username = email)
 			# save the user
 			user.save()
 			# login the user
 			login(request, user)
 			# redirect to dashboard with success message
-			return render(request, 'dashboard/index.html', {
-				'status' : 'success',
-				'message' : 'Welcome!'
-			})
+			flash_session_message(request, 'success', 'Welcome!')
+			return redirect('/dashboard/')

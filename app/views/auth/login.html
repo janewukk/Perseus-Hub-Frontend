@@ -2,10 +2,10 @@
 
 {% block navitems %}
 <li>
-	<a href="/register">Register</a>
+	<a href="/register/">Register</a>
 </li>
 <li class="active">
-	<a href="/login">Sign in</a>
+	<a href="/login/">Sign in</a>
 </li>
 {% endblock %}
 
@@ -26,26 +26,16 @@
 		</form>
 	</div>
 
-	<div class="col-md-8 col-md-offset-2" style="margin-top: 20px">
-		{% if status == "error" %}
-		<div class="alert alert-danger" role="alert">
-			<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-			{{ message }}
+	{% if messages %}
+		<div class="col-md-8 col-md-offset-2" style="margin-top: 20px">
+		{% for message in messages %}
+			<div class="alert alert-{{ message.tags }}" role="alert">
+				<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+				{{ message }}
+			</div>
+		{% endfor %}
 		</div>
-		{% endif %}
-		{% if status == "success" %}
-		<div class="alert alert-success" role="alert">
-			<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-			{{ message }}
-		</div>
-		{% endif %}
-		{% if status == "warning" %}
-		<div class="alert alert-warning" role="alert">
-			<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-			{{ message }}
-		</div>
-		{% endif %}
-	</div>
+	{% endif %}
 
 </div>
 {% endblock %}

@@ -18,8 +18,8 @@ from django.contrib import admin
 
 # import controllers
 from app.controllers.auth import LoginController, LogoutController, RegisterController
-from app.controllers.dashboard import DashboardController
-from app.controllers.file import FileUploadController
+from app.controllers.dashboard import DashboardController, DatasetViewController
+from app.controllers.dataset import DatasetSearchController, DatasetUploadController
 
 urlpatterns = [
     url(r'^$', DashboardController.as_view()),
@@ -27,5 +27,7 @@ urlpatterns = [
     url(r'^logout/$', LogoutController.as_view()),
 	url(r'^register/$', RegisterController.as_view()),
     url(r'^dashboard/$', DashboardController.as_view()),
-    url(r'^dataset/upload/$', FileUploadController.as_view())
+    url(r'^upload/$', DatasetUploadController.as_view()),
+    url(r'^search/$', DatasetSearchController.as_view()),
+    url(r'^datasets/(?P<id>\d+)/$', DatasetViewController.as_view())
 ]

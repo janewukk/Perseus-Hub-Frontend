@@ -45,11 +45,20 @@ Extends:
 class Dataset(models.Model):
 	# whether this dataset should be publicize
 	publicized = models.BooleanField()
+	# title for this dataset
+	title = models.CharField(max_length = 256)
+	# dataset's raw file field
+	raw_data = models.FileField(upload_to='uploads/datasets/')
+	# dataset's analyzed json file name
+	analyzed_json_filename = models.CharField(max_length = 256)
 	# the user who uploads this dataset
 	uploader = models.ForeignKey(User, on_delete = models.CASCADE)
+	# timestamps
+	created_at = models.DateTimeField(auto_now_add = True)
+	updated_at = models.DateTimeField(auto_now = True)
 
 """
-Bookmark user can make on properties/datasets
+Bookmark user can make on a specific node of a dataset
 
 Extends:
 	models.Model

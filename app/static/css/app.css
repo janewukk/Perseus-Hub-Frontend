@@ -1,0 +1,69 @@
+/*
+Boostrap modifications
+ */
+/* Copy behavior of .alert-danger */
+.alert-error {
+	color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
+
+/* File input */
+.input-file {
+  display: inline-block;
+  text-align: left;
+  background: #fff;
+  padding: 16px;
+  width: 450px;
+  position: relative;
+  border-radius: 3px;
+}
+
+.input-file > [type='file'] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.input-file > .button {
+  display: inline-block;
+  cursor: pointer;
+  background: #eee;
+  padding: 8px 16px;
+  border-radius: 2px;
+  margin-right: 8px;
+}
+
+.input-file:hover > .button {
+  background: dodgerblue;
+  color: white;
+}
+
+.input-file > .label {
+  color: #333;
+  white-space: nowrap;
+  opacity: .3;
+}
+
+.input-file.-chosen > .label {
+  opacity: 1;
+}
+
+/* Anchor */
+a {
+	cursor: pointer;
+}
+
+@media(max-width: 768px) {
+	/* Margin fix for navbar text on mobile */
+	.navbar-text {
+		margin-left: 20px;
+		margin-right: 20px;
+	}
+
+}
