@@ -20,7 +20,7 @@
 	</a>
 	<ul class="collapse nav" id="dataset-sections">
 		<li><a href="/dashboard/">Public datasets</a></li>
-		<li><a href="/my-datasets">My Datasets</a></li>
+		<li><a href="/dashboard/?my">My Datasets</a></li>
 	</ul>
 </li>
 <li><a href="/bookmarks/">Bookmarked</a></li>
@@ -64,18 +64,7 @@
 	</div>
 </div>
 
-<div class="modal fade" tabindex="-1" role="dialog" id="modal">
-	<div class="modal-dialog modal-sm" role="document">
-		<div class="modal-content">
-			<div class="modal-body">
-				
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
-			</div>
-		</div>
-	</div>
-</div>
+{% include 'components/modal.html' %}
 
 {% endblock %}
 
@@ -96,13 +85,6 @@
 			el.className += ' -chosen'
 			label.innerText = value
 		}
-	}
-	// helpers
-	function showModal(message) {
-		// set error message
-		$('#modal .modal-body').html("Please upload a file!");
-		// show modal
-		$('#modal').modal();
 	}
 	// file upload action
 	$('#upload-btn').click(function() {
@@ -128,9 +110,14 @@
 			showModal("Please upload a dataset file!");
 			return;
 		}
+		if ($('#title').val() == "") {
+			showModal("Please enter a title!");
+			return;
+		}
 
 		// extract form data
 		var data = new FormData();
+		data.append('title', $('#title').val());
 		data.append('file', $('#dataset-file')[0].files[0]);
 		data.append('is_publicized', $('#dataset-publicized').val());
 
@@ -142,10 +129,16 @@
 		};
 		http.post('/upload', data, config)
 			.then(function(res) {
-
+				if (res.data['status'] == 'success') {
+					showModal("Great! Your dataset has been uploaded! We will send " +
+						  "you an email when we finished processed the data");
+				} else {
+					showModal(res.data['message']);
+				}
+				
 			})
 			.catch(function(err) {
-
+				showModal("Oops. Please try again later!");
 			});
 	});
 </script>

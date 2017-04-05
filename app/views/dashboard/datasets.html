@@ -35,7 +35,7 @@
 	</a>
 	<ul class="collapse nav" id="dataset-sections">
 		<li><a href="/dashboard/">Public datasets</a></li>
-		<li><a href="/my-datasets">My Datasets</a></li>
+		<li><a href="/dashboard/?my">My Datasets</a></li>
 	</ul>
 </li>
 <li><a href="/bookmarks/">Bookmarked</a></li>
@@ -45,6 +45,15 @@
 {% block tabdetails %}
 <div class="row">
 	<div class="col-xs-12 col-sm-6 col-md-4 recent-view">
+		{% if messages %}
+			{% for message in messages %}
+				<div class="alert alert-{{ message.tags }} alert-dismissible" role="alert" style="margin-top:10px;">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+					{{ message }}
+				</div>
+			{% endfor %}
+		{% endif %}
 		<input type="text" id="search-field" class="form-control" placeholder="Search for dataset">
 		<ul class="list-group">
 			<li class="list-group-item clearfix">
@@ -60,3 +69,21 @@
 	</div>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+	// search action
+	$('#search-field').keyup(function() {
+		// extract current val
+		var query = $(this).val();
+		// send search request
+		http.post('/search/', {
+			query : query
+		}).then(function() {
+			// TODO: Fill the template with data
+		}).catch(function() {
+			console.log("SEARCH ERROR!");
+		});
+	});
+</script>
+{% endblock scripts %}

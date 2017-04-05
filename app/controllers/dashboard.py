@@ -10,11 +10,16 @@ class DashboardController(LoginRequiredResource, View):
 	redirect_field_name = 'redirect_to'
 
 	def get(self, request):
-		# render the default dataset view 
-		# with all datasets 
+		# render the dataset view 
+		# with all publicized datasets or user specific
 		# TODO: Pagination
+		if 'my' in request.GET.keys():
+			datasets = request.user.dataset_set
+		else:
+			datasets = Dataset.objects.filter(publicized = True)
+
 		return render(request, 'dashboard/datasets.html', {
-				'datasets' : Dataset.objects.all()
+				'datasets' : datasets
 			})
 
 class DatasetViewController(LoginRequiredResource, View):

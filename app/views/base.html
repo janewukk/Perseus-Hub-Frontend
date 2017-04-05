@@ -31,7 +31,7 @@
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<a class="navbar-brand" href="">Data Visualization</a>
+				<a class="navbar-brand" href="/dashboard/">Data Visualization</a>
 			</div>
 		
 			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -39,7 +39,8 @@
 					<ul class="nav navbar-nav navbar-right">
 						{% if user.is_authenticated %}
 						<li>
-							<span class="navbar-text">Welcome!</span><button onclick="window.location.href='/logout/'" class="btn btn-danger navbar-btn">Logout</button>
+							<button onclick="window.location.href='/settings/'" class="btn btn-primary navbar-btn">Settings</button>
+							<button onclick="window.location.href='/logout/'" class="btn btn-danger navbar-btn">Logout</button>
 						</li>
 						{% endif %}
 						{% block navitems %}

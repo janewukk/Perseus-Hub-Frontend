@@ -1,8 +1,7 @@
 from __future__ import unicode_literals
 
-# base model class
 from django.db import models
-# just in case we need to customize user
+from django.utils import timezone
 from django.contrib.auth.models import User as BaseUser
 
 """
@@ -22,7 +21,7 @@ class User(BaseUser):
 		Helper method to get user's datasets
 		
 		Returns:
-			RelationObject -- datasets
+			QuerySet -- datasets
 		"""
 		return self.dataset_set
 
@@ -31,7 +30,7 @@ class User(BaseUser):
 		Helper method to get user's bookmarks
 		
 		Returns:
-			RelationObject -- bookmarks
+			QuerySet -- bookmarks
 		"""
 		return self.bookmark_set
 
@@ -44,13 +43,15 @@ Extends:
 """
 class Dataset(models.Model):
 	# whether this dataset should be publicize
-	publicized = models.BooleanField()
+	publicized = models.BooleanField(default = False)
+	# whether this dataset has finished processing
+	processed = models.BooleanField(default = False)
 	# title for this dataset
-	title = models.CharField(max_length = 256)
+	title = models.CharField(max_length = 256, default = "")
 	# dataset's raw file field
-	raw_data = models.FileField(upload_to='uploads/datasets/')
+	raw_data = models.FileField(upload_to='uploads/datasets/', default = "")
 	# dataset's analyzed json file name
-	analyzed_json_filename = models.CharField(max_length = 256)
+	analyzed_json_filename = models.CharField(max_length = 256, default = "")
 	# the user who uploads this dataset
 	uploader = models.ForeignKey(User, on_delete = models.CASCADE)
 	# timestamps

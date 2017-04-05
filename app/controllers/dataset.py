@@ -1,3 +1,4 @@
+import json
 from django.views import View
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
@@ -17,12 +18,15 @@ class DatasetSearchController(LoginRequiredResource, View):
 			request {HTTPRequest} -- Request object
 		"""
 		# check for request param
-		if request.POST['query'] == "":
+		body = json.loads(request.body.decode('utf-8'))
+		query = body.get('query', False)
+
+		if query == False:
 			# if empty, then simply return every dataset
 			datasets = Dataset.objects.all()
 		else:
 			# search for datasets
-			datasets = Dataset.objects.filter(name__icontains = request.POST['query'])
+			datasets = Dataset.objects.filter(title__icontains = query)
 
 		if len(datasets) == 0:
 			response = {
