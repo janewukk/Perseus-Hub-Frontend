@@ -5,6 +5,7 @@
 	<meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon"> 
 	<title>A Data Visualization Website</title>
 	<!-- Normalize CSS -->
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
@@ -62,25 +63,8 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.15.3/axios.min.js"></script>
 	<!-- Jquery cookie -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.3/js.cookie.min.js"></script>
-	<!-- CSRF setup -->
-	<script type="text/javascript">
-		// config csrf token for jQuery ajax
-		var csrftoken = Cookies.get('csrftoken');
-		function csrfSafeMethod(method) {
-		    // these HTTP methods do not require CSRF protection
-		    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-		}
-		$.ajaxSetup({
-			beforeSend: function(xhr, settings) {
-				if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-					xhr.setRequestHeader("X-CSRFToken", csrftoken);
-				}
-			}
-		});
-		// config csrf token for Axios
-		axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
-		window.http = axios;
-	</script>
+	<!-- Knockout js -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-min.js"></script>
 	<!-- App JS -->
 	<script src="{% static 'js/app.js' %}"></script>
 	{% block scripts %}

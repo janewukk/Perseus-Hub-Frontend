@@ -55,13 +55,13 @@
 			{% endfor %}
 		{% endif %}
 		<input type="text" id="search-field" class="form-control" placeholder="Search for dataset">
-		<ul class="list-group">
+		<ul class="list-group" data-bind="foreach: datasets">
 			<li class="list-group-item clearfix">
 				<button class="btn btn-primary btn-sm">View</button>
 				<div class="content">
-					<h4 class="list-group-item-heading">Phone number linked nodes</h4>
+					<h4 class="list-group-item-heading" data-bind="text: title"></h4>
 	    			<p class="list-group-item-text">uploaded by 
-	    				<a href="mailto:example@example.org">example@example.org</a>
+	    				<a data-bind="attr: { href : 'mailto:' + uploaderEmail}, text: uploaderEmail"></a>
 	    			</p>
 				</div>
 			</li>
@@ -72,6 +72,17 @@
 
 {% block scripts %}
 <script type="text/javascript">
+	// init view model
+	var view = new View({
+		data : {
+			datasets : [
+				{
+					title : "Phone number linked nodes",
+					uploaderEmail : "example@example.org"
+				}
+			]
+		}
+	});
 	// search action
 	$('#search-field').keyup(function() {
 		// extract current val
