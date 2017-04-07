@@ -54,6 +54,11 @@ Boostrap modifications
   opacity: 1;
 }
 
+/* Content wrapper */
+#content {
+  margin-top: 51px;
+}
+
 /* Anchor */
 a {
 	cursor: pointer;
@@ -81,4 +86,11 @@ a {
 }
 .loader-list-item i {
   margin-left: 40%;
+}
+
+/* Search dropdown */
+.search-dropdown {
+  position: absolute;
+  z-index: 9999;
+  margin-top: 10px;
 }

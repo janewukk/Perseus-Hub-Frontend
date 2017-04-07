@@ -35,59 +35,33 @@ function showModal(message) {
  * A simple wrapper over the KnockoutJS MVVM
  * @param {Object} options Options to initialize
  */
+
+window.ob = ko.observable;
+window.oba = ko.observableArray;
+window.obc = ko.computed;
+
 function View(options) {
 	// init configs
-	var el = null, data = {}, computed = {};
+	var el = null, data = {}, computed = {}, methods = {};
 
 	// extract configurations
 	if (options.el) el = options.el;
 	if (options.data) data = options.data;
 	if (options.computed) computed = options.computed;
+	if (options.methods) methods = options.methods;
 
 	// construct internal view model
 	this.viewModel = data;
-
-	this.constructModel(this.viewModel);
-
-	for (var key in computed) {
-		this.viewModel[key] = ko.computed(computed[key], this.viewModel)
-	}
+	this.constructData(this.viewModel);
+	this.constructComputedData(computed);
+	this.constructMethods(methods);
 
 	// activate binding
 	if (el) {
-		ko.applyBindings(this.viewModel, el)
+		ko.applyBindings(this.viewModel, el);
 	} else {
-		ko.applyBindings(this.viewModel)
+		ko.applyBindings(this.viewModel);
 	}
-}
-
-View.prototype.constructModel = function (obj) {
-	var key, has = Object.prototype.hasOwnProperty.bind(obj);
-	for (key in obj) {
-		if (has(key)) {
-			var val = obj[key];
-			if (Array.isArray(val)){
-				for (var i = 0; i < val.length; ++i) {
-					this.constructModel(val[i]);
-				}
-				obj[key] = ko.observableArray(val);
-			} else {
-				obj[key] = ko.observable(val);
-			}
-		}
-	}
-}
-
-/**
- * Subscribe to changes of a view data
- * @param  {String}   key      Name of data
- * @param  {Function} callback<newValue>
- * @return {Void}
- */
-View.prototype.subscribe = function(key, callback) {
-
-	this.viewModel[key].subscribe(callback);
-
 }
 
 /**
@@ -99,3 +73,47 @@ View.prototype.data = function() {
 	return this.viewModel;
 
 };
+
+/**
+ * Convert all input data into observables
+ * @param  {Object} obj Initial data object
+ * @return {Void}
+ */
+View.prototype.constructData = function (obj) {
+	var key, has = Object.prototype.hasOwnProperty.bind(obj);
+	for (key in obj) {
+		if (has(key)) {
+			var val = obj[key];
+			if (Array.isArray(val)){
+				for (var i = 0; i < val.length; ++i) {
+					this.constructData(val[i]);
+				}
+				obj[key] = oba(val);
+			} else {
+				obj[key] = ob(val);
+			}
+		}
+	}
+}
+
+/**
+ * Make computed property functions 
+ * @param  {Object} computed Computed properties function mapping
+ * @return {Void}
+ */
+View.prototype.constructComputedData = function (computed) {
+	for (var key in computed) {
+		this.viewModel[key] = obc(computed[key], this.viewModel)
+	}
+}
+
+/**
+ * Make view specific methods
+ * @param  {Object} methods Method function mapping
+ * @return {Void}
+ */
+View.prototype.constructMethods = function (methods) {
+	for (var key in methods) {
+		this.viewModel[key] = methods[key].bind(this.viewModel);
+	}
+}

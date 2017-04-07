@@ -25,7 +25,7 @@
     {% endblock %}
 </head>
 <body>
-	<nav class="navbar navbar-default">
+	<nav class="navbar navbar-default navbar-fixed-top">
 		<div class="container-fluid">
 			<div class="navbar-header">
 				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
@@ -41,6 +41,16 @@
 				
 					<ul class="nav navbar-nav navbar-right">
 						{% if user.is_authenticated %}
+						<form class="navbar-form navbar-left" role="search" id="nav-search-form">
+							<div class="form-group">
+								<input type="text" id="search-field" class="form-control" placeholder="Search datasets" autocomplete="off">
+								<ul class="list-group search-dropdown" data-bind="visible: showDropdown, foreach: results">
+									<li class="list-group-item">
+										<a data-bind="attr: { href : url }, text: title"></a>
+									</li>
+								</ul>
+							</div>
+						</form>
 						<li>
 							<button onclick="window.location.href='/settings/'" class="btn btn-primary navbar-btn">Settings</button>
 							<button onclick="window.location.href='/logout/'" class="btn btn-danger navbar-btn">Logout</button>
@@ -53,7 +63,7 @@
 			</div>
 		</div>
 	</nav>
-	<div class="container-fluid">
+	<div class="container-fluid" id="content">
 		{% block content %}
 		{% endblock %}
 	</div>
@@ -67,8 +77,61 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.1.3/js.cookie.min.js"></script>
 	<!-- Knockout js -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-min.js"></script>
-	<!-- App JS -->
+	<!-- Vendor js -->
+	<script src="{% static 'js/vendor.js' %}"></script>
+	<!-- App js -->
 	<script src="{% static 'js/app.js' %}"></script>
+	<!-- Search -->
+	<script type="text/javascript">
+		// init view model
+		var searchView = new View({
+			el : document.getElementById('nav-search-form'),
+			data : {
+				results : [],
+				showDropdown : false
+			}
+		});
+		// search action
+		$('#search-field').keyup(function() {
+			// extract current input
+			var query = $(this).val();
+			if (query == "") {
+				// hide dropdown
+				searchView.data().showDropdown(false);
+				return;
+			}
+			// show dropdown
+			searchView.data().showDropdown(true);
+			// send search request
+			http.post('/search/', {
+
+				query : query
+
+			}).then(function(res) {
+				
+				if (res.data['status'] == 'success') {
+					
+					searchView.data().results(res.data['data']
+							  .map(function(item){
+									return {
+										title : item['title'],
+										url : "/datasets/" + item['id']
+									}
+								}));
+				} else {
+					searchView.data().results([
+						{
+							title : ob("No matches found!"),
+							url : "#"
+						}
+					]);
+				}
+
+			}).catch(function() {
+				console.log("SEARCH ERROR!");
+			});
+		});
+	</script>
 	{% block scripts %}
 	{% endblock %}
 </body>
