@@ -65,5 +65,20 @@ a {
 		margin-left: 20px;
 		margin-right: 20px;
 	}
+}
 
+/* Vega canvas fix */
+.vega div {
+  left: 20%;
+}
+.vega div a {
+  padding : 10px;
+}
+
+/* Loader list */
+.loader-list-item {
+  margin-top: 20px;
+}
+.loader-list-item i {
+  margin-left: 40%;
 }

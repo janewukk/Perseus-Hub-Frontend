@@ -31,7 +31,10 @@ function showModal(message) {
 }
 
 // ============== HELPER CLASSES
-// MVVM wrapper for knockout JS
+/**
+ * A simple wrapper over the KnockoutJS MVVM
+ * @param {Object} options Options to initialize
+ */
 function View(options) {
 	// init configs
 	var el = null, data = {}, computed = {};
@@ -43,24 +46,8 @@ function View(options) {
 
 	// construct internal view model
 	this.viewModel = data;
-	var makeData = function (obj) {
-		var key, has = Object.prototype.hasOwnProperty.bind(obj);
-		for (key in obj) {
-			if (has(key)) {
-				var val = obj[key];
-				if (Array.isArray(val)){
-					for (var i = 0; i < val.length; ++i) {
-						makeData(val[i]);
-					}
-					obj[key] = ko.observableArray(val);
-				} else {
-					obj[key] = ko.observable(val);
-				}
-			}
-		}
-	}
 
-	makeData(this.viewModel);
+	this.constructModel(this.viewModel);
 
 	for (var key in computed) {
 		this.viewModel[key] = ko.computed(computed[key], this.viewModel)
@@ -74,12 +61,39 @@ function View(options) {
 	}
 }
 
+View.prototype.constructModel = function (obj) {
+	var key, has = Object.prototype.hasOwnProperty.bind(obj);
+	for (key in obj) {
+		if (has(key)) {
+			var val = obj[key];
+			if (Array.isArray(val)){
+				for (var i = 0; i < val.length; ++i) {
+					this.constructModel(val[i]);
+				}
+				obj[key] = ko.observableArray(val);
+			} else {
+				obj[key] = ko.observable(val);
+			}
+		}
+	}
+}
+
+/**
+ * Subscribe to changes of a view data
+ * @param  {String}   key      Name of data
+ * @param  {Function} callback<newValue>
+ * @return {Void}
+ */
 View.prototype.subscribe = function(key, callback) {
 
 	this.viewModel[key].subscribe(callback);
 
 }
 
+/**
+ * Shortcut to retrieve the underlining view model
+ * @return {Object} View model
+ */
 View.prototype.data = function() {
 	
 	return this.viewModel;
