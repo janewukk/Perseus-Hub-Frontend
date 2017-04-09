@@ -294,7 +294,7 @@
         {
           "type": "symbol",
           "from": {"data": "iris"},
-          "interactive": false,
+          "interactive": true,
           "encode": {
             "enter": {
               "x": {
