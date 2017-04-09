@@ -4,6 +4,8 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User as BaseUser
 
+from app.services.utils import user_upload_dir
+
 """
 Abstract representation of a site user
 
@@ -49,7 +51,7 @@ class Dataset(models.Model):
 	# title for this dataset
 	title = models.CharField(max_length = 256, default = "")
 	# dataset's raw file field
-	raw_data_file = models.FileField(upload_to='uploads/datasets/', default = "")
+	raw_data_file = models.FileField(upload_to=user_upload_dir, default = "")
 	# dataset's analyzed json file name
 	analyzed_json_filename = models.CharField(max_length = 256, default = "")
 	# dataset's anomaly data json file name

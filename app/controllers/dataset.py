@@ -58,9 +58,11 @@ class DatasetUploadController(LoginRequiredResource, View):
 			request {HTTPRequest} -- Request object
 		"""
 		# TODO: form validation
+		# extract attribute
+		publicized = False if request.POST['is_publicized'] == "false" else True
 		# grab the request data and create dataset
-		dataset = Dataset(publicized = request.POST['publicized'], \
-						raw_data = request.FILES['file'], \
+		dataset = Dataset(publicized = publicized, \
+						raw_data_file = request.FILES['file'], \
 						uploader = request.user)
 		# save the metadata for the dataset 
 		# along with file as Django internally saved it

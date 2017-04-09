@@ -4,8 +4,8 @@ Boostrap modifications
 /* Copy behavior of .alert-danger */
 .alert-error {
 	color: #a94442;
-    background-color: #f2dede;
-    border-color: #ebccd1;
+  background-color: #f2dede;
+  border-color: #ebccd1;
 }
 
 /* File input */
@@ -70,6 +70,10 @@ a {
 		margin-left: 20px;
 		margin-right: 20px;
 	}
+  .sidebar {
+    position: relative !important;
+    top: 0px !important;
+  }
 }
 
 /* Vega canvas fix */

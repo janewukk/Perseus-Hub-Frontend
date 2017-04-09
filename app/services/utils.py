@@ -1,3 +1,4 @@
+import time
 from django.contrib import messages
 
 """
@@ -17,3 +18,10 @@ def flash_session_message(request, status, message):
 
 	# add message to session
 	messages.add_message(request, message_level, message)
+
+"""
+Define the custom user upload directory
+"""
+def user_upload_dir(instance, filename):
+	return 'uploads/user_{0}/{1}'.format(instance.uploader.id, \
+		str(time.time()) + filename)

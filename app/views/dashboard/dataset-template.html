@@ -13,7 +13,7 @@
 	<a data-toggle="collapse" href="#dataset-sections" 
 		aria-expanded="false" 
 		aria-controls="dataset-sections">
-		Datasets
+		<i class="fa fa-database" aria-hidden="true"></i> Datasets
 	</a>
 	<ul class="collapse nav" id="dataset-sections">
 		<li><a href="/dashboard/">Public datasets</a></li>
@@ -24,14 +24,18 @@
 	<a data-toggle="collapse" href="#bookmark-sections" 
 		aria-expanded="false" 
 		aria-controls="bookmark-sections">
-		Bookmarks
+		<i class="fa fa-bookmark" aria-hidden="true"></i> Bookmarks
 	</a>
 	<ul class="collapse nav" id="bookmark-sections">
 		<li><a href="/bookmarks/">Public bookmarks</a></li>
 		<li><a href="/bookmarks/?my">My bookmarks</a></li>
 	</ul>
 </li>
-<li><a href="/upload/">Upload data file</a></li>
+<li>
+	<a href="/upload/">
+		<i class="fa fa-upload" aria-hidden="true"></i> Upload data file
+	</a>
+</li>
 {% endblock %}
 
 {% block tabdetails %}
@@ -121,7 +125,7 @@
 					</div>
 					<div class="checkbox">
 						<label>
-						<input type="checkbox"> Do you want to publicize it?
+						<input type="checkbox" data-bind="checked: publicized"> Do you want to publicize it?
 						</label>
 					</div>
 				</div>
@@ -146,7 +150,10 @@
 		data : {
 			priority : 'medium',
 			priorityVal : 0,
-			publicized : ''
+			publicized : false,
+			metadata : {
+				nodeId : 
+			}
 		},
 		methods : {
 			selectPriority : function (val, level) {
@@ -161,7 +168,7 @@
 		$('#bookmark-creator').modal();
 	});
 
-	// vega test init
+	// load vega iris dataset and spec
 	var vegaView = null;
 	vega.loader().load('/static/data/config/iris.json')
 		.then(function(data){
@@ -174,11 +181,33 @@
 					.initialize(document.querySelector('#graph'))
 					.hover()
 					.run();
-			// try click listener
-			console.log(vegaView.scenegraph());
-			vegaView.addEventListener('click', function (event, item){
-				console.log(item);
-			});
+
+			// @Debug: vega tests
+			var clickHandler = function(event, item) {
+				if (!item) return;
+				var data = item.datum;
+				if (!data['species']) return;
+				alert("I am in the " + data['species'] + " family " +
+					  "with petal length " + data['petalLength'] + ", " +
+					  "petal width " + data['petalWidth'] +", " +
+					  "sepal length " + data['sepalLength'] + ", " +
+					  "sepal width " + data['sepalWidth'] );
+			}
+
+			var mousedownHandler = function(event, item) {
+				console.log("MOUSE DOWN...")
+				// disable click handler to prevent duplication
+				vegaView.removeEventListener('click');
+			}
+			var mouseupHandler = function(event, item) {
+				console.log("MOUSE UP...")
+				// reenable click handler
+				vegaView.addEventListener('click', clickHandler);
+			}
+
+			vegaView.addEventListener('mousedown', mousedownHandler);
+			vegaView.addEventListener('mouseup', mouseupHandler);
+			vegaView.addEventListener('click', clickHandler);
 		})
 
 </script>

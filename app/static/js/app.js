@@ -112,15 +112,17 @@ View.prototype.data = function() {
  * @return {Void}
  */
 View.prototype.constructData = function (obj) {
-	var key, has = Object.prototype.hasOwnProperty.bind(obj);
-	for (key in obj) {
-		if (has(key)) {
+	for (var key in obj) {
+		if (obj.hasOwnProperty(key)) {
 			var val = obj[key];
 			if (Array.isArray(val)){
 				for (var i = 0; i < val.length; ++i) {
 					this.constructData(val[i]);
 				}
 				obj[key] = oba(val);
+			} else if (val.__proto__.constructor.name == "Object"){
+				this.constructData(val);
+				obj[key] = ob(val);
 			} else {
 				obj[key] = ob(val);
 			}
@@ -135,7 +137,9 @@ View.prototype.constructData = function (obj) {
  */
 View.prototype.constructComputedData = function (computed) {
 	for (var key in computed) {
-		this.viewModel[key] = obc(computed[key], this.viewModel)
+		if (obj.hasOwnProperty(key)){
+			this.viewModel[key] = obc(computed[key], this.viewModel)
+		}
 	}
 }
 
@@ -146,6 +150,8 @@ View.prototype.constructComputedData = function (computed) {
  */
 View.prototype.constructMethods = function (methods) {
 	for (var key in methods) {
-		this.viewModel[key] = methods[key].bind(this.viewModel);
+		if (methods.hasOwnProperty(key)) {
+			this.viewModel[key] = methods[key].bind(this.viewModel);
+		}
 	}
 }

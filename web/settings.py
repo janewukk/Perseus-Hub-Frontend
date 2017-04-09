@@ -131,5 +131,4 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # Media root for handling uploaded files
-# TODO: 
-MEDIA_ROOT = '/'
+MEDIA_ROOT = BASE_DIR + "/app/"
