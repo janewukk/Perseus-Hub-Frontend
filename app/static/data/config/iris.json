@@ -11,7 +11,7 @@
     { "name": "chartSize", "value": 120 },
     { "name": "chartPad", "value": 30 },
     { "name": "chartStep", "update": "chartSize + chartPad" },
-    { "name": "width", "update": "chartStep * 4" },
+    { "name": "width", "update": "chartStep * 5" },
     { "name": "height", "update": "chartStep * 4" },
     {
       "name": "cell", "value": null,
@@ -228,17 +228,17 @@
     {
       "orient": "bottom", "scale": "petalLengthX",
       "title": "Petal Length", "tickCount": 5, "domain": false,
-      "offset": {"signal": "-chartPad"}, "position": {"signal": "1 * chartStep"}
+      "offset": {"signal": "-chartPad"}, "position": {"signal": "1.25 * chartStep"}
     },
     {
       "orient": "bottom", "scale": "sepalWidthX",
       "title": "Sepal Width", "tickCount": 5, "domain": false,
-      "offset": {"signal": "-chartPad"}, "position": {"signal": "2 * chartStep"}
+      "offset": {"signal": "-chartPad"}, "position": {"signal": "2.5 * chartStep"}
     },
     {
       "orient": "bottom", "scale": "sepalLengthX",
       "title": "Sepal Length", "tickCount": 5, "domain": false,
-      "offset": {"signal": "-chartPad"}, "position": {"signal": "3 * chartStep"}
+      "offset": {"signal": "-chartPad"}, "position": {"signal": "3.75 * chartStep"}
     }
   ],
 

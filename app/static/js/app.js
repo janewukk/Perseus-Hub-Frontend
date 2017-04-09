@@ -16,6 +16,25 @@ $.ajaxSetup({
 axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
 window.http = axios;
 
+// activate star animation
+var star = $(".star");
+
+star.on('star:toggled', function(event) {
+	var status = event.data['status'];
+	if (!status) {
+		// turn off star
+		star.removeClass("starred");
+		star.addClass("unstarred");
+	} else {
+		// turn on star
+		star.removeClass("unstarred");
+		star.addClass("starred");
+	}
+});
+
+// init tooltips
+$('[data-toggle="tooltip"]').tooltip();
+
 // ============== HELPER FUNCTIONS
 /**
  * Requires a modal#modal element present
@@ -30,12 +49,25 @@ function showModal(message) {
 	$('#modal').modal();
 }
 
+/**
+ * Trigger a jquery custom event
+ * @param  {jQuery.fn} $el   jQuery obj
+ * @param  {String} event Name of event
+ * @param  {Object} data  Data to pass into event
+ * @return {Void}
+ */
+function trigger($el, event, data) {
+	var eventData = {
+		'type' : event
+	}
+	$el.trigger(Object.assign(eventData, data));
+}
+
 // ============== HELPER CLASSES
 /**
  * A simple wrapper over the KnockoutJS MVVM
  * @param {Object} options Options to initialize
  */
-
 window.ob = ko.observable;
 window.oba = ko.observableArray;
 window.obc = ko.computed;

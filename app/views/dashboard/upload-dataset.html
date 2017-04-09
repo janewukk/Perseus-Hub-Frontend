@@ -23,7 +23,17 @@
 		<li><a href="/dashboard/?my">My Datasets</a></li>
 	</ul>
 </li>
-<li><a href="/bookmarks/">Bookmarked</a></li>
+<li>
+	<a data-toggle="collapse" href="#bookmark-sections" 
+		aria-expanded="false" 
+		aria-controls="bookmark-sections">
+		Bookmarks
+	</a>
+	<ul class="collapse nav" id="bookmark-sections">
+		<li><a href="/bookmarks/">Public bookmarks</a></li>
+		<li><a href="/bookmarks/?my">My bookmarks</a></li>
+	</ul>
+</li>
 <li class="active"><a href="/upload/">Upload data file</a></li>
 {% endblock %}
 

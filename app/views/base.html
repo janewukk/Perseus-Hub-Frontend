@@ -71,6 +71,8 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 	<!-- Boostrap js -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	<!-- Bootstrap validate -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>
 	<!-- Axios js -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.15.3/axios.min.js"></script>
 	<!-- Jquery cookie -->
@@ -92,7 +94,10 @@
 			}
 		});
 		// search action
+		var timer;
 		$('#search-field').keyup(function() {
+			// clear previous timeout
+			clearTimeout(timer);
 			// extract current input
 			var query = $(this).val();
 			if (query == "") {
@@ -102,34 +107,32 @@
 			}
 			// show dropdown
 			searchView.data().showDropdown(true);
-			// send search request
-			http.post('/search/', {
-
-				query : query
-
-			}).then(function(res) {
-				
-				if (res.data['status'] == 'success') {
-					
-					searchView.data().results(res.data['data']
-							  .map(function(item){
-									return {
-										title : item['title'],
-										url : "/datasets/" + item['id']
-									}
-								}));
-				} else {
-					searchView.data().results([
-						{
-							title : ob("No matches found!"),
-							url : "#"
-						}
-					]);
-				}
-
-			}).catch(function() {
-				console.log("SEARCH ERROR!");
-			});
+			// delayed search
+			timer = setTimeout(function() {
+				// send search request
+				http.post('/search/', {
+					query : query
+				}).then(function(res) {
+					if (res.data['status'] == 'success') {
+						searchView.data().results(res.data['data']
+								  .map(function(item){
+										return {
+											title : item['title'],
+											url : "/datasets/" + item['id']
+										}
+									}));
+					} else {
+						searchView.data().results([
+							{
+								title : ob("No matches found!"),
+								url : "#"
+							}
+						]);
+					}
+				}).catch(function() {
+					console.log("SEARCH ERROR!");
+				});
+			}, 500);
 		});
 	</script>
 	{% block scripts %}

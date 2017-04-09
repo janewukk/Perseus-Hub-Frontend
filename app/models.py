@@ -49,9 +49,11 @@ class Dataset(models.Model):
 	# title for this dataset
 	title = models.CharField(max_length = 256, default = "")
 	# dataset's raw file field
-	raw_data = models.FileField(upload_to='uploads/datasets/', default = "")
+	raw_data_file = models.FileField(upload_to='uploads/datasets/', default = "")
 	# dataset's analyzed json file name
 	analyzed_json_filename = models.CharField(max_length = 256, default = "")
+	# dataset's anomaly data json file name
+	anomaly_json_filename = models.CharField(max_length = 256, default = "")
 	# the user who uploads this dataset
 	uploader = models.ForeignKey(User, on_delete = models.CASCADE)
 	# timestamps
@@ -67,7 +69,18 @@ Extends:
 class Bookmark(models.Model):
 	# bookmark's creator (User)
 	creator = models.ForeignKey(User, on_delete = models.CASCADE)
-	# bookmark's associated dataset node
-	# associated_node = models.OneToOneField(Node, on_delete = models.CASCADE)
 	# a numerical representation of this bookmark's color, assigned by user
 	priority = models.IntegerField()
+	# x coordinate the bookmark refers to
+	x_coord = models.CharField(max_length = 256, default = "")
+	# y coordinate the bookmrk refers to
+	y_coord = models.CharField(max_length = 256, default = "")
+	# index of the properties that this bookmark refers to
+	property_index = models.IntegerField(default = 0)
+	# dataset that this bookmark resides on
+	dataset = models.ForeignKey(Dataset, on_delete = models.CASCADE)
+	# whether this bookmark should be publicize
+	publicized = models.BooleanField(default = False)
+	# timestamps
+	created_at = models.DateTimeField(auto_now_add = True)
+	updated_at = models.DateTimeField(auto_now = True)

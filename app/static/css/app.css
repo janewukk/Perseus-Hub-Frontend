@@ -94,3 +94,88 @@ a {
   z-index: 9999;
   margin-top: 10px;
 }
+
+/* star animation */
+.star {
+  display: block;
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.star-icon {
+  display: block;
+  transition: all .2s ease-in;
+  color: #e8e8ee;
+}
+
+.starred .star-icon {
+  color: #f6c342;
+}
+
+.starred {
+  animation: hop .6s forwards;
+  transform-origin: 50% 50%;
+  transition-timing-function: ease-in-out;
+}
+
+.starred .star-icon {
+  animation: spin .6s forwards;
+  transform-origin: 50% 50%;
+  -webkit-transform-origin: 50% 50%;
+  transition-timing-function: ease-in-out;
+}
+
+.unstarred .star-icon {
+  animation: unspin .3s forwards;
+  transform-origin: 50% 50%;
+  -webkit-transform-origin: 50% 50%;
+  transition-timing-function: ease-in-out;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  33% {
+    transform: rotate(175deg);
+  }
+  66% {
+    transform: rotate(120deg);
+  }
+  100% {
+    transform: rotate(144deg);
+  }
+}
+
+@keyframes unspin {
+  0% {
+    transform: rotate(142deg);
+  }
+  100% {
+    transform: rotate(72deg);
+  }
+}
+
+@keyframes hop {
+  0% {
+    transform: translate(0, 0px);
+  }
+  17% {
+    transform: translate(2px, -10px);
+  }
+  33% {
+    transform: translate(4px, 0px);
+  }
+  50% {
+    transform: translate(-2px, -7px);
+  }
+  66% {
+    transform: translate(-4px, -0px);
+  }
+  84% {
+    transform: translate(-2, -5px);
+  }
+  100% {
+    transform: translate(0, 0px);
+  }
+}
