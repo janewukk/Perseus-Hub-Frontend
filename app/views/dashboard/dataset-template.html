@@ -168,7 +168,7 @@
 		$('#bookmark-creator').modal();
 	});
 
-	// load vega iris dataset and spec
+	// @debug: load vega iris dataset and spec
 	var vegaView = null;
 	vega.loader().load('/static/data/config/iris.json')
 		.then(function(data){
@@ -182,7 +182,7 @@
 					.hover()
 					.run();
 
-			// @Debug: vega tests
+			// vega event handlers
 			var clickHandler = function(event, item) {
 				if (!item) return;
 				var data = item.datum;
