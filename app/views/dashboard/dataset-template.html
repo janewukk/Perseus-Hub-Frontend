@@ -137,6 +137,26 @@
 		</div>
 	</div>
 </div>
+<!-- Bookmark remover -->
+<div class="modal fade" id="bookmark-remover" tabindex="-1" role="dialog" aria-labelledby="bookmark-remover">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="bookmark-creator">Bookmark removal</h4>
+			</div>
+			<div class="modal-body">
+				<div>
+					Are you sure you want to remove this bookmark ?
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-danger">Remove</button>
+			</div>
+		</div>
+	</div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -152,7 +172,7 @@
 			priorityVal : 0,
 			publicized : false,
 			metadata : {
-				nodeId : 
+				nodeId : 'xxxx'
 			}
 		},
 		methods : {
@@ -162,15 +182,31 @@
 			}
 		}
 	});
-	// star toggling action
-	$('.star').click(function() {
-		// show modal prompt to create bookmark
-		$('#bookmark-creator').modal();
-	});
+
+	// check bookmarked status
+	var bookmarked = {{ bookmarked }};
+
+	if (bookmarked) {
+		// highlight star
+		trigger($('.star'), 'star:toggled', {
+			status : true
+		})
+		// click to show bookmark remover
+		$('.star').click(function() {
+			$('#bookmark-remover').modal();
+		});
+
+	} else {
+		// click to show bookmark creator
+		$('.star').click(function() {
+			$('#bookmark-creator').modal();
+		});
+	}
 
 	// @debug: load vega iris dataset and spec
 	var vegaView = null;
-	vega.loader().load('/static/data/config/iris.json')
+	vega.loader()
+		.load('/static/data/config/iris.json')
 		.then(function(data){
 			// init view
 			var spec = JSON.parse(data);
@@ -195,12 +231,10 @@
 			}
 
 			var mousedownHandler = function(event, item) {
-				console.log("MOUSE DOWN...")
 				// disable click handler to prevent duplication
 				vegaView.removeEventListener('click');
 			}
 			var mouseupHandler = function(event, item) {
-				console.log("MOUSE UP...")
 				// reenable click handler
 				vegaView.addEventListener('click', clickHandler);
 			}

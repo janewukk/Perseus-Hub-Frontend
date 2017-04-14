@@ -22,8 +22,8 @@ class DatasetSearchController(LoginRequiredResource, View):
 		query = body.get('query', False)
 
 		if query == False:
-			# if empty, then simply return every dataset
-			datasets = Dataset.objects.all()
+			# if empty, then simply return empty list
+			datasets = []
 		else:
 			# search for datasets
 			datasets = Dataset.objects.filter(title__icontains = query)
@@ -61,9 +61,10 @@ class DatasetUploadController(LoginRequiredResource, View):
 		# extract attribute
 		publicized = False if request.POST['is_publicized'] == "false" else True
 		# grab the request data and create dataset
-		dataset = Dataset(publicized = publicized, \
+		dataset = Dataset(title = request.POST['title'], \
+						publicized = publicized, \
 						raw_data_file = request.FILES['file'], \
-						uploader = request.user)
+						uploader = request.user,)
 		# save the metadata for the dataset 
 		# along with file as Django internally saved it
 		dataset.save()
@@ -72,6 +73,6 @@ class DatasetUploadController(LoginRequiredResource, View):
 		# can retrieve the user related to this dataset
 		return JsonResponse({
 				'status' : "success",
-				'message' : "Your dataset has been uploaded and processed. \
+				'message' : "Your dataset has been uploaded and is being processed. \
 							we will send you an email once it's done!"
 			})

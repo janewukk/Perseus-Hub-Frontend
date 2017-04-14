@@ -12,6 +12,7 @@ $.ajaxSetup({
 		}
 	}
 });
+
 // config csrf token for Axios
 axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
 window.http = axios;
@@ -20,7 +21,8 @@ window.http = axios;
 var star = $(".star");
 
 star.on('star:toggled', function(event) {
-	var status = event.data['status'];
+
+	var status = event['status'];
 	if (!status) {
 		// turn off star
 		star.removeClass("starred");
@@ -30,6 +32,7 @@ star.on('star:toggled', function(event) {
 		star.removeClass("unstarred");
 		star.addClass("starred");
 	}
+
 });
 
 // init tooltips
@@ -43,10 +46,12 @@ $('[data-toggle="tooltip"]').tooltip();
  * @return {Void}
  */
 function showModal(message) {
+
 	// set error message
 	$('#modal .modal-body').html(message);
 	// show modal
 	$('#modal').modal();
+
 }
 
 /**
@@ -57,11 +62,30 @@ function showModal(message) {
  * @return {Void}
  */
 function trigger($el, event, data) {
+
 	var eventData = {
 		'type' : event
 	}
 	$el.trigger(Object.assign(eventData, data));
+
 }
+
+/**
+ * Check if a js data type is a plain old js object
+ * @param  {[type]}  obj [description]
+ * @return {Boolean}     [description]
+ */
+function isPOJSO (obj) {
+
+	return obj.__proto__.constructor.name == "Object";
+
+}
+
+/**
+ * Django template utilities
+ */
+window.False = false;
+window.True = true;
 
 // ============== HELPER CLASSES
 /**
@@ -71,6 +95,30 @@ function trigger($el, event, data) {
 window.ob = ko.observable;
 window.oba = ko.observableArray;
 window.obc = ko.computed;
+window.obo = function(obj) {
+	for (var key in obj) {
+		if (obj.hasOwnProperty(key)) {
+			var val = obj[key];
+			if (Array.isArray(val)){
+				for (var i = 0; i < val.length; ++i) {
+					if (isPOJSO(val[i])) {
+						obo(val[i]);
+					}else {
+						val[i] = ob(val[i]);
+					}
+				}
+				obj[key] = oba(val);
+			} else if (isPOJSO(val)){
+				obo(val);
+				obj[key] = ob(val);
+			} else {
+				obj[key] = ob(val);
+			}
+		}
+	}
+	return obj;
+
+}
 
 function View(options) {
 	// init configs
@@ -94,6 +142,7 @@ function View(options) {
 	} else {
 		ko.applyBindings(this.viewModel);
 	}
+
 }
 
 /**
@@ -112,22 +161,9 @@ View.prototype.data = function() {
  * @return {Void}
  */
 View.prototype.constructData = function (obj) {
-	for (var key in obj) {
-		if (obj.hasOwnProperty(key)) {
-			var val = obj[key];
-			if (Array.isArray(val)){
-				for (var i = 0; i < val.length; ++i) {
-					this.constructData(val[i]);
-				}
-				obj[key] = oba(val);
-			} else if (val.__proto__.constructor.name == "Object"){
-				this.constructData(val);
-				obj[key] = ob(val);
-			} else {
-				obj[key] = ob(val);
-			}
-		}
-	}
+
+	obo(obj);
+
 }
 
 /**
@@ -137,10 +173,11 @@ View.prototype.constructData = function (obj) {
  */
 View.prototype.constructComputedData = function (computed) {
 	for (var key in computed) {
-		if (obj.hasOwnProperty(key)){
+		if (computed.hasOwnProperty(key)){
 			this.viewModel[key] = obc(computed[key], this.viewModel)
 		}
 	}
+
 }
 
 /**
@@ -154,4 +191,5 @@ View.prototype.constructMethods = function (methods) {
 			this.viewModel[key] = methods[key].bind(this.viewModel);
 		}
 	}
+
 }

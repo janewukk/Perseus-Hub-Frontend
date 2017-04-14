@@ -1,4 +1,5 @@
 from django.views import View
+from django.db.models import F
 from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin as LoginRequiredResource
@@ -26,6 +27,12 @@ class DashboardController(LoginRequiredResource, View):
 		else:
 			datasets = Dataset.objects.filter(publicized = True)
 
+		# sort datasets
+		try:
+			datasets = datasets.order_by(F('created_at').desc())
+		except Exception as e:
+			print e
+
 		return render(request, 'dashboard/datasets.html', {
 				'datasets' : datasets
 			})
@@ -40,15 +47,19 @@ class DatasetViewController(LoginRequiredResource, View):
 		# fetch the dataset
 		try:
 			dataset = Dataset.objects.get(id = dataset_id)
+			bookmarked = dataset in request.user.dataset_set.all()
 		except Exception as e:
 			dataset = None
+			bookmarked = False
+
 		if dataset is None:
 			# TODO : Remove the error message after debugging!
 			# raise Http404("Dataset does not exist!")
 			pass
 
 		return render(request, 'dashboard/dataset-template.html',{
-				'dataset' : dataset
+				'dataset' : dataset,
+				'bookmarked' : bookmarked
 			})
 
 class BookmarkViewController(LoginRequiredResource, View):
@@ -70,6 +81,13 @@ class BookmarkViewController(LoginRequiredResource, View):
 				bookmarks = users[0].bookmarks().filter(publicized = True)
 		else:
 			bookmarks = Bookmark.objects.filter(publicized = True)
+
+		# sort bookmarks
+		try:
+			bookmarks = bookmarks.order_by(F('created_at').desc()) \
+								 .order_by(F('priority').desc())
+		except Exception as e:
+			print e
 
 		return render(request, 'dashboard/bookmarks.html', {
 				'bookmarks' : bookmarks
