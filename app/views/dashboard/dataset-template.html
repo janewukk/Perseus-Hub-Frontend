@@ -206,7 +206,7 @@
 	// @debug: load vega iris dataset and spec
 	var vegaView = null;
 	vega.loader()
-		.load('/static/data/config/iris.json')
+		.load('/static/data/config/test_config.json')
 		.then(function(data){
 			// init view
 			var spec = JSON.parse(data);
@@ -220,6 +220,7 @@
 
 			// vega event handlers
 			var clickHandler = function(event, item) {
+				console.log(item);
 				if (!item) return;
 				var data = item.datum;
 				if (!data['species']) return;

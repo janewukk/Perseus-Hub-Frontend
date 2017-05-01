@@ -5,7 +5,6 @@ from django.contrib import messages
 Flash a one-time short message to session
 """
 def flash_session_message(request, status, message):
-
 	# convert status to message tag level
 	if status == 'success':
 		message_level = messages.SUCCESS
@@ -22,6 +21,6 @@ def flash_session_message(request, status, message):
 """
 Define the custom user upload directory
 """
-def user_upload_dir(instance, filename):
-	return 'uploads/user_{0}/{1}'.format(instance.uploader.id, \
+def user_upload_dir(dataset, filename):
+	return 'uploads/user_{0}/{1}'.format(dataset.uploader.id, \
 		str(time.time()) + filename)

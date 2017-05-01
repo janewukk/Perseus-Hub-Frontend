@@ -22,7 +22,7 @@
 	<meta name="msapplication-TileColor" content="#ffffff">
 	<meta name="msapplication-TileImage" content="/static/images/ms-icon-144x144.png">
 	<meta name="theme-color" content="#ffffff">
-	<title>Persus Data Net</title>
+	<title>Perseus</title>
 	<!-- Normalize CSS -->
 	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
 	<!-- Bootstrap CSS -->
@@ -53,7 +53,7 @@
 				<a class="navbar-brand" href="/dashboard/">
 					<img alt="Persus" height="30r" src="/static/images/logo.png" 
 						 style="display: inline">
-					Persus
+					Perseus
 				</a>
 			</div>
 		
@@ -134,13 +134,16 @@
 					query : query
 				}).then(function(res) {
 					if (res.data['status'] == 'success') {
-						searchView.data().results(res.data['data']
-								  .map(function(item){
-										return {
-											title : item['title'],
-											url : "/datasets/" + item['id']
-										}
-									}));
+						searchView.data()
+								  .results(
+							  		res.data['data']
+							  			.map(function(item){
+											return {
+												title : item['title'],
+												url : "/datasets/" + item['id']
+											}
+										})
+									);
 					} else {
 						searchView.data().results([
 							{
