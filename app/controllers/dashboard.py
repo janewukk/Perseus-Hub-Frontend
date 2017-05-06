@@ -1,10 +1,11 @@
 from django.views import View
 from django.db.models import F
-from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import render, redirect
+from django.http import HttpResponse, JsonResponse, Http404
 from django.contrib.auth.mixins import LoginRequiredMixin as LoginRequiredResource
 
 from app.models import Dataset, User, Bookmark
+from app.services.graph import graph_from_file
 from app.services.utils import flash_session_message
 
 class DashboardController(LoginRequiredResource, View):
@@ -44,6 +45,7 @@ class DatasetViewController(LoginRequiredResource, View):
 	def get(self, request, *args, **kwargs):
 		# extract id
 		dataset_id = kwargs.get('id')
+
 		# fetch the dataset
 		try:
 			dataset = Dataset.objects.get(id = dataset_id)
@@ -51,15 +53,22 @@ class DatasetViewController(LoginRequiredResource, View):
 		except Exception as e:
 			dataset = None
 			bookmarked = False
-
+		
+		# handle error
 		if dataset is None:
 			# TODO : Remove the error message after debugging!
 			# raise Http404("Dataset does not exist!")
 			pass
 
+		# make graph
+		# @todo: make the file name dynamic
+		graph_data = graph_from_file('test.txt')
+
 		return render(request, 'dashboard/dataset-template.html',{
 				'dataset' : dataset,
-				'bookmarked' : bookmarked
+				'bookmarked' : bookmarked,
+				'graph_script' : graph_data['graph_script'],
+				'graph' : graph_data['graph']
 			})
 
 class BookmarkViewController(LoginRequiredResource, View):

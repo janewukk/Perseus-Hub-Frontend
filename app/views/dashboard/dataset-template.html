@@ -1,6 +1,7 @@
 {% extends 'dashboard/base.html' %}
 
 {% block tabstyles %}
+<link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.5.min.css">
 <style type="text/css">
 #priority-selector a {
 	display: inline;
@@ -87,7 +88,9 @@
 				</div>
 			</div>
 		</div>
-		<div id="graph" class="center-block vega"></div>
+		<!-- Content -->
+		<!-- <div id="graph" class="center-block vega"></div> -->
+		{{ graph | safe }}
 	</div>
 </div>
 <!-- Bookmark creator -->
@@ -160,10 +163,30 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- Vega js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vega/3.0.0-beta.28/vega.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/2.0.0-alpha.7/vega-lite.js"></script>
+<!-- @removed: Vega js -->
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vega/3.0.0-beta.28/vega.js"></script> -->
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/2.0.0-alpha.7/vega-lite.js"></script> -->
+<!-- Bokeh JS -->
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.5.min.js"></script>
+<script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.5.min.js"></script>
+<!-- Graph JS -->
+{{ graph_script | safe }}
 <script type="text/javascript">
+	// star animation
+	var star = $(".star");
+	star.on('star:toggled', function(event) {
+		var on = event['on'];
+		if (!on) {
+			// turn off star
+			star.removeClass("starred");
+			star.addClass("unstarred");
+		} else {
+			// turn on star
+			star.removeClass("unstarred");
+			star.addClass("starred");
+		}
+	});
+
 	// init view models
 	var bookmarkView = new View({
 		el : document.getElementById('bookmark-creator'),
@@ -189,7 +212,7 @@
 	if (bookmarked) {
 		// highlight star
 		trigger($('.star'), 'star:toggled', {
-			status : true
+			on : true
 		})
 		// click to show bookmark remover
 		$('.star').click(function() {
@@ -203,16 +226,21 @@
 		});
 	}
 
-	// @debug: load vega iris dataset and spec
-	var vegaView = null;
-	vega.loader()
+	// graph callback function
+	function nodeSelected(indices) {
+		console.log("From FrontEnd ", indices);
+	}
+
+	/* @removed: Replace Vega with Bokeh
+	* var vegaView = null;
+	* vega.loader()
 		.load('/static/data/config/test_config.json')
 		.then(function(data){
 			// init view
 			var spec = JSON.parse(data);
 			if (vegaView) vegaView.finalize();
 			vegaView = new vega.View(runtime = vega.parse(spec));
-			vegaView.logLevel(vega.Warn)
+			vegaView.logLevel(vega.Debug)
 					.renderer('canvas')
 					.initialize(document.querySelector('#graph'))
 					.hover()
@@ -244,6 +272,6 @@
 			vegaView.addEventListener('mouseup', mouseupHandler);
 			vegaView.addEventListener('click', clickHandler);
 		})
-
+	*/
 </script>
 {% endblock scripts %}

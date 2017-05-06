@@ -17,24 +17,6 @@ $.ajaxSetup({
 axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
 window.http = axios;
 
-// activate star animation
-var star = $(".star");
-
-star.on('star:toggled', function(event) {
-
-	var status = event['status'];
-	if (!status) {
-		// turn off star
-		star.removeClass("starred");
-		star.addClass("unstarred");
-	} else {
-		// turn on star
-		star.removeClass("unstarred");
-		star.addClass("starred");
-	}
-
-});
-
 // init tooltips
 $('[data-toggle="tooltip"]').tooltip();
 

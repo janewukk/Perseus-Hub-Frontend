@@ -195,12 +195,12 @@
 				{
 					"type": "formula",
 					"as": "xscale", 
-					"expr": "datum.x + 'X'"
+					"expr": "datum.x.data + 'X'"
 				},
 				{
 					"type": "formula",
 					"as": "yscale",
-					"expr": "datum.y + 'Y'"
+					"expr": "datum.y.data + 'Y'"
 				}
 			]
 		}
@@ -303,6 +303,21 @@
 
 	"axes": [
 		{
+			"orient": "left", "scale": "sepalLengthY", "minExtent": 25,
+			"title": "Sepal Length", "tickCount": 5, "domain": false,
+			"position": {"signal": "1 * chartStep"}
+		},
+		{
+			"orient": "left", "scale": "petalLengthY", "minExtent": 25,
+			"title": "Petal Length", "tickCount": 5, "domain": false,
+			"position": {"signal": "1 * chartStep"}
+		},
+		{
+			"orient": "left", "scale": "customLengthY", "minExtent": 25,
+			"title": "Custom Length", "tickCount": 5, "domain": false,
+			"position": {"signal": "1 * chartStep"}
+		},
+		{
 			"orient": "bottom", "scale": "sepalWidthX",
 			"title": "Sepal Width", "tickCount": 5, "domain": false,
 			"offset": {"signal": "-chartPad"}
@@ -369,20 +384,36 @@
 				}
 			},
 
-			"scales": [
+			"marks": [
 				{
-					"name": "x",
-					"type": "linear",
-					"range": [{"signal": "chartSize"}, 0],
-					"nice": true, "zero": true,
-					"domain": false
+					"type": "symbol",
+					"from": {"data": "test"},
+					"interactive": true,
+					"encode": {
+						"enter": {
+							"x": {
+								"scale": {"parent": "xscale"},
+								"field": {"datum": {"parent": "x.data"}}
+							},
+							"y": {
+								"scale": {"parent": "yscale"},
+								"field": {"datum": {"parent": "y.data"}}
+							},
+							"fillOpacity": {"value": 0.5},
+							"size": {"value": 36}
+						},
+						"update": {
+							"fill": [
+								{
+									"test": "!cell || inrange(datum[cell.datum.x.data], rangeX) && inrange(datum[cell.datum.y.data], rangeY)",
+									"value": "steelblue"
+								},
+								{"value": "#ddd"}
+							]
+						}
+					}
 				}
-			],
-
-			"axes": [
-				{"orient": "left", "scale": "x", "format": "s"}
 			]
-
 		},
 		{
 			"type": "rect",
