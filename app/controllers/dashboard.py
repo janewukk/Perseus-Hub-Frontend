@@ -105,5 +105,6 @@ class BookmarkViewController(LoginRequiredResource, View):
 	def post(self, request):
 		# create a bookmark
 		# TODO
+		print "hi"
 		pass
 

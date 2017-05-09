@@ -34,6 +34,7 @@ class LoginController(View):
 		Arguments:
 			request {HTTPRequest} -- Request object
 		"""
+
 		return render(request, 'auth/login.html') 
 
 	def post(self, request):

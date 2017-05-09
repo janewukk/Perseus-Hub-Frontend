@@ -21,6 +21,9 @@ from app.controllers.settings import SettingsController
 from app.controllers.auth import LoginController, LogoutController, RegisterController
 from app.controllers.dashboard import DashboardController, DatasetViewController, BookmarkViewController
 from app.controllers.dataset import DatasetSearchController, DatasetUploadController
+from app.controllers.database_querry import QuerryController
+
+from .views import egonet
 
 urlpatterns = [
     url(r'^$', DashboardController.as_view()),
@@ -32,5 +35,9 @@ urlpatterns = [
     url(r'^upload/$', DatasetUploadController.as_view()),
     url(r'^bookmarks/$', BookmarkViewController.as_view()),
     url(r'^search/$', DatasetSearchController.as_view()),
-    url(r'^datasets/(?P<id>\d+)/$', DatasetViewController.as_view())
+    url(r'^datasets/(?P<id>\d+)/$', DatasetViewController.as_view()),
+
+    # Added
+    url(r'^querry/$', QuerryController.as_view()),
+    url(r'^app/', egonet, name="egonet")
 ]

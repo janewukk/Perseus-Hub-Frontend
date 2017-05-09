@@ -81,11 +81,11 @@ DATABASES = {
     # development specific database config
     'default' : {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'data_visualization_website',
+        'NAME': 'PERSEUS_SPARK',
         'USER': 'root',
         'PASSWORD': 'root',
         'OPTIONS': {
-            'unix_socket': '/Applications/MAMP/tmp/mysql/mysql.sock',
+            'unix_socket': '/var/run/mysqld/mysqld.sock',
             'init_command': 'SET sql_mode=STRICT_TRANS_TABLES',
         }
     } 

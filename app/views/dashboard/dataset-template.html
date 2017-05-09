@@ -88,9 +88,189 @@
 				</div>
 			</div>
 		</div>
-		<!-- Content -->
-		<!-- <div id="graph" class="center-block vega"></div> -->
+
+
+		<!--Display the Bokeh plots-->
 		{{ graph | safe }}
+
+		<!--Table with egonet and adjacency matrix D3 Graphs-->
+		<table class="table">
+			<tbody>
+				<tr>
+					<td><svg class="adjacency" style="width:500px;height:500px; lightgray solid;"/></td>
+					<td><svg class="egonet"/></td>
+				</tr>
+			</tbody>
+		</table>
+
+
+		<style>
+			.node circle {
+				fill: steelblue;
+			}
+
+			.link {
+				fill: none;
+				stroke: #000;
+				stroke-opacity: .2;
+			}
+		</style>
+
+    	<script src="http://d3js.org/d3.v3.min.js"></script>
+
+		<!--Script for the egonet D3 plot-->
+		<script>
+			console.log("Enters Egonet");
+			var width = 500,
+				height = 500
+
+			var svg = d3.select(".egonet")
+				.attr("width", width)
+				.attr("height", height);
+
+			var force = d3.layout.force()
+				.gravity(.05)
+				.distance(100)
+				.charge(-100)
+				.size([width, height]);
+
+			d3.json("{% url "egonet" %}", function(error, json) {
+			var edges = [];
+				json.Links.forEach(function(e) { 
+				var sourceNode = json.Nodes.filter(function(n) { return n.Id === e.Source; })[0],
+				targetNode = json.Nodes.filter(function(n) { return n.Id === e.Target; })[0];
+					
+				edges.push({source: sourceNode, target: targetNode, value: e.Value});
+				});
+				
+			force
+				.nodes(json.Nodes)
+				.links(edges)
+				.start();
+
+			var link = svg.selectAll(".link")
+				.data(edges)
+				.enter().append("line")
+				.attr("class", "link");
+
+			var node = svg.selectAll(".node")
+				.data(json.Nodes)
+				.enter().append("g")
+				.attr("class", "node")
+				.call(force.drag);
+
+			node.append("circle")
+				.attr("class", "node")
+				.attr("r", 5);
+
+			node.append("svg:a")
+				.attr("xlink:href", function(d){return d.Url;})
+				.append("text")
+				.attr("dx", 12)
+				.attr("dy", ".35em")
+				.text(function(d) { return d.Name})
+
+			
+			force.on("tick", function() {
+				link.attr("x1", function(d) { return d.source.x; })
+					.attr("y1", function(d) { return d.source.y; })
+					.attr("x2", function(d) { return d.target.x; })
+					.attr("y2", function(d) { return d.target.y; });
+
+				node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+			});
+			});
+		</script>
+
+	
+		<style>
+			.tick line {
+				shape-rendering: crispEdges;
+				stroke: #000;
+			}
+
+			line.minor  {
+				stroke: #777;
+				stroke-dasharray: 2,2;
+			}
+
+			path.domain {
+				fill: none;
+				stroke: black;
+			}
+		</style>
+
+		<!--Script for the D3 adjacency matrix plot-->
+		<script>
+			console.log("enters adj")
+			createAdjacencyMatrix()
+		
+			function createAdjacencyMatrix() {
+				var edgeHash = {};
+				weight = [3, 8, 2, 1, 5, 1, 1, 5, 3, 1, 3, 2, 1, 7, 1, 4, 1, 3, 1, 2, 5]
+				source = ["sam", "sam", "sam", "sam", "roy", "roy", "tully", "tully", "tully", "tully", "tully", "kim", "kim", "mo", "mo", "mo", "mo", "pat","pat","pat","pat"]
+				target = ["tully", "pat", "kim", "pris", "pris","sam", "pris", "kim", "pat", "mo", "pat", "mo", "tully", "pat", "sam", "pris", "sam", "tully", "kim", "mo"]
+				nodes = ["sam", "roy", "tully", "kim", "pat", "pris", "mo"]
+				var edgeHash = {};
+				for (var i = 0; i < source.length; i++) {
+					var id = source[i] + "-" + target[i];
+					edgeHash[id] = weight[i];
+				}
+
+				matrix = [];
+				for (a in nodes) {
+					for (b in nodes) {
+						var grid = {id: nodes[a] + "-" + nodes[b], x: b, y: a, weight: 0};
+						if (edgeHash[grid.id]) {
+							grid.weight = 1;
+						}
+						matrix.push(grid);
+					}
+				}
+				console.log("finish updating matrix")
+
+				d3.select(".adjacency")
+				.append("g")
+				.attr("transform", "translate(50,50)")
+				.attr("id", "adjacencyG")
+				.selectAll("rect")
+				.data(matrix)
+				.enter()
+				.append("rect")
+				.attr("width", 25)
+				.attr("height", 25)
+				.attr("x", function (d) {return d.x * 25})
+				.attr("y", function (d) {return d.y * 25})
+				.style("stroke", "black")
+				.style("stroke-width", "1px")
+				.style("fill", "red")
+				.style("fill-opacity", function (d) {return d.weight * .2})
+				.on("mouseover", gridOver)
+		
+				var scaleSize = nodes.length * 25;
+				var nameScale = d3.scale.ordinal()
+					.rangePoints([0, scaleSize], 1)
+					.domain(nodes)
+
+				console.log("nameScale")
+				console.log(nameScale)
+		
+				xAxis = d3.svg.axis()
+					.scale(nameScale)
+					.tickSize(4)
+					.orient("top");    
+				yAxis = d3.svg.axis()
+					.scale(nameScale)
+					.tickSize(4)
+					.orient("left");    
+				d3.select("#adjacencyG").append("g").call(xAxis).selectAll("text").style("text-anchor", "end").attr("transform", "translate(-10,-10) rotate(90)");
+				d3.select("#adjacencyG").append("g").call(yAxis);
+		
+				function gridOver(d,i) {
+					d3.selectAll("rect").style("stroke-width", function (p) {return p.x == d.x || p.y == d.y ? "3px" : "1px"})
+				}
+			}
+		</script>
 	</div>
 </div>
 <!-- Bookmark creator -->
@@ -229,49 +409,23 @@
 	// graph callback function
 	function nodeSelected(indices) {
 		console.log("From FrontEnd ", indices);
+		// var data = { "hahah": "hohohohoh" };
+		// var args = { type:"POST", url:"/querry/", data:data };
+		// $.ajax(args);
+
+		$.ajax({
+			type: 'POST',
+			url: '/querry/',
+			contentType: "application/json; charset=UTF-8",
+			response: "application/json; charset=UTF-8",
+			data: JSON.stringify({
+				"indices": indices
+			}),
+			success: function (data) {
+				console.log(data)
+			}
+      	});
+		console.log("AJAX SENT!");
 	}
-
-	/* @removed: Replace Vega with Bokeh
-	* var vegaView = null;
-	* vega.loader()
-		.load('/static/data/config/test_config.json')
-		.then(function(data){
-			// init view
-			var spec = JSON.parse(data);
-			if (vegaView) vegaView.finalize();
-			vegaView = new vega.View(runtime = vega.parse(spec));
-			vegaView.logLevel(vega.Debug)
-					.renderer('canvas')
-					.initialize(document.querySelector('#graph'))
-					.hover()
-					.run();
-
-			// vega event handlers
-			var clickHandler = function(event, item) {
-				console.log(item);
-				if (!item) return;
-				var data = item.datum;
-				if (!data['species']) return;
-				alert("I am in the " + data['species'] + " family " +
-					  "with petal length " + data['petalLength'] + ", " +
-					  "petal width " + data['petalWidth'] +", " +
-					  "sepal length " + data['sepalLength'] + ", " +
-					  "sepal width " + data['sepalWidth'] );
-			}
-
-			var mousedownHandler = function(event, item) {
-				// disable click handler to prevent duplication
-				vegaView.removeEventListener('click');
-			}
-			var mouseupHandler = function(event, item) {
-				// reenable click handler
-				vegaView.addEventListener('click', clickHandler);
-			}
-
-			vegaView.addEventListener('mousedown', mousedownHandler);
-			vegaView.addEventListener('mouseup', mouseupHandler);
-			vegaView.addEventListener('click', clickHandler);
-		})
-	*/
 </script>
 {% endblock scripts %}

@@ -1,0 +1,42 @@
+{
+  "Nodes": [
+    {
+      "Id": "338",
+      "Name": "338"
+    },
+    {
+      "Id": "340",
+      "Name": "TEST NODE TWO"
+    },
+    {
+      "Id": "341",
+      "Name": "TEST NODE THREE"
+    },
+    {
+      "Id": "342",
+      "Name": "TEST NODE FOUR"
+    }
+  ],
+  "Links": [
+    {
+      "Source": "338",
+      "Target": "338",
+      "Value": "0"
+    },
+    {
+      "Source": "338",
+      "Target": "340",
+      "Value": "0"
+    },
+    {
+      "Source": "340",
+      "Target": "341",
+      "Value": "0"
+    },
+    {
+      "Source": "342",
+      "Target": "341",
+      "Value": "0"
+    }
+  ]
+}
