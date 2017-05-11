@@ -76,3 +76,69 @@ class DatasetUploadController(LoginRequiredResource, View):
 				'message' : "Your dataset has been uploaded and is being processed. \
 							we will send you an email once it's done!"
 			})
+
+class DatasetQueryController(LoginRequiredResource, View):
+	login_url = '/login/'
+	redirect_field_name = 'redirect_to'
+
+	def get(self, request, *args, **kwargs):
+		# extract id
+		dataset_id = kwargs.get('id')
+
+		# extract adjMatrix param, one of ['adjMatrix', 'egonet']
+		param = request.GET['type']
+		
+		# TODO: find nodes dynamically from database
+		if param == 'adjMatrix':
+			return JsonResponse({
+					'status' : "success",
+					'message' : "Your nodes are updated!"
+				})
+		if param == 'egonet':
+			# for now, returning dummy data
+			return JsonResponse({
+				"Nodes": [
+					{
+					"Id": "338",
+					"Name": "338"
+					},
+					{
+					"Id": "340",
+					"Name": "TEST NODE TWO"
+					},
+					{
+					"Id": "341",
+					"Name": "TEST NODE THREE"
+					},
+					{
+					"Id": "342",
+					"Name": "TEST NODE FOUR"
+					}
+					],
+					"Links": [
+					{
+					"Source": "338",
+					"Target": "338",
+					"Value": "0"
+					},
+					{
+					"Source": "338",
+					"Target": "340",
+					"Value": "0"
+					},
+					{
+					"Source": "340",
+					"Target": "341",
+					"Value": "0"
+					},
+					{
+					"Source": "342",
+					"Target": "341",
+					"Value": "0"
+					}
+				]
+			})
+		return JsonResponse({
+				'status' : 'error',
+				'message' : "Param is invalid. Try again!"
+			})

@@ -6,7 +6,28 @@
 #priority-selector a {
 	display: inline;
 }
+.node circle {
+	fill: steelblue;
+}
+.link {
+	fill: none;
+	stroke: #000;
+	stroke-opacity: .2;
+}
+.tick line {
+	shape-rendering: crispEdges;
+	stroke: #000;
+}
+line.minor  {
+	stroke: #777;
+	stroke-dasharray: 2,2;
+}
+path.domain {
+	fill: none;
+	stroke: black;
+}
 </style>
+
 {% endblock %}
 
 {% block tabs %}
@@ -83,13 +104,16 @@
 						  </tbody>
 						</table>
 					</div>
-					<div role="tabpanel" class="tab-pane" id="egonet">...</div>
-					<div role="tabpanel" class="tab-pane" id="adj-maxtrix">...</div>
+					<div role="tabpanel" class="tab-pane" id="egonet">
+						<svg class="egonet"/>
+					</div>
+					<div role="tabpanel" class="tab-pane" id="adj-maxtrix">
+						<svg class="adjacency" style="width:500px;height:500px; lightgray solid;"/>
+					</div>
 				</div>
 			</div>
 		</div>
-		<!-- Content -->
-		<!-- <div id="graph" class="center-block vega"></div> -->
+		<!-- Graph -->
 		{{ graph | safe }}
 	</div>
 </div>
@@ -163,15 +187,18 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- @removed: Vega js -->
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vega/3.0.0-beta.28/vega.js"></script> -->
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/vega-lite/2.0.0-alpha.7/vega-lite.js"></script> -->
+<!-- D3 JS -->
+<script src="http://d3js.org/d3.v3.min.js"></script>
 <!-- Bokeh JS -->
 <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.5.min.js"></script>
 <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.5.min.js"></script>
 <!-- Graph JS -->
 {{ graph_script | safe }}
 <script type="text/javascript">
+	// TODO: since we are not fetching database anyway, make it 1 by default
+	// var datasetId = {{ dataset.id }};
+	var datasetId = 1;
+
 	// star animation
 	var star = $(".star");
 	star.on('star:toggled', function(event) {
@@ -196,7 +223,8 @@
 			publicized : false,
 			metadata : {
 				nodeId : 'xxxx'
-			}
+			},
+			nodeSelected : false
 		},
 		methods : {
 			selectPriority : function (val, level) {
@@ -218,7 +246,6 @@
 		$('.star').click(function() {
 			$('#bookmark-remover').modal();
 		});
-
 	} else {
 		// click to show bookmark creator
 		$('.star').click(function() {
@@ -229,49 +256,150 @@
 	// graph callback function
 	function nodeSelected(indices) {
 		console.log("From FrontEnd ", indices);
+		createAdjMatrix();
+		createEgonet();
 	}
 
-	/* @removed: Replace Vega with Bokeh
-	* var vegaView = null;
-	* vega.loader()
-		.load('/static/data/config/test_config.json')
-		.then(function(data){
-			// init view
-			var spec = JSON.parse(data);
-			if (vegaView) vegaView.finalize();
-			vegaView = new vega.View(runtime = vega.parse(spec));
-			vegaView.logLevel(vega.Debug)
-					.renderer('canvas')
-					.initialize(document.querySelector('#graph'))
-					.hover()
-					.run();
+	// fill the data retrieved into information console
+	// TODO: make it dynamic
+	function createInformationConsole() {
 
-			// vega event handlers
-			var clickHandler = function(event, item) {
-				console.log(item);
-				if (!item) return;
-				var data = item.datum;
-				if (!data['species']) return;
-				alert("I am in the " + data['species'] + " family " +
-					  "with petal length " + data['petalLength'] + ", " +
-					  "petal width " + data['petalWidth'] +", " +
-					  "sepal length " + data['sepalLength'] + ", " +
-					  "sepal width " + data['sepalWidth'] );
-			}
+	}
 
-			var mousedownHandler = function(event, item) {
-				// disable click handler to prevent duplication
-				vegaView.removeEventListener('click');
-			}
-			var mouseupHandler = function(event, item) {
-				// reenable click handler
-				vegaView.addEventListener('click', clickHandler);
-			}
+	// create adj matrix and egonet
+	// TODO: make it dynamic
+	function createAdjMatrix() {
+		var edgeHash = {};
+		weight = [3, 8, 2, 1, 5, 1, 1, 5, 3, 1, 3, 2, 1, 7, 1, 4, 1, 3, 1, 2, 5]
+		source = ["sam", "sam", "sam", "sam", "roy", "roy", "tully", "tully", "tully", "tully", "tully", "kim", "kim", "mo", "mo", "mo", "mo", "pat","pat","pat","pat"]
+		target = ["tully", "pat", "kim", "pris", "pris","sam", "pris", "kim", "pat", "mo", "pat", "mo", "tully", "pat", "sam", "pris", "sam", "tully", "kim", "mo"]
+		nodes = ["sam", "roy", "tully", "kim", "pat", "pris", "mo"]
+		var edgeHash = {};
+		for (var i = 0; i < source.length; i++) {
+			var id = source[i] + "-" + target[i];
+			edgeHash[id] = weight[i];
+		}
 
-			vegaView.addEventListener('mousedown', mousedownHandler);
-			vegaView.addEventListener('mouseup', mouseupHandler);
-			vegaView.addEventListener('click', clickHandler);
-		})
-	*/
+		matrix = [];
+		for (a in nodes) {
+			for (b in nodes) {
+				var grid = {id: nodes[a] + "-" + nodes[b], x: b, y: a, weight: 0};
+				if (edgeHash[grid.id]) {
+					grid.weight = 1;
+				}
+				matrix.push(grid);
+			}
+		}
+
+		d3.select(".adjacency")
+			.append("g")
+			.attr("transform", "translate(50,50)")
+			.attr("id", "adjacencyG")
+			.selectAll("rect")
+			.data(matrix)
+			.enter()
+			.append("rect")
+			.attr("width", 25)
+			.attr("height", 25)
+			.attr("x", function (d) {return d.x * 25})
+			.attr("y", function (d) {return d.y * 25})
+			.style("stroke", "black")
+			.style("stroke-width", "1px")
+			.style("fill", "red")
+			.style("fill-opacity", function (d) {return d.weight * .2})
+			.on("mouseover", gridOver)
+		
+		var scaleSize = nodes.length * 25;
+		var nameScale = d3.scale.ordinal()
+								.rangePoints([0, scaleSize], 1)
+								.domain(nodes)
+		
+		xAxis = d3.svg.axis()
+					.scale(nameScale)
+					.tickSize(4)
+					.orient("top");    
+		yAxis = d3.svg.axis()
+					.scale(nameScale)
+					.tickSize(4)
+					.orient("left");    
+
+		d3.select("#adjacencyG").append("g").call(xAxis).selectAll("text").style("text-anchor", "end").attr("transform", "translate(-10,-10) rotate(90)");
+		d3.select("#adjacencyG").append("g").call(yAxis);
+		
+		function gridOver(d,i) {
+			d3.selectAll("rect").style("stroke-width", function (p) {
+				return p.x == d.x || p.y == d.y ? "3px" : "1px"
+			})
+		}
+	}
+
+	// create egonet 
+	// TODO: make it REAL dynamic
+	function createEgonet() {
+		var width = 500,
+		height = 500
+
+		var svg = d3.select(".egonet")
+					.attr("width", width)
+					.attr("height", height);
+
+		var force = d3.layout.force()
+						.gravity(.05)
+						.distance(100)
+						.charge(-100)
+						.size([
+							width, 
+							height
+						]);
+
+		d3.json("/datasets/" + datasetId + "/query/?type=egonet", function(error, json) {
+			var edges = [];
+			json.Links.forEach(function(e) { 
+				var sourceNode = json.Nodes.filter(function(n) { return n.Id === e.Source; })[0],
+				targetNode = json.Nodes.filter(function(n) { return n.Id === e.Target; })[0];
+
+				edges.push({source: sourceNode, target: targetNode, value: e.Value});
+			});
+
+			force.nodes(json.Nodes)
+				.links(edges)
+				.start();
+
+			var link = svg.selectAll(".link")
+						.data(edges)
+						.enter().append("line")
+						.attr("class", "link");
+
+			var node = svg.selectAll(".node")
+							.data(json.Nodes)
+							.enter().append("g")
+							.attr("class", "node")
+							.call(force.drag);
+
+			node.append("circle")
+				.attr("class", "node")
+				.attr("r", 5);
+
+			node.append("svg:a")
+				.attr("xlink:href", function(d){return d.Url;})
+				.append("text")
+				.attr("dx", 12)
+				.attr("dy", ".35em")
+				.text(function(d) { return d.Name})
+
+			
+			force.on("tick", function() {
+				link.attr("x1", function(d) { return d.source.x; })
+					.attr("y1", function(d) { return d.source.y; })
+					.attr("x2", function(d) { return d.target.x; })
+					.attr("y2", function(d) { return d.target.y; });
+
+				node.attr("transform", function(d) { 
+					return "translate(" + d.x + "," + d.y + ")"; 
+				});
+			});
+		});
+	}
+
 </script>
 {% endblock scripts %}
