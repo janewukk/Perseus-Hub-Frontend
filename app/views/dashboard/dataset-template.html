@@ -333,62 +333,316 @@ path.domain {
 		}
 	}
 
-	// create egonet 
+	// Egonet Javascript Code
+	var prevLinks = {},
+		nodes = {};
+
 	// TODO: make it REAL dynamic
 	function createEgonet() {
-		var width = 500,
-		height = 500
 
-		var svg = d3.select(".egonet")
-					.attr("width", width)
-					.attr("height", height);
+		shift = false;
+		d3.select("body")
+			.on("keydown",function(){
+			if (d3.event.shiftKey)
+				shift = true
+			else
+				shift = false
 
-		var force = d3.layout.force()
-						.gravity(.05)
-						.distance(100)
-						.charge(-100)
-						.size([
-							width, 
-							height
-						]);
+			console.log("Shift is:" + shift);
+			})
+			.on("keyup",function(){
+			if (d3.event.shiftKey)
+				shift = true
+			else
+				shift = false
 
-		d3.json("/datasets/" + datasetId + "/query/?type=egonet", function(error, json) {
-			var edges = [];
-			json.Links.forEach(function(e) { 
-				var sourceNode = json.Nodes.filter(function(n) { return n.Id === e.Source; })[0],
-				targetNode = json.Nodes.filter(function(n) { return n.Id === e.Target; })[0];
+			console.log("Shift is:" + shift);
+			})
 
-				edges.push({source: sourceNode, target: targetNode, value: e.Value});
+			var node;
+
+			var width = 500,
+			height = 500
+
+			var svg = d3.select(".egonet")
+						.attr("width", width)
+						.attr("height", height);
+
+			var force = d3.layout.force()
+							.gravity(.05)
+							.distance(100)
+							.charge(-100)
+							.size([
+								width, 
+								height
+							]);
+
+			d3.json("/datasets/" + datasetId + "/query/?type=egonet", function(error, json) {
+				var edges = [];
+				json.Links.forEach(function(e) { 
+					var sourceNode = json.Nodes.filter(function(n) { return n.Id === e.Source; })[0],
+					targetNode = json.Nodes.filter(function(n) { return n.Id === e.Target; })[0];
+
+					edges.push({source: sourceNode, target: targetNode, value: e.Value});
+				});
+
+				prevLinks = edges;
+				nodes = json.Nodes;
+
+				console.log(edges);
+
+				force.nodes(json.Nodes)
+					.links(edges)
+					.start();
+
+				var link = svg.selectAll(".link")
+							.data(edges)
+							.enter().append("line")
+							.attr("class", "link");
+
+				node = svg.selectAll(".node")
+								.data(json.Nodes)
+								.enter().append("g")
+								.attr("class", "node")
+								.call(force.drag);
+
+				node.append("circle")
+					.attr("class", "node")
+					.attr("r", 5);
+
+				node.append("svg:a")
+					.attr("xlink:href", function(d){return d.Url;})
+					.append("text")
+					.attr("dx", 12)
+					.attr("dy", ".35em")
+					.text(function(d) { return d.Name})
+
+				
+				force.on("tick", function() {
+					link.attr("x1", function(d) { return d.source.x; })
+						.attr("y1", function(d) { return d.source.y; })
+						.attr("x2", function(d) { return d.target.x; })
+						.attr("y2", function(d) { return d.target.y; });
+
+					node.attr("transform", function(d) { 
+						return "translate(" + d.x + "," + d.y + ")"; 
+					});
+				});
 			});
 
-			force.nodes(json.Nodes)
-				.links(edges)
+			var w = 500,
+				h = 500,
+				fill = d3.scale.category20()
+				trans=[0,0]
+				scale=1;
+
+			var brush = d3.svg.brush()
+				.on("brushstart", brushstart)
+				.on("brush", brushing)
+				.on("brushend", brushend);
+
+			//set brush constraints to full width 
+			brushX=d3.scale.linear().range([0, w]), 
+			brushY=d3.scale.linear().range([0, h]);
+
+			var vis=svg
+				.append("svg:svg")
+				.attr("width", w)
+				.attr("height", h)
+				.attr("pointer-events", "all")
+				.append('svg:g')
+				.attr('class', 'brush') 
+				.call(brush.x(brushX).y(brushY))
+				.style({"fill": "c4c4ff"});
+
+			console.log(vis);
+			
+			//set brush constraints to full width 
+			brushX=d3.scale.linear().range([0, w]), 
+			brushY=d3.scale.linear().range([0, h]);
+
+			function brushstart(){
+				console.log("brushstart!!!")
+			}
+
+			function brushing(){
+				console.log("brushing!!!")
+				var e = brush.extent();
+			}
+
+			function brushend(){
+				var e = brush.extent();
+				console.log("brushend!!!");
+				if(shift){
+					var brush_node=[]
+					node.filter(function (d){
+						if (e[0][0] <= brushX.invert(d.x) && brushX.invert(d.x) <= e[1][0]
+							&& e[0][1] <= brushY.invert(d.y) && brushY.invert(d.y) <= e[1][1])
+							brush_node.push(d.Id);
+						return  e[0][0] <= brushX.invert(d.x) && brushX.invert(d.x) <= e[1][0]
+							&& e[0][1] <= brushY.invert(d.y) && brushY.invert(d.y) <= e[1][1]})
+					
+					deletenodes(brush_node);
+				}
+			}
+		}
+
+		function deletenodes(nodeid) {
+			console.log('Delete Nodes Called');
+
+			// clear the original canvas
+			d3.select('.egonet').text('');
+
+			var len = nodeid.length;
+			var i;
+			var prevLinksArray = [];
+
+			// Remove Links
+			for (d in prevLinks) {
+				var flag = true;
+				for (i=0; i<len; i++){
+					if (prevLinks[d]['source']['Id'] == nodeid[i] || prevLinks[d]['target']['Id'] == nodeid[i])
+						flag=false;
+				}
+				if (flag==true)
+					prevLinksArray.push(prevLinks[d]);  
+			}
+
+			var prevNodesArray = [];
+
+			// Remove nodes
+			node_deletion_indices = []
+			for (d in nodes){
+				var flag = true
+				for (i=0; i<len; i++) {
+					if (nodes[d]['Id'] === nodeid[i]) {
+						flag=false;
+						node_deletion_indices.push(d);
+						break;
+					}
+				}
+				
+				if (flag == true)
+					prevNodesArray.push(nodes[d]); 
+			}
+
+			// for (i=0; i<node_deletion_indices.length; i++) {
+			// 	delete nodes[node_deletion_indices[i]];
+			// }
+
+			prevLinks=prevLinksArray;
+			nodes = prevNodesArray;
+
+			var node;
+
+			var width = 500,
+				height = 500
+
+			var svg = d3.select(".egonet")
+						.attr("width", width)
+						.attr("height", height);
+
+
+			console.log(prevLinks);
+			console.log(nodes);
+
+			var force = d3.layout.force()
+			//.nodes(d3.values(nodes))
+			.nodes(nodes)
+			.links(prevLinks)
+			.on("tick", tick)
+  			.distance(100)
+			.gravity(0.0)
+			.charge(-300)
+			.start();
+
+			// Brushing Code
+			var w = 500,
+				h = 500,
+				fill = d3.scale.category20()
+				trans=[0,0]
+				scale=1;
+
+			var brush = d3.svg.brush()
+				.on("brushstart", brushstart)
+				.on("brush", brushing)
+				.on("brushend", brushend);
+
+			//set brush constraints to full width 
+			brushX=d3.scale.linear().range([0, w]), 
+			brushY=d3.scale.linear().range([0, h]);
+
+			var vis=svg
+				.append("svg:svg")
+				.attr("width", w)
+				.attr("height", h)
+				.attr("pointer-events", "all")
+				.append('svg:g')
+				.attr('class', 'brush') 
+				.call(brush.x(brushX).y(brushY))
+				.style({"fill": "c4c4ff"});
+			
+			//set brush constraints to full width 
+			brushX=d3.scale.linear().range([0, w]), 
+			brushY=d3.scale.linear().range([0, h]);
+
+			function brushstart(){
+				console.log("brushstart!!!")
+			}
+
+			function brushing(){
+				console.log("brushing!!!")
+				var e = brush.extent();
+			}
+
+			function brushend(){
+				var e = brush.extent();
+				console.log("brushend!!!");
+				if(shift){
+					var brush_node=[]
+					node.filter(function (d){
+						if (e[0][0] <= brushX.invert(d.x) && brushX.invert(d.x) <= e[1][0]
+							&& e[0][1] <= brushY.invert(d.y) && brushY.invert(d.y) <= e[1][1])
+							brush_node.push(d.Id);
+						return  e[0][0] <= brushX.invert(d.x) && brushX.invert(d.x) <= e[1][0]
+							&& e[0][1] <= brushY.invert(d.y) && brushY.invert(d.y) <= e[1][1]})
+					
+					deletenodes(brush_node);
+				}
+			}
+			// End of brushing code
+
+			force.nodes(nodes)
+				.links(prevLinks)
 				.start();
 
 			var link = svg.selectAll(".link")
-						.data(edges)
-						.enter().append("line")
-						.attr("class", "link");
+				.data(prevLinks)
+				.enter().append("line")
+				.attr("class", "link");
 
-			var node = svg.selectAll(".node")
-							.data(json.Nodes)
-							.enter().append("g")
-							.attr("class", "node")
-							.call(force.drag);
+			node = svg.selectAll(".node")
+				.data(nodes)
+				.enter().append("g")
+				.attr("class", "node")
+				.call(force.drag);
 
 			node.append("circle")
 				.attr("class", "node")
 				.attr("r", 5);
 
 			node.append("svg:a")
-				.attr("xlink:href", function(d){return d.Url;})
+				.attr("xlink:href", function(d){return d.Id;})
 				.append("text")
 				.attr("dx", 12)
 				.attr("dy", ".35em")
-				.text(function(d) { return d.Name})
+				.text(function(d) { return d.Id})
 
-			
-			force.on("tick", function() {
+
+			function tick() {
+				node.attr("cx", function(d) { return d.x = Math.max(15, Math.min(width - 15, d.x)); })
+					.attr("cy", function(d) { return d.y = Math.max(15, Math.min(height - 15, d.y)); });
+
 				link.attr("x1", function(d) { return d.source.x; })
 					.attr("y1", function(d) { return d.source.y; })
 					.attr("x2", function(d) { return d.target.x; })
@@ -397,9 +651,8 @@ path.domain {
 				node.attr("transform", function(d) { 
 					return "translate(" + d.x + "," + d.y + ")"; 
 				});
-			});
-		});
-	}
-
+			}			
+		}
+	 
 </script>
 {% endblock scripts %}

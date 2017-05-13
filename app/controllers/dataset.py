@@ -104,21 +104,21 @@ class DatasetQueryController(LoginRequiredResource, View):
 					},
 					{
 					"Id": "340",
-					"Name": "TEST NODE TWO"
+					"Name": "340"
 					},
 					{
 					"Id": "341",
-					"Name": "TEST NODE THREE"
+					"Name": "341"
 					},
 					{
 					"Id": "342",
-					"Name": "TEST NODE FOUR"
+					"Name": "342"
 					}
 					],
 					"Links": [
 					{
 					"Source": "338",
-					"Target": "338",
+					"Target": "341",
 					"Value": "0"
 					},
 					{
