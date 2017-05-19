@@ -86,3 +86,38 @@ class Bookmark(models.Model):
 	# timestamps
 	created_at = models.DateTimeField(auto_now_add = True)
 	updated_at = models.DateTimeField(auto_now = True)
+
+
+class Node(models.Model):
+	nodeid = models.CharField(default= 0, max_length=30, primary_key=True)
+	degree = models.CharField(default= 0, max_length=30, db_index=True)
+	count = models.CharField(default= 0, max_length=30, db_index=True)
+	pagerank = models.CharField(default= 0, max_length=30, db_index=True)
+	pagerank_t = models.CharField(default= 0, max_length=30, db_index=True)
+	pagerank_t_count = models.CharField(default= 0, max_length=30, db_index=True)
+	v_1 = models.CharField(default= 0, max_length=30, db_index=True)
+	v_2 = models.CharField(default= 0, max_length=30, db_index=True)
+	v_3 = models.CharField(default= 0, max_length=30, db_index=True)
+	v_4 = models.CharField(default= 0, max_length=30, db_index=True)
+	v_5 = models.CharField(default= 0, max_length=30, db_index=True)
+	v_6 = models.CharField(default= 0, max_length=30, db_index=True)
+	v_7 = models.CharField(default= 0, max_length=30, db_index=True)
+	v_8 = models.CharField(default= 0, max_length=30, db_index=True)
+	v_9 = models.CharField(default= 0, max_length=30, db_index=True)
+	v_10 = models.CharField(default= 0, max_length=30, db_index=True)
+	v_1_t = models.CharField(default= 0, max_length=30, db_index=True)
+	v_2_t = models.CharField(default= 0, max_length=30, db_index=True)
+	v_3_t = models.CharField(default= 0, max_length=30, db_index=True)
+	v_4_t = models.CharField(default= 0, max_length=30, db_index=True)
+	v_5_t = models.CharField(default= 0, max_length=30, db_index=True)
+	v_6_t = models.CharField(default= 0, max_length=30, db_index=True)
+	v_7_t = models.CharField(default= 0, max_length=30, db_index=True)
+	v_8_t = models.CharField(default= 0, max_length=30, db_index=True)
+	v_9_t = models.CharField(default= 0, max_length=30, db_index=True)
+	v_10_t = models.CharField(default= 0, max_length=30, db_index=True)
+
+	
+class Edge(models.Model):
+	fromNode = models.IntegerField(default= 0, db_index=True)
+	toNode = models.IntegerField(default= 0, db_index=True)
+	weight = models.IntegerField(default= 0, db_index=True)

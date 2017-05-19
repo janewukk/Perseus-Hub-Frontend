@@ -254,8 +254,8 @@ path.domain {
 	}
 
 	// graph callback function
-	function nodeSelected(indices) {
-		console.log("From FrontEnd ", indices);
+	function nodeSelected(x1, y1) {
+		console.log(x1, y1);
 		createAdjMatrix();
 		createEgonet();
 	}
@@ -653,6 +653,11 @@ path.domain {
 				});
 			}			
 		}
+
+
+		// window.onmouseover=function(e) {
+        // 	console.log(e.target.className);
+		// };
 	 
 </script>
 {% endblock scripts %}

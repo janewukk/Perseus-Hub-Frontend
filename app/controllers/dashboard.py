@@ -62,7 +62,7 @@ class DatasetViewController(LoginRequiredResource, View):
 
 		# make graph
 		# @todo: make the file name dynamic
-		graph_data = graph_from_file('test.txt')
+		graph_data = graph_from_file('combined_data.csv')
 
 		return render(request, 'dashboard/dataset-template.html',{
 				'dataset' : dataset,
