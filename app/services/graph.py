@@ -167,29 +167,29 @@ def graph_from_file(dataset_filename):
         return plot
 
 
-    # plots_row1 = []
-    # row = []
+    plots_row1 = []
+    row = []
 
     plot1 = make_plot("degree", "count", True, False, "", degree_x_p1, count_y)
     plot2 = make_plot("degree", "pagerank", True, True, "pagerank_count", degree_x_p2, pagerank_y)
     plot3 = make_plot("pagerank", "pagerank_count", True, False, "", pagerank_x, pagerank_count)
 
-    # row.append(plot1)
-    # row.append(plot2)
-    # row.append(plot3)
-    # plots_row1.append(row)
+    row.append(plot1)
+    row.append(plot2)
+    row.append(plot3)
+    plots_row1.append(row)
 
-    # plots_row2 = []
-    # row = []
+    plots_row2 = []
+    row = []
 
     plot4 = make_plot("v1", "v2", False, False, "", p4_x, p4_y)
     plot5 = make_plot("v3", "v4", False, False, "", p5_x, p5_y)
     plot6 = make_plot("v5", "v6", False, False, "", p6_x, p6_y)
 
-    # row.append(plot4)
-    # row.append(plot5)
-    # row.append(plot6)
-    # plots_row2.append(row)
+    row.append(plot4)
+    row.append(plot5)
+    row.append(plot6)
+    plots_row2.append(row)
 
 
     stats = Div(text='', width=9000)
@@ -205,9 +205,12 @@ def graph_from_file(dataset_filename):
     tickers_rowx = bokeh.layouts.row(ticker1x, ticker2x, ticker3x)
     tickers_rowy = bokeh.layouts.row(ticker1y, ticker2y, ticker3y)
 
-    plots_row = gridplot([[plot1, plot2, plot3],[plot4, plot5, plot6]])
+    plots_row1 = gridplot(plots_row1)
+    plots_row2 = gridplot(plots_row2)
 
-    layout = bokeh.layouts.column(tickers_rowx, tickers_rowy, plots_row, stats, sizing_mode='scale_width')
+    # plots_row = gridplot([[plot1, plot2, plot3],[plot4, plot5, plot6]])
+
+    layout = bokeh.layouts.column(plots_row1, tickers_rowx, tickers_rowy, plots_row2, stats, sizing_mode='scale_width')
 
     callback_ticker1x = CustomJS(args=dict(source=source, source_true=source_true, plot=plot4), code="""
         console.log("Callback_ticker1x is called");
@@ -257,36 +260,77 @@ def graph_from_file(dataset_filename):
         source.trigger('change')
     """)
 
-    callback = CustomJS(args=dict(source=source, source_new=source_state, stats=stats,
+    callback = CustomJS(args=dict(source=source, source_true=source_true, source_new=source_state, stats=stats,
         tk1x=ticker1x, tk1y=ticker1y, tk2x=ticker2x, tk2y=ticker2y, tk3x=ticker3x, tk3y=ticker3y), code="""
         console.log("Selected callback was called");
         var inds = cb_obj.selected['1d'].indices;
-        state = Number(source_new['data']['state'][0])
-        console.log("State is:", state)
 
-        var name = ['degree', 'count', 'pagerank', 'pagerank_count', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6']
+        if (inds.length > 0) {        
+            state = Number(source_new['data']['state'][0])
+            console.log("State is:", state)
 
-        // Update the right names for the eigenvectors
-        if (state >= 4 && state <= 6) {
-            if (state === 4) {
-                name[4] = tk1x.get("value");
-                name[5] = tk1y.get("value");
+            var name = ['degree', 'count', 'degree', 'pagerank', 'pagerank', 'pagerank_count', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6'];
+            var real_name = ['degree', 'count', 'degree', 'pagerank_t', 'pagerank_t', 'pagerank_t_count', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6'];
+
+            // Update the right names for the eigenvectors
+            if (state >= 4 && state <= 6) {
+                if (state === 4) {
+                    name[6] = tk1x.get("value");
+                    name[7] = tk1y.get("value");
+                    real_name[6] = tk1x.get("value");
+                    real_name[7] = tk1y.get("value");
+                }
+                else if (state === 5) {
+                    name[8] = tk2x.get("value");
+                    name[9] = tk2y.get("value");
+                    real_name[8] = tk2x.get("value");
+                    real_name[9] = tk2y.get("value");
+                }
+                else if (state === 6) {
+                    name[10] = tk3x.get("value");
+                    name[11] = tk3y.get("value");
+                    real_name[10] = tk2x.get("value");
+                    real_name[11] = tk2y.get("value");
+                }
             }
-            else if (state === 5) {
-                name[6] = tk2x.get("value");
-                name[7] = tk2y.get("value");
+
+            // console.log(name);
+            console.log(real_name);
+
+            if (state <= 3) {
+                var x1 = source['data'][name[2*state-2]][inds[0]];
+                var y1 = source['data'][name[2*state-1]][inds[0]];
             }
-            else if (state === 6) {
-                name[8] = tk3x.get("value");
-                name[9] = tk3y.get("value");
+            else {
+                var x1 = source_true['data'][name[2*state-2]][inds[0]];
+                var y1 = source_true['data'][name[2*state-1]][inds[0]];
             }
+            
+            var x1_name = real_name[2*state-2];
+            var y1_name = real_name[2*state-1];
+
+            // Adjusting for real names
+            if (state >= 4 && state <= 6) {
+                val_x1 = x1_name[1];
+                val_y1 = y1_name[1];
+
+                if (x1_name === "v10") {
+                    x1_name = x1_name[0] + "_10_t";
+                }
+                else {
+                    x1_name = x1_name[0] + "_" + val_x1 + "_t";
+                }
+                
+                if (y1_name === "v10") {
+                    y1_name = y1_name[0] + "_10_t";
+                }
+                else {
+                    y1_name = y1_name[0] + "_" + val_y1 + "_t"
+                }
+            }
+
+            nodeSelected(x1, y1, x1_name, y1_name);
         }
-
-        console.log(name);
-
-        var x1 = source['data'][name[2*state-2]][inds[0]];
-        var y1 = source['data'][name[2*state-1]][inds[0]];
-        nodeSelected(x1, y1)
     """)
 
     event_callback_1 = CustomJS(args=dict(source=source_state),code="""

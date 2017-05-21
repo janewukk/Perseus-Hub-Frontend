@@ -79,19 +79,17 @@ path.domain {
 					<div role="tabpanel" class="tab-pane active" id="info-console">
 						<table class="table table-hover">
 						  <thead>
-						  	<tr>
-						  		<th>Node ID</th>
-						  		<th>Number</th>
-						  		<th>Degree</th>
-						  		<th>Degree(U)</th>
-						  		<th>PageRank</th>
-						  		<th>Eigenvector</th>
-						  		<th>Egonet</th>
-						  		<th>Adj matrix</th>
-						  	</tr>
+							<tr>
+								<th>Node ID</th>
+								<th>Degree</th>
+								<th>Pagerank</th>
+								<th>Eiganvector</th>
+								<th>Egonet</th>
+								<th>Adj matrix</th>
+							</tr>
 						  </thead>
-						  <tbody>
-						  	<tr>
+						  <tbody id="temp_id">
+						  	<!--<tr>
 						  		<td>466</td>
 						  		<td>1-85e</td>
 						  		<td>65</td>
@@ -100,15 +98,15 @@ path.domain {
 						  		<td>2.2009e-7</td>
 						  		<td><button class="btn btn-primary btn-sm">View</button></td>
 						  		<td><button class="btn btn-primary btn-sm">View</button></td>
-						  	</tr>
+						  	</tr>-->
 						  </tbody>
 						</table>
 					</div>
 					<div role="tabpanel" class="tab-pane" id="egonet">
-						<svg class="egonet"/>
+						<svg class="egonet" id="egonet-id"/>
 					</div>
 					<div role="tabpanel" class="tab-pane" id="adj-maxtrix">
-						<svg class="adjacency" style="width:500px;height:500px; lightgray solid;"/>
+						<svg class="adjacency" style="width:500px;height:500px; lightgray solid;" id = "adj-id"/>
 					</div>
 				</div>
 			</div>
@@ -254,30 +252,120 @@ path.domain {
 	}
 
 	// graph callback function
-	function nodeSelected(x1, y1) {
-		console.log(x1, y1);
-		createAdjMatrix();
-		createEgonet();
+	function nodeSelected(x1, y1, x1_name, y1_name) {
+		console.log(x1, y1, x1_name, y1_name);
+		$.ajax({
+			type: 'POST',
+			url: '/ClickPlot/',
+			contentType: "application/json; charset=UTF-8",
+			response: "application/json; charset=UTF-8",
+			data: JSON.stringify({
+				"x1": x1,
+				"y1": y1,
+				"x_name": x1_name,
+				"y_name": y1_name 
+			}),
+			success: function (data) {
+				$("#temp_id").empty();
+				data = JSON.parse(data)
+				createInformationConsole(data)
+			}
+		  });
+	}
+
+	function getEgonet(id) {
+		console.log("Clicked to get egonet data for node", id);
+		$.ajax({
+			type: 'POST',
+			url: '/GetEgonet/',
+			contentType: "application/json; charset=UTF-8",
+			response: "application/json; charset=UTF-8",
+			data: JSON.stringify({
+				"id": id
+			}),
+			success: function (data) {
+				$("#egonet-id").empty();
+				console.log(data)
+				createEgonet(data)
+			}
+		});
+	}
+
+	function getAdjMatrix(nodeid){
+		$.ajax({
+			type: 'POST',
+			url: '/GetAdjMatrix/',
+			contentType: "application/json; charset=UTF-8",
+			response: "application/json; charset=UTF-8",
+			data: JSON.stringify({
+				"nodeid": nodeid
+			}),
+			success: function (data) {
+				$("#adj-id").empty();
+				console.log(data)
+				createAdjMatrix(data)
+			}
+		  });
 	}
 
 	// fill the data retrieved into information console
 	// TODO: make it dynamic
-	function createInformationConsole() {
+	function createInformationConsole(data) {
+        tabBody=document.getElementsByTagName("tbody").item(0)
+        i = 0
+        while (i < data.length){
+            row=document.createElement("tr");
+            cell1 = document.createElement("td");
+            cell2 = document.createElement("td");
+            cell3 = document.createElement("td");
+            cell4 = document.createElement("td");
+            cell5 = document.createElement("td");
+            cell6 = document.createElement("td");
+            textnode1=document.createTextNode(data[i][0]);
+            textnode2=document.createTextNode(data[i][1]);
+            textnode3=document.createTextNode(data[i][2]);
+            textnode4=document.createTextNode(data[i][3]);
+            btn1=document.createElement("button")
+            btn2=document.createElement("button")
 
-	}
+			nodeID = data[i][0];
+
+			// TODO: Make every onclick for each button unique
+			btn1.onclick = function(){getEgonet(nodeID);}
+			btn2.onclick = function(){getAdjMatrix(nodeID);}
+
+            btn1.innerHTML = "View"
+            btn2.innerHTML = "View"
+            btn1.className ="btn btn-primary btn-sm";
+            btn2.className ="btn btn-primary btn-sm"
+            cell1.appendChild(textnode1);
+            cell2.appendChild(textnode2);
+            cell3.appendChild(textnode3);
+            cell4.appendChild(textnode4);
+            cell5.appendChild(btn1);
+            cell6.appendChild(btn2);
+            row.appendChild(cell1);
+            row.appendChild(cell2);
+            row.appendChild(cell3);
+            row.appendChild(cell4);
+            row.appendChild(cell5);
+            row.appendChild(cell6);
+            tabBody.appendChild(row);
+            i = i + 1;
+        }
+    }
 
 	// create adj matrix and egonet
 	// TODO: make it dynamic
-	function createAdjMatrix() {
+	function createAdjMatrix(data) {
 		var edgeHash = {};
-		weight = [3, 8, 2, 1, 5, 1, 1, 5, 3, 1, 3, 2, 1, 7, 1, 4, 1, 3, 1, 2, 5]
-		source = ["sam", "sam", "sam", "sam", "roy", "roy", "tully", "tully", "tully", "tully", "tully", "kim", "kim", "mo", "mo", "mo", "mo", "pat","pat","pat","pat"]
-		target = ["tully", "pat", "kim", "pris", "pris","sam", "pris", "kim", "pat", "mo", "pat", "mo", "tully", "pat", "sam", "pris", "sam", "tully", "kim", "mo"]
-		nodes = ["sam", "roy", "tully", "kim", "pat", "pris", "mo"]
+		source = data['source']
+		target = data['target']
+		nodes = data['nodes']
 		var edgeHash = {};
 		for (var i = 0; i < source.length; i++) {
 			var id = source[i] + "-" + target[i];
-			edgeHash[id] = weight[i];
+			edgeHash[id] = 1;
 		}
 
 		matrix = [];
@@ -299,17 +387,17 @@ path.domain {
 			.data(matrix)
 			.enter()
 			.append("rect")
-			.attr("width", 25)
-			.attr("height", 25)
-			.attr("x", function (d) {return d.x * 25})
-			.attr("y", function (d) {return d.y * 25})
+			.attr("width", 15)
+			.attr("height", 15)
+			.attr("x", function (d) {return d.x * 15})
+			.attr("y", function (d) {return d.y * 15})
 			.style("stroke", "black")
 			.style("stroke-width", "1px")
 			.style("fill", "red")
 			.style("fill-opacity", function (d) {return d.weight * .2})
 			.on("mouseover", gridOver)
 		
-		var scaleSize = nodes.length * 25;
+		var scaleSize = nodes.length * 15;
 		var nameScale = d3.scale.ordinal()
 								.rangePoints([0, scaleSize], 1)
 								.domain(nodes)
@@ -338,7 +426,7 @@ path.domain {
 		nodes = {};
 
 	// TODO: make it REAL dynamic
-	function createEgonet() {
+	function createEgonet(data) {
 
 		shift = false;
 		d3.select("body")
@@ -369,66 +457,117 @@ path.domain {
 						.attr("height", height);
 
 			var force = d3.layout.force()
-							.gravity(.05)
+							.gravity(.01)
 							.distance(100)
-							.charge(-100)
+							.charge(-300)
 							.size([
 								width, 
 								height
-							]);
+							])
+							.start();
+				
+			// New Code Adjusted for dynamic data
+			var edges = [];
+			data.Links.forEach(function(e) { 
+				var sourceNode = data.Nodes.filter(function(n) { return n.Id === e.Source; })[0],
+				targetNode = data.Nodes.filter(function(n) { return n.Id === e.Target; })[0];
 
-			d3.json("/datasets/" + datasetId + "/query/?type=egonet", function(error, json) {
-				var edges = [];
-				json.Links.forEach(function(e) { 
-					var sourceNode = json.Nodes.filter(function(n) { return n.Id === e.Source; })[0],
-					targetNode = json.Nodes.filter(function(n) { return n.Id === e.Target; })[0];
+				edges.push({source: sourceNode, target: targetNode, value: e.Value});
+			});
 
-					edges.push({source: sourceNode, target: targetNode, value: e.Value});
-				});
+			prevLinks = edges;
+			nodes = data.Nodes;
 
-				prevLinks = edges;
-				nodes = json.Nodes;
+			// force.nodes(nodes)
+			// 	.links(edges)
+			// 	.start();
 
-				console.log(edges);
+			// var link = svg.selectAll(".link")
+			// 			.data(edges)
+			// 			.enter().append("line")
+			// 			.attr("class", "link");
 
-				force.nodes(json.Nodes)
-					.links(edges)
-					.start();
+			// node = svg.selectAll(".node")
+			// 				.data(data.Nodes)
+			// 				.enter().append("g")
+			// 				.attr("class", "node")
+			// 				.call(force.drag);
 
-				var link = svg.selectAll(".link")
-							.data(edges)
-							.enter().append("line")
-							.attr("class", "link");
+			// node.append("circle")
+			// 	.attr("class", "node")
+			// 	.attr("r", 5);
 
-				node = svg.selectAll(".node")
-								.data(json.Nodes)
-								.enter().append("g")
-								.attr("class", "node")
-								.call(force.drag);
+			// node.append("svg:a")
+			// 	.attr("xlink:href", function(d){return d.Id;})
+			// 	.append("text")
+			// 	.attr("dx", 12)
+			// 	.attr("dy", ".35em")
+			// 	.text(function(d) { return d.Id})
 
-				node.append("circle")
-					.attr("class", "node")
-					.attr("r", 5);
+			
+			// force.on("tick", function() {
+			// 	link.attr("x1", function(d) { return d.source.x; })
+			// 		.attr("y1", function(d) { return d.source.y; })
+			// 		.attr("x2", function(d) { return d.target.x; })
+			// 		.attr("y2", function(d) { return d.target.y; });
 
-				node.append("svg:a")
-					.attr("xlink:href", function(d){return d.Url;})
-					.append("text")
-					.attr("dx", 12)
-					.attr("dy", ".35em")
-					.text(function(d) { return d.Name})
+			// 	node.attr("transform", function(d) { 
+			// 		return "translate(" + d.x + "," + d.y + ")"; 
+			// 	});
+			// });
+
+			// d3.json("/datasets/" + datasetId + "/query/?type=egonet", function(error, json) {
+			// 	var edges = [];
+			// 	json.Links.forEach(function(e) { 
+			// 		var sourceNode = json.Nodes.filter(function(n) { return n.Id === e.Source; })[0],
+			// 		targetNode = json.Nodes.filter(function(n) { return n.Id === e.Target; })[0];
+
+			// 		edges.push({source: sourceNode, target: targetNode, value: e.Value});
+			// 	});
+
+			// 	prevLinks = edges;
+			// 	nodes = json.Nodes;
+
+			// 	console.log(edges);
+
+			// 	force.nodes(json.Nodes)
+			// 		.links(edges)
+			// 		.start();
+
+			// 	var link = svg.selectAll(".link")
+			// 				.data(edges)
+			// 				.enter().append("line")
+			// 				.attr("class", "link");
+
+			// 	node = svg.selectAll(".node")
+			// 					.data(json.Nodes)
+			// 					.enter().append("g")
+			// 					.attr("class", "node")
+			// 					.call(force.drag);
+
+			// 	node.append("circle")
+			// 		.attr("class", "node")
+			// 		.attr("r", 5);
+
+			// 	node.append("svg:a")
+			// 		.attr("xlink:href", function(d){return d.Url;})
+			// 		.append("text")
+			// 		.attr("dx", 12)
+			// 		.attr("dy", ".35em")
+			// 		.text(function(d) { return d.Name})
 
 				
-				force.on("tick", function() {
-					link.attr("x1", function(d) { return d.source.x; })
-						.attr("y1", function(d) { return d.source.y; })
-						.attr("x2", function(d) { return d.target.x; })
-						.attr("y2", function(d) { return d.target.y; });
+			// 	force.on("tick", function() {
+			// 		link.attr("x1", function(d) { return d.source.x; })
+			// 			.attr("y1", function(d) { return d.source.y; })
+			// 			.attr("x2", function(d) { return d.target.x; })
+			// 			.attr("y2", function(d) { return d.target.y; });
 
-					node.attr("transform", function(d) { 
-						return "translate(" + d.x + "," + d.y + ")"; 
-					});
-				});
-			});
+			// 		node.attr("transform", function(d) { 
+			// 			return "translate(" + d.x + "," + d.y + ")"; 
+			// 		});
+			// 	});
+			// });
 
 			var w = 500,
 				h = 500,
@@ -454,8 +593,6 @@ path.domain {
 				.attr('class', 'brush') 
 				.call(brush.x(brushX).y(brushY))
 				.style({"fill": "c4c4ff"});
-
-			console.log(vis);
 			
 			//set brush constraints to full width 
 			brushX=d3.scale.linear().range([0, w]), 
@@ -485,6 +622,46 @@ path.domain {
 					deletenodes(brush_node);
 				}
 			}
+
+			force.nodes(nodes)
+				.links(edges)
+				.start();
+
+			var link = svg.selectAll(".link")
+						.data(edges)
+						.enter().append("line")
+						.attr("class", "link");
+
+			node = svg.selectAll(".node")
+							.data(data.Nodes)
+							.enter().append("g")
+							.attr("class", "node")
+							.call(force.drag);
+
+			node.append("circle")
+				.attr("class", "node")
+				.attr("r", 5);
+
+			node.append("svg:a")
+				// .attr("xlink:href", function(d){return d.Id;})
+				.append("text")
+				.attr("dx", 12)
+				.attr("dy", ".35em")
+				.text(function(d) { return d.Id})
+			
+			force.on("tick", function() {
+				node.attr("cx", function(d) { return d.x = Math.max(15, Math.min(width - 15, d.x)); })
+					.attr("cy", function(d) { return d.y = Math.max(15, Math.min(height - 15, d.y)); });
+
+				link.attr("x1", function(d) { return d.source.x; })
+					.attr("y1", function(d) { return d.source.y; })
+					.attr("x2", function(d) { return d.target.x; })
+					.attr("y2", function(d) { return d.target.y; });
+
+				node.attr("transform", function(d) { 
+					return "translate(" + d.x + "," + d.y + ")"; 
+				});
+			});
 		}
 
 		function deletenodes(nodeid) {
@@ -652,12 +829,7 @@ path.domain {
 					return "translate(" + d.x + "," + d.y + ")"; 
 				});
 			}			
-		}
-
-
-		// window.onmouseover=function(e) {
-        // 	console.log(e.target.className);
-		// };
+		}	
 	 
 </script>
 {% endblock scripts %}

@@ -22,6 +22,8 @@ from app.controllers.auth import LoginController, LogoutController, RegisterCont
 from app.controllers.dashboard import DashboardController, DatasetViewController, BookmarkViewController
 from app.controllers.dataset import DatasetSearchController, DatasetUploadController, DatasetQueryController
 
+from app.views import *
+
 urlpatterns = [
     url(r'^$', DashboardController.as_view()),
 	url(r'^login/$', LoginController.as_view()),
@@ -33,5 +35,9 @@ urlpatterns = [
     url(r'^bookmarks/$', BookmarkViewController.as_view()),
     url(r'^search/$', DatasetSearchController.as_view()),
     url(r'^datasets/(?P<id>\d+)/$', DatasetViewController.as_view()),
-    url(r'^datasets/(?P<id>\d+)/query/$', DatasetQueryController.as_view())
+    url(r'^datasets/(?P<id>\d+)/query/$', DatasetQueryController.as_view()),
+
+    url(r'^ClickPlot',ClickPlot),
+    url(r'^GetEgonet',GetEgonet),
+    url(r'^GetAdjMatrix', GetAdjMatrix),
 ]
