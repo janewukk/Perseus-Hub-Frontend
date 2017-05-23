@@ -50,6 +50,7 @@ Notice: dataset should be in the Django root data/ folder
 """
 def graph_from_file(dataset_filename):
 
+    pd.set_option('display.precision',20)
     data = pd.read_csv('data/' + dataset_filename, skipinitialspace=True, escapechar="\\", header=None)
     color_mapper = LinearColorMapper(palette=palette)
 
@@ -289,8 +290,8 @@ def graph_from_file(dataset_filename):
                 else if (state === 6) {
                     name[10] = tk3x.get("value");
                     name[11] = tk3y.get("value");
-                    real_name[10] = tk2x.get("value");
-                    real_name[11] = tk2y.get("value");
+                    real_name[10] = tk3x.get("value");
+                    real_name[11] = tk3y.get("value");
                 }
             }
 

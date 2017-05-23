@@ -18,6 +18,8 @@ import string
 import random
 import json
 
+from decimal import *
+
 def ClickPlot(request):
     val = "hi from ClickPlot"
     data = json.loads(request.body)
@@ -29,8 +31,23 @@ def ClickPlot(request):
     print(y_name)
     print(x)
     print(y)
-    results = Node.objects.filter(**{x_name: x, y_name: y})[:10]
+
+    # Check if we have count vs degree, or pagerank_count vs pagerank 
+    if (x_name == "degree" and y_name == "count"):
+        results = Node.objects.filter(degree = x)[:10]
+    elif (x_name == "pagerank_t" and y_name == "pagerank_t_count"):
+        print "pagerank_t vs. pagerank_t_count"
+        results = Node.objects.raw("Select * from app_node where " + x_name + " = " + x + " LIMIT 10;")
+        # results = Node.objects.filter(pagerank_t = x)[:10]
+    else:
+        print 'here'
+        results = Node.objects.raw("Select * from app_node where " + x_name + " = " + x + " and " + y_name + " = " + y + " LIMIT 10;")
+        # results = Node.objects.filter(pagerank_t = y)[:10]
+        # results = Node.objects.filter(**{x_name: x, y_name: y})[:10]
+    
     output = []
+
+    print results
 
     for result in results:
         item = []

@@ -260,14 +260,15 @@ path.domain {
 			contentType: "application/json; charset=UTF-8",
 			response: "application/json; charset=UTF-8",
 			data: JSON.stringify({
-				"x1": x1,
-				"y1": y1,
+				"x1": x1.toString(),
+				"y1": y1.toString(),
 				"x_name": x1_name,
 				"y_name": y1_name 
 			}),
 			success: function (data) {
 				$("#temp_id").empty();
-				data = JSON.parse(data)
+				data = JSON.parse(data);
+				console.log(data);
 				createInformationConsole(data)
 			}
 		  });
