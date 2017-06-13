@@ -65,7 +65,7 @@ path.domain {
 	<div class="col-sm-10">
 		<div class="row" style="margin-top: 20px">
 			<div class="col-sm-10">
-				<ul class="nav nav-tabs" role="tablist">
+				<ul class="nav nav-tabs" role="tablist" id="tabs">
 					<li role="presentation" class="active"><a href="#info-console" aria-controls="info-console" role="tab" data-toggle="tab">Information console</a></li>
 					<li role="presentation"><a href="#egonet" aria-controls="egonet" role="tab" data-toggle="tab">EgoNet</a></li>
 					<li role="presentation"><a href="#adj-maxtrix" aria-controls="adj-maxtrix" role="tab" data-toggle="tab">Adj Matrix</a></li>
@@ -268,8 +268,10 @@ path.domain {
 			success: function (data) {
 				$("#temp_id").empty();
 				data = JSON.parse(data);
-				console.log(data);
+				console.log('data: ',data);
 				createInformationConsole(data)
+				// jump to tab 1
+				$('#tabs li:eq(0) a').tab('show');
 			}
 		  });
 	}
@@ -287,7 +289,10 @@ path.domain {
 			success: function (data) {
 				$("#egonet-id").empty();
 				console.log(data)
+				// draw egonet
 				createEgonet(data)
+				// jump to tab 2
+				$('#tabs li:eq(1) a').tab('show');
 			}
 		});
 	}
@@ -305,6 +310,8 @@ path.domain {
 				$("#adj-id").empty();
 				console.log(data)
 				createAdjMatrix(data)
+				// jump to tab 3
+				$('#tabs li:eq(2) a').tab('show');
 			}
 		  });
 	}
@@ -329,16 +336,15 @@ path.domain {
             btn1=document.createElement("button")
             btn2=document.createElement("button")
 
-			nodeID = data[i][0];
+			var nodeID = data[i][0];
 
-			// TODO: Make every onclick for each button unique
-			btn1.onclick = function(){getEgonet(nodeID);}
-			btn2.onclick = function(){getAdjMatrix(nodeID);}
+			btn1.id = nodeID;
+			btn2.id = nodeID;
 
             btn1.innerHTML = "View"
             btn2.innerHTML = "View"
-            btn1.className ="btn btn-primary btn-sm";
-            btn2.className ="btn btn-primary btn-sm"
+            btn1.className ="btn btn-primary btn-sm btn-egonet";
+            btn2.className ="btn btn-primary btn-sm btn-adj-matrix"
             cell1.appendChild(textnode1);
             cell2.appendChild(textnode2);
             cell3.appendChild(textnode3);
@@ -354,6 +360,17 @@ path.domain {
             tabBody.appendChild(row);
             i = i + 1;
         }
+
+      	// bind click events to btns
+        $('body').on('click', '.btn-egonet', function(e) {
+        	var nodeId = $(e.target).attr('id');
+        	getEgonet(nodeId);
+        });
+
+        $('body').on('click', '.btn-adj-matrix', function(e) {
+        	var nodeId = $(e.target).attr('id');
+        	getAdjMatrix(nodeId);
+        });
     }
 
 	// create adj matrix and egonet
