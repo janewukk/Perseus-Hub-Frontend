@@ -63,43 +63,51 @@ path.domain {
 {% block tabdetails %}
 <div class="row">
 	<div class="col-sm-10">
-		<div class="row" style="margin-top: 20px">
+		<!-- Graph -->
+		{{ graph | safe }}
+		<!-- Data browser -->
+		<div class="row" style="margin-top: 20px" id="data-browser">
 			<div class="col-sm-10">
 				<ul class="nav nav-tabs" role="tablist" id="tabs">
 					<li role="presentation" class="active"><a href="#info-console" aria-controls="info-console" role="tab" data-toggle="tab">Information console</a></li>
 					<li role="presentation"><a href="#egonet" aria-controls="egonet" role="tab" data-toggle="tab">EgoNet</a></li>
 					<li role="presentation"><a href="#adj-maxtrix" aria-controls="adj-maxtrix" role="tab" data-toggle="tab">Adj Matrix</a></li>
-					<li style="float:right">
-						<span class="star" data-toggle="tooltip" data-placement="right" title="Click to bookmark/unbookmark">
-							<span class="star-icon fa fa-star" ></span>
-						</span>
-					</li>
 				</ul>
 				<div class="tab-content">
 					<div role="tabpanel" class="tab-pane active" id="info-console">
 						<table class="table table-hover">
-						  <thead>
-							<tr>
-								<th>Node ID</th>
-								<th>Degree</th>
-								<th>Pagerank</th>
-								<th>Eiganvector</th>
-								<th>Egonet</th>
-								<th>Adj matrix</th>
-							</tr>
-						  </thead>
-						  <tbody id="temp_id">
-						  	<!--<tr>
-						  		<td>466</td>
-						  		<td>1-85e</td>
-						  		<td>65</td>
-						  		<td>10</td>
-						  		<td>2.6e-05</td>
-						  		<td>2.2009e-7</td>
-						  		<td><button class="btn btn-primary btn-sm">View</button></td>
-						  		<td><button class="btn btn-primary btn-sm">View</button></td>
-						  	</tr>-->
-						  </tbody>
+							<thead data-bind="if: nodes().length > 0">
+								<tr>
+									<th>Node ID</th>
+									<th>Degree</th>
+									<th>Pagerank</th>
+									<th>Eiganvector</th>
+									<th>Egonet</th>
+									<th>Adj matrix</th>
+									<th>Bookmark / Unbookmark</th>
+								</tr>
+							</thead>
+							<tbody data-bind="foreach: nodes">
+								<td data-bind="text: id"></td>
+								<td data-bind="text: degree"></td>
+								<td data-bind="text: pageRank"></td>
+								<td data-bind="text: eigenVector"></td>
+								<td>
+									<button data-bind="attr: { id : id }, click: function() { $parent.drawEgonet(id) }" class="btn btn-primary btn-sm btn-egonet">View</button>
+								</td>
+								<td>
+									<button data-bind="attr: { id : id }, click: function() { $parent.drawAdjMatrix(id) }" class="btn btn-primary btn-sm btn-adj-matrix">View</button>
+								</td>
+								<td>
+									<span class="star" data-toggle="tooltip" data-placement="right" title="Click to bookmark/unbookmark" data-bind="click: function() { if (! bookmarked) { $('#bookmark-creator').modal(); } else { $('#bookmark-remover').modal(); } }">
+										<span class="star-icon fa fa-star"></span>
+									</span>
+								</td>
+							</tbody>
+							<tbody>
+								<h4 data-bind="if: nodes().length == 0"> No data records available. Please select a data point above</h4>
+							</tbody>
+							
 						</table>
 					</div>
 					<div role="tabpanel" class="tab-pane" id="egonet">
@@ -111,10 +119,9 @@ path.domain {
 				</div>
 			</div>
 		</div>
-		<!-- Graph -->
-		{{ graph | safe }}
 	</div>
 </div>
+
 <!-- Bookmark creator -->
 <div class="modal fade" id="bookmark-creator" tabindex="-1" role="dialog" aria-labelledby="bookmark-creator">
 	<div class="modal-dialog" role="document">
@@ -182,6 +189,16 @@ path.domain {
 		</div>
 	</div>
 </div>
+<!-- Loading indicator -->
+<div class="modal fade" id="loading-indicator" tabindex="-1" role="dialog" aria-labelledby="loading-indicator">
+	<div class="modal-dialog modal-sm" role="document">
+		<div class="modal-content">
+			<div align="center" style="font-size: 20px">
+				<i class="fa fa-spinner fa-spin fa-fw"></i>
+			</div>
+		</div>
+	</div>
+</div>
 {% endblock %}
 
 {% block scripts %}
@@ -212,7 +229,7 @@ path.domain {
 		}
 	});
 
-	// init view models
+	// init bookmark models
 	var bookmarkView = new View({
 		el : document.getElementById('bookmark-creator'),
 		data : {
@@ -232,28 +249,27 @@ path.domain {
 		}
 	});
 
-	// check bookmarked status
-	var bookmarked = {{ bookmarked }};
-
-	if (bookmarked) {
-		// highlight star
-		trigger($('.star'), 'star:toggled', {
-			on : true
-		})
-		// click to show bookmark remover
-		$('.star').click(function() {
-			$('#bookmark-remover').modal();
-		});
-	} else {
-		// click to show bookmark creator
-		$('.star').click(function() {
-			$('#bookmark-creator').modal();
-		});
-	}
+	// init node view model
+	var nodesView = new View({
+		el : document.getElementById('info-console'),
+		data : {
+			nodes : []
+		}, 
+		methods: {
+			drawEgonet : function (nodeId) {
+				getEgonet(nodeId);
+			},
+			drawAdjMatrix : function (nodeId) {
+				getAdjMatrix(nodeId);
+			}
+		}
+	})
 
 	// graph callback function
 	function nodeSelected(x1, y1, x1_name, y1_name) {
-		console.log(x1, y1, x1_name, y1_name);
+		// show loading indicator
+		$('#loading-indicator').modal('show');
+		// fetch nodes
 		$.ajax({
 			type: 'POST',
 			url: '/ClickPlot/',
@@ -266,12 +282,16 @@ path.domain {
 				"y_name": y1_name 
 			}),
 			success: function (data) {
-				$("#temp_id").empty();
 				data = JSON.parse(data);
-				console.log('data: ',data);
 				createInformationConsole(data)
+				// scroll to bottom
+				$('html, body').animate({
+					scrollTop: $("#data-browser").offset().top
+				}, 1000);
 				// jump to tab 1
 				$('#tabs li:eq(0) a').tab('show');
+				// hide loading indicator
+				$('#loading-indicator').modal('hide');
 			}
 		  });
 	}
@@ -317,60 +337,21 @@ path.domain {
 	}
 
 	// fill the data retrieved into information console
-	// TODO: make it dynamic
 	function createInformationConsole(data) {
-        tabBody=document.getElementsByTagName("tbody").item(0)
-        i = 0
-        while (i < data.length){
-            row=document.createElement("tr");
-            cell1 = document.createElement("td");
-            cell2 = document.createElement("td");
-            cell3 = document.createElement("td");
-            cell4 = document.createElement("td");
-            cell5 = document.createElement("td");
-            cell6 = document.createElement("td");
-            textnode1=document.createTextNode(data[i][0]);
-            textnode2=document.createTextNode(data[i][1]);
-            textnode3=document.createTextNode(data[i][2]);
-            textnode4=document.createTextNode(data[i][3]);
-            btn1=document.createElement("button")
-            btn2=document.createElement("button")
+		console.log(data);
+        // create node data array
+        var nodes = data.map(function(node) {
+        	// TODO: append bookmarked attribute to nodes
+        	return {
+        		id : node[0],
+        		degree : node[1],
+        		pageRank : node[2],
+        		eigenVector : node[3],
+        		bookmarked : false
+        	}
+        })
 
-			var nodeID = data[i][0];
-
-			btn1.id = nodeID;
-			btn2.id = nodeID;
-
-            btn1.innerHTML = "View"
-            btn2.innerHTML = "View"
-            btn1.className ="btn btn-primary btn-sm btn-egonet";
-            btn2.className ="btn btn-primary btn-sm btn-adj-matrix"
-            cell1.appendChild(textnode1);
-            cell2.appendChild(textnode2);
-            cell3.appendChild(textnode3);
-            cell4.appendChild(textnode4);
-            cell5.appendChild(btn1);
-            cell6.appendChild(btn2);
-            row.appendChild(cell1);
-            row.appendChild(cell2);
-            row.appendChild(cell3);
-            row.appendChild(cell4);
-            row.appendChild(cell5);
-            row.appendChild(cell6);
-            tabBody.appendChild(row);
-            i = i + 1;
-        }
-
-      	// bind click events to btns
-        $('body').on('click', '.btn-egonet', function(e) {
-        	var nodeId = $(e.target).attr('id');
-        	getEgonet(nodeId);
-        });
-
-        $('body').on('click', '.btn-adj-matrix', function(e) {
-        	var nodeId = $(e.target).attr('id');
-        	getAdjMatrix(nodeId);
-        });
+        nodesView.data().nodes(nodes);
     }
 
 	// create adj matrix and egonet

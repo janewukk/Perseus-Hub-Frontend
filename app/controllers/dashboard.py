@@ -45,7 +45,6 @@ class DatasetViewController(LoginRequiredResource, View):
 	def get(self, request, *args, **kwargs):
 		# extract id
 		dataset_id = kwargs.get('id')
-
 		# fetch the dataset
 		try:
 			dataset = Dataset.objects.get(id = dataset_id)
@@ -61,12 +60,11 @@ class DatasetViewController(LoginRequiredResource, View):
 			pass
 
 		# make graph
-		# @todo: make the file name dynamic
+		# TODO: make the file name dynamic
 		graph_data = graph_from_file('combined_data.csv')
 
 		return render(request, 'dashboard/dataset-template.html',{
 				'dataset' : dataset,
-				'bookmarked' : bookmarked,
 				'graph_script' : graph_data['graph_script'],
 				'graph' : graph_data['graph']
 			})
@@ -96,7 +94,7 @@ class BookmarkViewController(LoginRequiredResource, View):
 			bookmarks = bookmarks.order_by(F('created_at').desc()) \
 								 .order_by(F('priority').desc())
 		except Exception as e:
-			print e
+			print "Bookmark fetch error:", e
 
 		return render(request, 'dashboard/bookmarks.html', {
 				'bookmarks' : bookmarks

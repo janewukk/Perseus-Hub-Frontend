@@ -17,9 +17,6 @@ $.ajaxSetup({
 axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
 window.http = axios;
 
-// init tooltips
-$('[data-toggle="tooltip"]').tooltip();
-
 // ============== HELPER FUNCTIONS
 /**
  * Requires a modal#modal element present
@@ -29,7 +26,7 @@ $('[data-toggle="tooltip"]').tooltip();
  */
 function showModal(message) {
 
-	// set error message
+	// set modal message
 	$('#modal .modal-body').html(message);
 	// show modal
 	$('#modal').modal();

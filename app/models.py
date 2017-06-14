@@ -62,6 +62,13 @@ class Dataset(models.Model):
 	created_at = models.DateTimeField(auto_now_add = True)
 	updated_at = models.DateTimeField(auto_now = True)
 
+	def nodes(self):
+		"""Helper to fetch all nodes belong to this dataset
+		Returns:
+			QuerySet -- Collection of node models
+		"""
+		return self.node_set
+
 """
 Bookmark user can make on a specific node of a dataset
 
@@ -115,6 +122,8 @@ class Node(models.Model):
 	v_8_t = models.FloatField(default= 0, db_index=True)
 	v_9_t = models.FloatField(default= 0, db_index=True)
 	v_10_t = models.FloatField(default= 0, db_index=True)
+	# dataset that this node belongs to
+	dataset = models.ForeignKey(Dataset, on_delete = models.CASCADE)
 
 	
 class Edge(models.Model):
