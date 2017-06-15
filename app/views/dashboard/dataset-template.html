@@ -2,9 +2,6 @@
 
 {% block tabstyles %}
 <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.5.min.css">
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <style type="text/css">
 #priority-selector a {
 	display: inline;
@@ -143,29 +140,6 @@ path.domain {
 		</div>
 	</div>
 </div>
-
-<script type="text/javascript">
-$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-	tabname = $(e.target).attr("href");
-	console.log("Clicked on", tabname, "tab");
-	if (tabname === "#GFADD") {
-		$.ajax({
-			type: 'POST',
-			url: '/GetGFADD/',
-			contentType: "application/json; charset=UTF-8",
-			response: "application/json; charset=UTF-8",
-			data: JSON.stringify({
-				"dummy": "dummy"
-			}),
-			success: function (data) {
-				console.log("Success!")
-				console.log(data)
-			}
-		});
-	}
-});
-</script>
-
 <!-- Bookmark creator -->
 <div class="modal fade" id="bookmark-creator" tabindex="-1" role="dialog" aria-labelledby="bookmark-creator">
 	<div class="modal-dialog" role="document">
@@ -254,6 +228,26 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 <!-- Graph JS -->
 {{ graph_script | safe }}
 <script type="text/javascript">
+	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+		tabname = $(e.target).attr("href");
+		console.log("Clicked on", tabname, "tab");
+		if (tabname === "#GFADD") {
+			$.ajax({
+				type: 'POST',
+				url: '/GetGFADD/',
+				contentType: "application/json; charset=UTF-8",
+				response: "application/json; charset=UTF-8",
+				data: JSON.stringify({
+					"dummy": "dummy"
+				}),
+				success: function (data) {
+					console.log("Success!")
+					console.log(data)
+				}
+			});
+		}
+	});
+
 	// TODO: since we are not fetching database anyway, make it 1 by default
 	// var datasetId = {{ dataset.id }};
 	var datasetId = 1;
@@ -400,7 +394,6 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     }
 
 	// create adj matrix and egonet
-	// TODO: make it dynamic
 	function createAdjMatrix(data) {
 		var edgeHash = {};
 		source = data['source']
@@ -469,7 +462,6 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 	var prevLinks = {},
 		nodes = {};
 
-	// TODO: make it REAL dynamic
 	function createEgonet(data) {
 
 		shift = false;

@@ -791,7 +791,6 @@ def graph_from_file(dataset_filename):
     ticker3y.js_on_change('value', callback_ticker3y)
  
     script, div = components(layout, CDN)
-
     return {
         "graph_script": script, 
         "graph": div

@@ -90,8 +90,7 @@ class Migration(migrations.Migration):
             fields=[
             ],
             options={
-                'proxy': True,
-                'indexes': [],
+                'proxy': True
             },
             bases=('auth.user',),
             managers=[

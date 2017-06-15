@@ -52,10 +52,10 @@ class Dataset(models.Model):
 	title = models.CharField(max_length = 256, default = "")
 	# dataset's raw file field
 	raw_data_file = models.FileField(upload_to=user_upload_dir, default = "")
-	# dataset's analyzed json file name
-	analyzed_json_filename = models.CharField(max_length = 256, default = "")
-	# dataset's anomaly data json file name
-	anomaly_json_filename = models.CharField(max_length = 256, default = "")
+	# dataset's analyzed file path
+	analyzed_filepath = models.CharField(max_length = 256, default = "")
+	# dataset's anomaly data file path
+	anomaly_filepath = models.CharField(max_length = 256, default = "")
 	# the user who uploads this dataset
 	uploader = models.ForeignKey(User, on_delete = models.CASCADE)
 	# timestamps

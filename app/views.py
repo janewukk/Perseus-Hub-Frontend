@@ -67,7 +67,6 @@ def ClickPlot(request):
 
     return HttpResponse(json_data)
 
-
 previousNodeID = 0
 storedNodes =  []
 
@@ -141,7 +140,6 @@ def GetEgonet(request):
     json_data = json.dumps(dictionary)
 
     return HttpResponse(json_data, content_type="application/json")
-
 
 def GetAdjMatrix(request):
 	data = json.loads(request.body)
