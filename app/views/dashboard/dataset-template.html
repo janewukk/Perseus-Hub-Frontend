@@ -2,6 +2,9 @@
 
 {% block tabstyles %}
 <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.5.min.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <style type="text/css">
 #priority-selector a {
 	display: inline;
@@ -72,6 +75,10 @@ path.domain {
 					<li role="presentation" class="active"><a href="#info-console" aria-controls="info-console" role="tab" data-toggle="tab">Information console</a></li>
 					<li role="presentation"><a href="#egonet" aria-controls="egonet" role="tab" data-toggle="tab">EgoNet</a></li>
 					<li role="presentation"><a href="#adj-maxtrix" aria-controls="adj-maxtrix" role="tab" data-toggle="tab">Adj Matrix</a></li>
+					<li role="presentation"><a href="#GFADD" aria-controls="GFADD" role="tab" data-toggle="tab">GFADD</a></li>
+					<li role="presentation"><a href="#ABOD" aria-controls="ABOD" role="tab" data-toggle="tab">ABOD</a></li>
+					<li role="presentation"><a href="#CombAnScore" aria-controls="CombAnScore" role="tab" data-toggle="tab">Combined Anomaly Score</a></li>
+
 				</ul>
 				<div class="tab-content">
 					<div role="tabpanel" class="tab-pane active" id="info-console">
@@ -116,11 +123,48 @@ path.domain {
 					<div role="tabpanel" class="tab-pane" id="adj-maxtrix">
 						<svg class="adjacency" style="width:500px;height:500px; lightgray solid;" id = "adj-id"/>
 					</div>
+					<div role="tabpanel" class="tab-pane fade" id="GFADD">
+						<table class="table table-hover">
+							<thead >
+								<tr>
+									<th>Node ID</th>
+									<th>Score</th>
+									<th>Egonet</th>
+									<th>Adj matrix</th>
+									<th>Bookmark / Unbookmark</th>
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
+
+<script type="text/javascript">
+$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+	tabname = $(e.target).attr("href");
+	console.log("Clicked on", tabname, "tab");
+	if (tabname === "#GFADD") {
+		$.ajax({
+			type: 'POST',
+			url: '/GetGFADD/',
+			contentType: "application/json; charset=UTF-8",
+			response: "application/json; charset=UTF-8",
+			data: JSON.stringify({
+				"dummy": "dummy"
+			}),
+			success: function (data) {
+				console.log("Success!")
+				console.log(data)
+			}
+		});
+	}
+});
+</script>
 
 <!-- Bookmark creator -->
 <div class="modal fade" id="bookmark-creator" tabindex="-1" role="dialog" aria-labelledby="bookmark-creator">
@@ -269,6 +313,7 @@ path.domain {
 	function nodeSelected(x1, y1, x1_name, y1_name) {
 		// show loading indicator
 		$('#loading-indicator').modal('show');
+		console.log(x1_name, y1_name)
 		// fetch nodes
 		$.ajax({
 			type: 'POST',

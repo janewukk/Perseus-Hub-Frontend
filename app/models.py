@@ -102,6 +102,8 @@ class Node(models.Model):
 	pagerank = models.FloatField(default= 0, db_index=True)
 	pagerank_t = models.FloatField(default= 0, db_index=True)
 	pagerank_t_count = models.FloatField(default= 0, db_index=True)
+	clustering_coefficient_t = models.FloatField(default= 0, db_index=True)
+	clustering_coefficient_t_count = models.FloatField(default= 0, db_index=True)
 	v_1 = models.FloatField(default= 0, db_index=True)
 	v_2 = models.FloatField(default= 0, db_index=True)
 	v_3 = models.FloatField(default= 0, db_index=True)
@@ -123,7 +125,7 @@ class Node(models.Model):
 	v_9_t = models.FloatField(default= 0, db_index=True)
 	v_10_t = models.FloatField(default= 0, db_index=True)
 	# dataset that this node belongs to
-	dataset = models.ForeignKey(Dataset, on_delete = models.CASCADE)
+	dataset = models.ForeignKey(Dataset, on_delete = models.CASCADE, default = 1)
 
 	
 class Edge(models.Model):

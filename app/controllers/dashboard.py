@@ -5,8 +5,10 @@ from django.http import HttpResponse, JsonResponse, Http404
 from django.contrib.auth.mixins import LoginRequiredMixin as LoginRequiredResource
 
 from app.models import Dataset, User, Bookmark
-from app.services.graph import graph_from_file
+from app.services.graph import *
 from app.services.utils import flash_session_message
+
+graph = Graph()
 
 class DashboardController(LoginRequiredResource, View):
 	login_url = '/login/'
@@ -61,7 +63,7 @@ class DatasetViewController(LoginRequiredResource, View):
 
 		# make graph
 		# TODO: make the file name dynamic
-		graph_data = graph_from_file('combined_data.csv')
+		graph_data = graph.graph_from_file('combined_data.csv')
 
 		return render(request, 'dashboard/dataset-template.html',{
 				'dataset' : dataset,
