@@ -85,7 +85,7 @@ path.domain {
 									<th>Node ID</th>
 									<th>Degree</th>
 									<th>Pagerank</th>
-									<th>Eiganvector</th>
+									<th>Singular Vector 1</th>
 									<th>Egonet</th>
 									<th>Adj matrix</th>
 									<th>Bookmark / Unbookmark</th>
@@ -121,14 +121,41 @@ path.domain {
 						<svg class="adjacency" style="width:500px;height:500px; lightgray solid;" id = "adj-id"/>
 					</div>
 					<div role="tabpanel" class="tab-pane fade" id="GFADD">
-						<table class="table table-hover">
+						<table class="table table-hover" id="GFADD_table">
 							<thead >
 								<tr>
 									<th>Node ID</th>
-									<th>Score</th>
+									<th>GFADD Score</th>
 									<th>Egonet</th>
 									<th>Adj matrix</th>
-									<th>Bookmark / Unbookmark</th>
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+					</div>
+					<div role="tabpanel" class="tab-pane fade" id="ABOD">
+						<table class="table table-hover" id="ABOD_table">
+							<thead >
+								<tr>
+									<th>Node ID</th>
+									<th>ABOD Score</th>
+									<th>Egonet</th>
+									<th>Adj matrix</th>
+								</tr>
+							</thead>
+							<tbody>
+							</tbody>
+						</table>
+					</div>
+					<div role="tabpanel" class="tab-pane fade" id="CombAnScore">
+						<table class="table table-hover" id="CombAnScore_table">
+							<thead >
+								<tr>
+									<th>Node ID</th>
+									<th>Combined Score</th>
+									<th>Egonet</th>
+									<th>Adj matrix</th>
 								</tr>
 							</thead>
 							<tbody>
@@ -231,7 +258,7 @@ path.domain {
 	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 		tabname = $(e.target).attr("href");
 		console.log("Clicked on", tabname, "tab");
-		if (tabname === "#GFADD") {
+		if (tabname === "#GFADD" || tabname === "#CombAnScore") {
 			$.ajax({
 				type: 'POST',
 				url: '/GetGFADD/',
@@ -243,6 +270,50 @@ path.domain {
 				success: function (data) {
 					console.log("Success!")
 					console.log(data)
+					nodes = data.nodeid
+					scores = data.score
+					aggnode = data.aggnodeid
+
+					if (tabname === "#GFADD") {
+						table_id = "GFADD_table";
+					}
+					else if (tabname === "#CombAnScore") {
+						table_id = "CombAnScore_table";
+					}
+					
+					var table = document.getElementById(table_id).getElementsByTagName('tbody')[0];
+
+					// Delete previous rows so that they don't append
+					while(table.rows.length > 0) {
+						table.deleteRow(0);
+					}
+
+					for (var i = 0; i < nodes.length; i++) {
+						var row = table.insertRow(i);
+						var cell0 = row.insertCell(0);
+						var cell1 = row.insertCell(1);
+						var text0 = document.createTextNode(nodes[i]);
+						var text1 = document.createTextNode(scores[i]);
+						cell0.appendChild(text0);
+						cell1.appendChild(text1);
+
+						var cell2 = row.insertCell(2);
+						var cell3 = row.insertCell(3);
+						// Create the buttons egonet and adjacency matrix buttons
+						var egonet_btn = document.createElement('input');
+						egonet_btn.type = "button";
+						egonet_btn.className = "btn btn-primary btn-sm btn-egonet";
+						egonet_btn.value = "view";
+						egonet_btn.onclick = function(){ getEgonet(aggnode[i]);}
+						cell2.appendChild(egonet_btn);
+
+						var adjmatr_btn = document.createElement('input');
+						adjmatr_btn.type = "button";
+						adjmatr_btn.className = "btn btn-primary btn-sm btn-adj-matrix";
+						adjmatr_btn.value = "view";
+						adjmatr_btn.onclick = function(){ getAdjMatrix(aggnode[i]);}
+						cell3.appendChild(adjmatr_btn);
+					}
 				}
 			});
 		}
@@ -307,7 +378,7 @@ path.domain {
 	function nodeSelected(x1, y1, x1_name, y1_name) {
 		// show loading indicator
 		$('#loading-indicator').modal('show');
-		console.log(x1_name, y1_name)
+		console.log(x1, y1, x1_name, y1_name)
 		// fetch nodes
 		$.ajax({
 			type: 'POST',

@@ -231,10 +231,7 @@ def GetGFADD(request):
 
     nodes = data[0][0:10].index.tolist()
     scores = data[0][0:10].tolist()
-    response_data = {
-		'nodeid': nodes,
-		'score': scores,
-    }
+
 
     # Read aggregate data file in order to find which aggregate nodes correspond to the top 10 anomalous nodes
     aggfile = "data/combined_data.csv"
@@ -254,7 +251,7 @@ def GetGFADD(request):
         rel_points = aggdata.loc[(aggdata[0] == degree) & (aggdata[1] == count) & (aggdata[2] == pagerank_t) & (aggdata[4] == clustering_coef_t)]
         aggregate_node_ids.append(rel_points.index.tolist()[0])
 
-    
+
     # TODO Update the bokeh plot so that only the top 10 anomalous points are selected
     # Make all the nodes in the aggregate_node_ids selected and the rest unselected in the bokeh visualization
 
@@ -272,6 +269,11 @@ def GetGFADD(request):
     # return HttpResponse(html)
     # return render(request, 'dashboard/dataset-template.html',
 
+    response_data = {
+		'nodeid': nodes,
+		'score': scores,
+        'aggnodeid': aggregate_node_ids
+    }
 
     print(json.dumps(response_data))
 

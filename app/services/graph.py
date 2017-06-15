@@ -130,7 +130,7 @@ class Graph:
         between_window_size = 40
         border_size = 6
 
-        def make_plot(xname, yname, isLog, needsColor, xcolor, xdr, ydr, xax=False, yax=False):
+        def make_plot(xname, yname, isLog, needsColor, xcolor, needsS, xdr, ydr, xax=False, yax=False):
             mbl = between_window_size if yax else 0
             mbb = between_window_size if xax else 0
 
@@ -145,9 +145,13 @@ class Graph:
                     x_range=xdr, y_range=ydr, background_fill_color="white",
                     border_fill_color='white', plot_width=window_size + mbl, plot_height=window_size + mbb,
                     min_border_left=border_size+mbl, min_border_right=border_size, min_border_top=border_size, min_border_bottom=2+mbb)
-
-            plot.xaxis.axis_label = xname
-            plot.yaxis.axis_label = yname
+            
+            if not needsS:
+                plot.xaxis.axis_label = xname
+                plot.yaxis.axis_label = yname
+            else:
+                plot.xaxis.axis_label = "s" + xname
+                plot.yaxis.axis_label = "s" + yname
             
             if needsColor:
                 circle = Circle(x=xname, y=yname, fill_color={'field': xcolor, 'transform': color_mapper}, fill_alpha=0.6, size=5, line_color=None)
@@ -184,10 +188,10 @@ class Graph:
         plots_row1 = []
         row = []
 
-        plot1 = make_plot("degree", "count", True, False, "", degree_x_p1, count_y)
-        plot2 = make_plot("degree", "pagerank", True, True, "pagerank_count", degree_x_p2, pagerank_y)
-        plot3 = make_plot("pagerank", "pagerank_count", True, False, "", pagerank_x, pagerank_count)
-        plot4 = make_plot("clustering_coefficient", "clustering_coefficient_count", True, False, "", clustering_coefficient, clustering_coefficient_count)
+        plot1 = make_plot("degree", "count", True, False, "", False, degree_x_p1, count_y)
+        plot2 = make_plot("degree", "pagerank", True, True, "pagerank_count", False, degree_x_p2, pagerank_y)
+        plot3 = make_plot("pagerank", "pagerank_count", True, False, "", False, pagerank_x, pagerank_count)
+        plot4 = make_plot("clustering_coefficient", "clustering_coefficient_count", True, False, "", False, clustering_coefficient, clustering_coefficient_count)
 
         row.append(plot1)
         row.append(plot2)
@@ -198,10 +202,10 @@ class Graph:
         plots_row2 = []
         row = []
 
-        plot5 = make_plot("v1", "v2", False, False, "", p4_x, p4_y)
-        plot6 = make_plot("v3", "v4", False, False, "", p5_x, p5_y)
-        plot7 = make_plot("v5", "v6", False, False, "", p6_x, p6_y)
-        plot8 = make_plot("v7", "v8", False, False, "", p7_x, p7_y)
+        plot5 = make_plot("v1", "v2", False, False, "", True, p4_x, p4_y)
+        plot6 = make_plot("v3", "v4", False, False, "", True, p5_x, p5_y)
+        plot7 = make_plot("v5", "v6", False, False, "", True, p6_x, p6_y)
+        plot8 = make_plot("v7", "v8", False, False, "", True, p7_x, p7_y)
 
         row.append(plot5)
         row.append(plot6)
@@ -212,14 +216,14 @@ class Graph:
         stats = Div(text='', width=9000)
 
         # Tickers
-        ticker1x = Select(title="x1-axis:", value="v1", options=["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"])
-        ticker1y = Select(title="y1-axis:", value="v2", options=["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"])
-        ticker2x = Select(title="x2-axis:", value="v3", options=["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"])
-        ticker2y = Select(title="y2-axis:", value="v4", options=["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"])
-        ticker3x = Select(title="x3-axis:", value="v5", options=["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"])
-        ticker3y = Select(title="y3-axis:", value="v6", options=["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"])
-        ticker4x = Select(title="x4-axis:", value="v7", options=["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"])
-        ticker4y = Select(title="y4-axis:", value="v8", options=["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"])
+        ticker1x = Select(title="x1-axis:", value="sv1", options=["sv1", "sv2", "sv3", "sv4", "sv5", "sv6", "sv7", "sv8", "sv9", "sv10"])
+        ticker1y = Select(title="y1-axis:", value="sv2", options=["sv1", "sv2", "sv3", "sv4", "sv5", "sv6", "sv7", "sv8", "sv9", "sv10"])
+        ticker2x = Select(title="x2-axis:", value="sv3", options=["sv1", "sv2", "sv3", "sv4", "sv5", "sv6", "sv7", "sv8", "sv9", "sv10"])
+        ticker2y = Select(title="y2-axis:", value="sv4", options=["sv1", "sv2", "sv3", "sv4", "sv5", "sv6", "sv7", "sv8", "sv9", "sv10"])
+        ticker3x = Select(title="x3-axis:", value="sv5", options=["sv1", "sv2", "sv3", "sv4", "sv5", "sv6", "sv7", "sv8", "sv9", "sv10"])
+        ticker3y = Select(title="y3-axis:", value="sv6", options=["sv1", "sv2", "sv3", "sv4", "sv5", "sv6", "sv7", "sv8", "sv9", "sv10"])
+        ticker4x = Select(title="x4-axis:", value="sv7", options=["sv1", "sv2", "sv3", "sv4", "sv5", "sv6", "sv7", "sv8", "sv9", "sv10"])
+        ticker4y = Select(title="y4-axis:", value="sv8", options=["sv1", "sv2", "sv3", "sv4", "sv5", "sv6", "sv7", "sv8", "sv9", "sv10"])
 
         tickers_rowx = bokeh.layouts.row(ticker1x, ticker2x, ticker3x, ticker4x)
         tickers_rowy = bokeh.layouts.row(ticker1y, ticker2y, ticker3y, ticker4y)
@@ -234,64 +238,72 @@ class Graph:
         callback_ticker1x = CustomJS(args=dict(source=self.source, source_true=source_true, plot=plot5), code="""
             console.log("Callback_ticker1x is called");
             var value = cb_obj.get("value");
+            value = value.substring(1);
             source['data']['v1'] = source_true['data'][value];
-            plot.below[0].axis_label = value;
+            plot.below[0].axis_label = "s"+value;
             source.trigger('change')
         """)
 
         callback_ticker1y = CustomJS(args=dict(source=self.source, source_true=source_true, plot=plot5), code="""
             console.log("Callback_ticker1y is called");
             var value = cb_obj.get("value");
+            value = value.substring(1);
             source['data']['v2'] = source_true['data'][value];
-            plot.left[0].axis_label = value;
+            plot.left[0].axis_label = "s"+value;
             source.trigger('change')
         """)
 
         callback_ticker2x = CustomJS(args=dict(source=self.source, source_true=source_true,plot=plot6), code="""
             console.log("Callback_ticker2x is called");
             var value = cb_obj.get("value");
+            value = value.substring(1);
             source['data']['v3'] = source_true['data'][value];
-            plot.below[0].axis_label = value;
+            plot.below[0].axis_label = "s"+value;
             source.trigger('change')
         """)
 
         callback_ticker2y = CustomJS(args=dict(source=self.source, source_true=source_true,plot=plot6), code="""
             console.log("Callback_ticker2y is called");
             var value = cb_obj.get("value");
+            value = value.substring(1);
             source['data']['v4'] = source_true['data'][value];
-            plot.left[0].axis_label = value;
+            plot.left[0].axis_label = "s"+value;
             source.trigger('change')
         """)
 
         callback_ticker3x = CustomJS(args=dict(source=self.source, source_true=source_true, plot=plot7), code="""
             console.log("Callback_ticker3x is called");
             var value = cb_obj.get("value");
+            value = value.substring(1);
             source['data']['v5'] = source_true['data'][value];
-            plot.below[0].axis_label = value;
+            plot.below[0].axis_label = "s"+value;
             source.trigger('change')
         """)
 
         callback_ticker3y = CustomJS(args=dict(source=self.source, source_true=source_true, plot=plot7), code="""
             console.log("Callback_ticker3y is called");
             var value = cb_obj.get("value");
+            value = value.substring(1);
             source['data']['v6'] = source_true['data'][value];
-            plot.left[0].axis_label = value;
+            plot.left[0].axis_label = "s"+value;
             source.trigger('change')
         """)
 
         callback_ticker4x = CustomJS(args=dict(source=self.source, source_true=source_true, plot=plot8), code="""
             console.log("Callback_ticker4x is called");
             var value = cb_obj.get("value");
+            value = value.substring(1);
             source['data']['v7'] = source_true['data'][value];
-            plot.below[0].axis_label = value;
+            plot.below[0].axis_label = "s"+value;
             source.trigger('change')
         """)
 
         callback_ticker4y = CustomJS(args=dict(source=self.source, source_true=source_true, plot=plot8), code="""
             console.log("Callback_ticker4y is called");
             var value = cb_obj.get("value");
+            value = value.substring(1);
             source['data']['v8'] = source_true['data'][value];
-            plot.left[0].axis_label = value;
+            plot.left[0].axis_label = "s"+value;
             source.trigger('change')
         """)
 
@@ -311,32 +323,48 @@ class Graph:
                 // Update the right names for the eigenvectors
                 if (state >= 5 && state <= 8) {
                     if (state === 5) {
-                        name[8] = tk1x.get("value");
-                        name[9] = tk1y.get("value");
-                        real_name[8] = tk1x.get("value");
-                        real_name[9] = tk1y.get("value");
+                        name8 = tk1x.get("value");
+                        name9 = tk1y.get("value");
+                        name8 = name8.substring(1);
+                        name9 = name9.substring(1);
+                        name[8] = name8;
+                        name[9] = name9;
+                        real_name[8] = name8;
+                        real_name[9] = name9;
                     }
                     else if (state === 6) {
-                        name[10] = tk2x.get("value");
-                        name[11] = tk2y.get("value");
-                        real_name[10] = tk2x.get("value");
-                        real_name[11] = tk2y.get("value");
+                        name10 = tk2x.get("value");
+                        name11 = tk2y.get("value");
+                        name10 = name10.substring(1);
+                        name11 = name11.substring(1);
+                        name[10] = name10;
+                        name[11] = name11;
+                        real_name[10] = name10;
+                        real_name[11] = name11;
                     }
                     else if (state === 7) {
-                        name[12] = tk3x.get("value");
-                        name[13] = tk3y.get("value");
-                        real_name[12] = tk3x.get("value");
-                        real_name[13] = tk3y.get("value");
+                        name12 = tk3x.get("value");
+                        name13 = tk3y.get("value");
+                        name12 = name12.substring(1);
+                        name13 = name13.substring(1);
+                        name[12] = name12;
+                        name[13] = name13;
+                        real_name[12] = name12;
+                        real_name[13] = name13;
                     }
                     else if (state === 8) {
-                        name[14] = tk4x.get("value");
-                        name[15] = tk4y.get("value");
-                        real_name[14] = tk4x.get("value");
-                        real_name[15] = tk4y.get("value");
+                        name14 = tk4x.get("value");
+                        name15 = tk4y.get("value");
+                        name14 = name14.substring(1);
+                        name15 = name15.substring(1);
+                        name[14] = name14;
+                        name[15] = name15;
+                        real_name[14] = name14;
+                        real_name[15] = name15;
                     }
                 }
 
-                // console.log(name);
+                console.log(name);
                 console.log(real_name);
 
                 if (state <= 4) {
