@@ -57,7 +57,7 @@ class Dataset(models.Model):
 	# dataset's anomaly data file path
 	anomaly_filepath = models.CharField(max_length = 256, default = "")
 	# the user who uploads this dataset
-	uploader = models.ForeignKey(User, on_delete = models.CASCADE)
+	uploader = models.ForeignKey(User, on_delete = models.CASCADE, default =1)
 	# timestamps
 	created_at = models.DateTimeField(auto_now_add = True)
 	updated_at = models.DateTimeField(auto_now = True)
@@ -102,6 +102,7 @@ class Node(models.Model):
 	pagerank = models.FloatField(default= 0, db_index=True)
 	pagerank_t = models.FloatField(default= 0, db_index=True)
 	pagerank_t_count = models.FloatField(default= 0, db_index=True)
+	clustering_coefficient = models.FloatField(default= 0, db_index=True)
 	clustering_coefficient_t = models.FloatField(default= 0, db_index=True)
 	clustering_coefficient_t_count = models.FloatField(default= 0, db_index=True)
 	v_1 = models.FloatField(default= 0, db_index=True)
