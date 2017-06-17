@@ -35,12 +35,12 @@ def create_data_sql(data_input_filename, data_sql_filename):
     data_sql.close()
 
 def main():
-    edges_input_filename = "data/edges.txt"
+    edges_input_filename = "data/edges_set3.txt"
     data_input_filename = "data/full_data_set3.csv"
-    edges_sql_filename = "edges_set1.sql"
+    edges_sql_filename = "edges_set3.sql"
     data_sql_filename = "data_set3.sql"
-    # create_edges_sql(edges_input_filename, edges_sql_filename)
-    create_data_sql(data_input_filename, data_sql_filename)
+    create_edges_sql(edges_input_filename, edges_sql_filename)
+    # create_data_sql(data_input_filename, data_sql_filename)
 
 if __name__ == '__main__':
     start_time = time.time()
