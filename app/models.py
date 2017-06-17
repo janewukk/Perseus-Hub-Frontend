@@ -124,8 +124,6 @@ class Node(models.Model):
 	v_8_t = models.FloatField(default= 0, db_index=True)
 	v_9_t = models.FloatField(default= 0, db_index=True)
 	v_10_t = models.FloatField(default= 0, db_index=True)
-	# dataset that this node belongs to
-	dataset = models.ForeignKey(Dataset, on_delete = models.CASCADE, default = 1)
 
 	
 class Edge(models.Model):
