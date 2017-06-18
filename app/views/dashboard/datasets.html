@@ -35,55 +35,34 @@
 {% endblock %}
 
 {% block tabdetails %}
-<div class="row" style="margin-top:20px" id="dataset-list" data-bind="foreach: datasets">
+{% if datasets %}
+<div class="row" style="margin-top:20px" id="dataset-list">
+	{% for dataset in datasets %}
 	<div class="col-sm-6 col-md-4">
 		<div class="thumbnail">
 			<img src="http://placehold.it/320x125/EEE" class="">
 			<div class="caption">
-				<h4 data-bind="text: title"></h4>
-				<p>Uploaded by <a data-bind="attr:{ href:'mailto:' + uploaderEmail() }, text: uploaderEmail"></a></p>
-				<p>Uploaded on 2017-4-13 12:30pm</p>
+				<h4><a href="/datasets/{{ dataset.id }}">{{ dataset.title }}</a></h4>
+				<p>Uploaded by <a>{{ dataset.uploader.email }}</a></p>
+				<p>Uploaded on {{ dataset.created_at }}</p>
 			</div>
 		</div>
 	</div>
+	{% endfor %}
 </div>
+{% else %}
+<div class="row" style="margin-top:20px">
+	<div class="container">
+		<h2>Oops. No datasets available!</h2>
+	</div>
+</div>
+{% endif %}
+
 {% endblock %}
 
 {% block scripts %}
 <script type="text/javascript">
-	// init view model
-	var datasetList = new View({
-		el : document.getElementById('dataset-list'),
-		data : {
-			datasets : [
-				{
-					title : "Phone node linked list",
-					uploaderEmail : "example@example.net",
-					uploadedDate : "2017-4-13 12:30pm"
-				},
-				{
-					title : "Phone node linked list",
-					uploaderEmail : "example@example.net",
-					uploadedDate : "2017-4-13 12:30pm"
-				},
-				{
-					title : "Phone node linked list",
-					uploaderEmail : "example@example.net",
-					uploadedDate : "2017-4-13 12:30pm"
-				},
-				{
-					title : "Phone node linked list",
-					uploaderEmail : "example@example.net",
-					uploadedDate : "2017-4-13 12:30pm"
-				},
-				{
-					title : "Phone node linked list",
-					uploaderEmail : "example@example.net",
-					uploadedDate : "2017-4-13 12:30pm"
-				}
-			]
-		}
-	});
+
 
 </script>
 {% endblock scripts %}

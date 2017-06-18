@@ -20,7 +20,7 @@ from django.contrib import admin
 from app.controllers.settings import SettingsController
 from app.controllers.auth import LoginController, LogoutController, RegisterController
 from app.controllers.dashboard import DashboardController, DatasetViewController, BookmarkViewController
-from app.controllers.dataset import DatasetSearchController, DatasetUploadController, DatasetQueryController
+from app.controllers.dataset import DatasetSearchController, DatasetUploadController
 
 from app.views import *
 
@@ -35,7 +35,6 @@ urlpatterns = [
     url(r'^bookmarks/$', BookmarkViewController.as_view()),
     url(r'^search/$', DatasetSearchController.as_view()),
     url(r'^datasets/(?P<id>\d+)/$', DatasetViewController.as_view()),
-    url(r'^datasets/(?P<id>\d+)/query/$', DatasetQueryController.as_view()),
 
     url(r'^ClickPlot',ClickPlot),
     url(r'^GetEgonet',GetEgonet),

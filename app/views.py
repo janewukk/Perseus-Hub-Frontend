@@ -11,6 +11,7 @@ from django.db.models import Q
 
 import app
 from app.models import *
+from app.services.utils import absolute_path
 
 import os
 import time
@@ -25,10 +26,19 @@ from decimal import *
 from app.services.graph import *
 from app.controllers.dashboard import *
 from django.template.loader import render_to_string
+from django.http import HttpResponseForbidden
+
 
 def ClickPlot(request):
     val = "hi from ClickPlot"
     data = json.loads(request.body)
+
+    # check dataset validity
+    if not 'dataset_id' in data.keys():
+        return HttpResponseForbidden()
+
+    dataset = Dataset.objects.get(id = data['dataset_id'])
+
     x = data['x1']
     y = data['y1']
     x_name = data['x_name']
@@ -40,14 +50,14 @@ def ClickPlot(request):
 
     # Check if we have count vs degree, or pagerank_count vs pagerank 
     if (x_name == "degree" and y_name == "count"):
-        results = Node.objects.filter(degree = x)[:10]
+        results = dataset.nodes().filter(degree = x)[:10]
     elif (x_name == "pagerank_t" and y_name == "pagerank_t_count"):
         print "pagerank_t vs. pagerank_t_count"
-        results = Node.objects.raw("Select * from app_node where " + x_name + " = " + x + " LIMIT 10;")
+        results = dataset.nodes().raw("Select * from app_node where " + x_name + " = " + x + " LIMIT 10;")
         # results = Node.objects.filter(pagerank_t = x)[:10]
     else:
         print 'here'
-        results = Node.objects.raw("Select * from app_node where " + x_name + " = " + x + " and " + y_name + " = " + y + " LIMIT 10;")
+        results = dataset.nodes().raw("Select * from app_node where " + x_name + " = " + x + " and " + y_name + " = " + y + " LIMIT 10;")
         # results = Node.objects.filter(pagerank_t = y)[:10]
         # results = Node.objects.filter(**{x_name: x, y_name: y})[:10]
     
@@ -77,11 +87,18 @@ def GetEgonet(request):
     resultStr = ''
     
     data = json.loads(request.body)
+
+    # check dataset validity
+    if not 'dataset_id' in data.keys():
+        return HttpResponseForbidden()
+
+    dataset = Dataset.objects.get(id = data['dataset_id'])
+
     nodeid = data['id']
     print "Generating egonet for node " + str(nodeid)
 
-    outedges = Edge.objects.filter(fromNode = nodeid)
-    inedges = Edge.objects.filter(toNode = nodeid)
+    outedges = dataset.edges().filter(fromNode = nodeid)
+    inedges = dataset.edges().filter(toNode = nodeid)
     nodes = set()
     nodes_ego = set()
 
@@ -143,14 +160,21 @@ def GetEgonet(request):
 
 def GetAdjMatrix(request):
 	data = json.loads(request.body)
+    # check dataset validity
+	if not 'dataset_id' in data.keys():
+		return HttpResponseForbidden()
+
+	dataset = Dataset.objects.get(id = data['dataset_id'])
+
 	nodeid = data['nodeid']
+
 	print(nodeid)
 	## begin di's code
 	adjNumMax = 100
 	resultStr = ""
 	nodes = set()
-	outedges = Edge.objects.filter(fromNode = nodeid)
-	inedges = Edge.objects.filter(toNode = nodeid)
+	outedges = dataset.edges().filter(fromNode = nodeid)
+	inedges = dataset.edges().filter(toNode = nodeid)
 	
 	for oe in outedges:
 		nodes.add(oe.toNode)
@@ -161,7 +185,7 @@ def GetAdjMatrix(request):
 
 	pagerankDict = dict()
 	for curNode in nodes:
-		curNode_pagerankList = Node.objects.filter(nodeid = curNode)
+		curNode_pagerankList = dataset.nodes().filter(nodeid = curNode)
 		for temp in curNode_pagerankList:
 			curNode_pagerank = float(temp.pagerank) #temp.pagerank
 		pagerankDict.update({curNode: curNode_pagerank})
@@ -186,7 +210,7 @@ def GetAdjMatrix(request):
 	print(nodes_adj)
 
 
-	validEdges = Edge.objects.filter(fromNode__in=nodes_adj, toNode__in=nodes_adj)
+	validEdges = dataset.edges().filter(fromNode__in=nodes_adj, toNode__in=nodes_adj)
 	print ("writing starts")
 
 	response_data = {}
@@ -223,7 +247,15 @@ def GetAdjMatrix(request):
 	return HttpResponse(json.dumps(response_data), content_type="application/json")
 
 def GetGFADD(request):
-    file = "data/combined_scores.csv"
+
+    body = json.loads(request.body)
+    # check dataset validity
+    if not 'dataset_id' in body.keys():
+        return HttpResponseForbidden()
+
+    dataset = Dataset.objects.get(id = body['dataset_id'])
+
+    file = absolute_path(dataset.anomaly_scores_file.name)
     data = pd.read_csv(file, skipinitialspace=True, escapechar="\\", header=None)
 
     # Sort the data to get the top 10 anomaly scores
@@ -232,10 +264,9 @@ def GetGFADD(request):
     nodes = data[0][0:10].index.tolist()
     scores = data[0][0:10].tolist()
 
-
     # Read aggregate data file in order to find which aggregate nodes correspond to the top 10 anomalous nodes
-    aggfile = "data/combined_data.csv"
-    fullfile = "data/full_data.csv"
+    aggfile = absolute_path(dataset.analyzed_graph_file.name)
+    fullfile = absolute_path(dataset.analyzed_fulldata_file.name)
     aggdata = pd.read_csv(aggfile, skipinitialspace=True, escapechar="\\", header=None)
     fulldata = pd.read_csv(fullfile, skipinitialspace=True, escapechar="\\", header=None)
 

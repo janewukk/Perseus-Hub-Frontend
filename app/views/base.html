@@ -134,16 +134,17 @@
 					query : query
 				}).then(function(res) {
 					if (res.data['status'] == 'success') {
+						var rawData = JSON.parse(res.data['data']);
+						var results = []
+						rawData.forEach(function(item){
+											results.push({
+												title : item['fields']['title'],
+												url : "/datasets/" + item['pk']
+											});
+										});
+
 						searchView.data()
-								  .results(
-							  		res.data['data']
-							  			.map(function(item){
-											return {
-												title : item['title'],
-												url : "/datasets/" + item['id']
-											}
-										})
-									);
+								  .results(results);
 					} else {
 						searchView.data().results([
 							{

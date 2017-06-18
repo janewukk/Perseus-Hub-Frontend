@@ -67,9 +67,16 @@ class Dataset(models.Model):
 	def nodes(self):
 		"""Helper to fetch all nodes belong to this dataset
 		Returns:
-			QuerySet -- Collection of node models
+			QuerySet -- Collection of Node models
 		"""
 		return self.node_set
+
+	def edges(self):
+		"""Helper to fetch all edges belong to this dataset
+		Returns:
+			QuerySet -- Collection of Edge models
+		"""
+		return self.edge_set
 
 """
 Bookmark user can make on a specific node of a dataset
@@ -96,9 +103,11 @@ class Bookmark(models.Model):
 	created_at = models.DateTimeField(auto_now_add = True)
 	updated_at = models.DateTimeField(auto_now = True)
 
-
+"""
+Graph node
+"""
 class Node(models.Model):
-	nodeid = models.CharField(default= 0, max_length=30, primary_key=True)
+	nodeid = models.CharField(default= 0, max_length=30, db_index=True)
 	degree = models.CharField(default= 0, max_length=30, db_index=True)
 	count = models.CharField(default= 0, max_length=30, db_index=True)
 	pagerank = models.FloatField(default= 0, db_index=True)
@@ -128,8 +137,14 @@ class Node(models.Model):
 	v_9_t = models.FloatField(default= 0, db_index=True)
 	v_10_t = models.FloatField(default= 0, db_index=True)
 
-	
+	dataset = models.ForeignKey(Dataset, on_delete = models.CASCADE, default = 1)
+
+"""
+Graph edge
+"""
 class Edge(models.Model):
 	fromNode = models.IntegerField(default= 0, db_index=True)
 	toNode = models.IntegerField(default= 0, db_index=True)
 	weight = models.IntegerField(default= 0, db_index=True)
+
+	dataset = models.ForeignKey(Dataset, on_delete = models.CASCADE, default = 1)

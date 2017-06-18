@@ -56,7 +56,7 @@ class Graph:
 
     def graph_from_file(self, dataset_filename):
         pd.set_option('display.precision',20)
-        data = pd.read_csv('data/' + dataset_filename, skipinitialspace=True, escapechar="\\", header=None)
+        data = pd.read_csv(dataset_filename, skipinitialspace=True, escapechar="\\", header=None)
         color_mapper = LinearColorMapper(palette=palette)
 
         source_true = ColumnDataSource(

@@ -81,7 +81,7 @@ DATABASES = {
     # development specific database config
     'default' : {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'data_visualization_website',
+        'NAME': 'perseus_db',
         'USER': 'root',
         'PASSWORD': 'root',
         'OPTIONS': {

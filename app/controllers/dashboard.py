@@ -6,7 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin as LoginRequiredResour
 
 from app.models import Dataset, User, Bookmark
 from app.services.graph import *
-from app.services.utils import flash_session_message
+from app.services.utils import flash_session_message, absolute_path
 
 graph = Graph()
 
@@ -47,22 +47,21 @@ class DatasetViewController(LoginRequiredResource, View):
 	def get(self, request, *args, **kwargs):
 		# extract id
 		dataset_id = kwargs.get('id')
+
 		# fetch the dataset
 		try:
 			dataset = Dataset.objects.get(id = dataset_id)
-			bookmarked = dataset in request.user.dataset_set.all()
 		except Exception as e:
 			dataset = None
-					
+
 		# handle error
 		if dataset is None:
-			# TODO : Remove the error message after debugging!
-			# raise Http404("Dataset does not exist!")
-			pass
+			raise Http404("Dataset does not exist!")
 
 		# make graph
-		# TODO: make the file name dynamic
-		graph_data = graph.graph_from_file('combined_data.csv')
+		graph_filepath = absolute_path(dataset.analyzed_graph_file.name)
+		print "path: " + graph_filepath
+		graph_data = graph.graph_from_file(graph_filepath)
 
 		return render(request, 'dashboard/dataset-template.html',{
 				'dataset' : dataset,

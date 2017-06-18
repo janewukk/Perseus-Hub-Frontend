@@ -56,7 +56,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Node',
             fields=[
-                ('nodeid', models.CharField(default=0, max_length=30, primary_key=True, serialize=False)),
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('nodeid', models.CharField(db_index=True,default=0, max_length=30)),
                 ('degree', models.CharField(db_index=True, default=0, max_length=30)),
                 ('count', models.CharField(db_index=True, default=0, max_length=30)),
                 ('pagerank', models.FloatField(db_index=True, default=0)),

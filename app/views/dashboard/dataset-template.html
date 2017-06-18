@@ -270,9 +270,7 @@ path.domain {
 {{ graph_script | safe }}
 <script type="text/javascript">
 
-	// TODO: since we are not fetching database anyway, make it 1 by default
-	// var datasetId = {{ dataset.id }};
-	var datasetId = 1;
+	var datasetId = {{ dataset.id }};
 
 	// star animation
 	var star = $(".star");
@@ -368,7 +366,8 @@ path.domain {
 				contentType: "application/json; charset=UTF-8",
 				response: "application/json; charset=UTF-8",
 				data: JSON.stringify({
-					"dummy": "dummy"
+					"dummy": "dummy",
+					"dataset_id": datasetId
 				}),
 				success: function (data) {
 					console.log("Success!")
@@ -416,7 +415,8 @@ path.domain {
 				"x1": x1.toString(),
 				"y1": y1.toString(),
 				"x_name": x1_name,
-				"y_name": y1_name 
+				"y_name": y1_name ,
+				"dataset_id": datasetId
 			}),
 			success: function (data) {
 				data = JSON.parse(data);
@@ -441,7 +441,8 @@ path.domain {
 			contentType: "application/json; charset=UTF-8",
 			response: "application/json; charset=UTF-8",
 			data: JSON.stringify({
-				"id": id
+				"id": id,
+				"dataset_id": datasetId
 			}),
 			success: function (data) {
 				$("#egonet-id").empty();
@@ -461,7 +462,8 @@ path.domain {
 			contentType: "application/json; charset=UTF-8",
 			response: "application/json; charset=UTF-8",
 			data: JSON.stringify({
-				"nodeid": nodeid
+				"nodeid": nodeid,
+				"dataset_id": datasetId
 			}),
 			success: function (data) {
 				$("#adj-id").empty();
