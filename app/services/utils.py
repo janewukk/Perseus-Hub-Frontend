@@ -22,5 +22,12 @@ def flash_session_message(request, status, message):
 Define the custom user upload directory
 """
 def user_upload_dir(dataset, filename):
-	return 'uploads/user_{0}/{1}'.format(dataset.uploader.id, \
+	return 'data/uploads/user_{0}/{1}'.format(dataset.uploader.id, \
+		str(time.time()) + filename)
+
+"""
+Define the custom user processed file directory
+"""
+def user_processed_dir(dataset, filename):
+	return 'data/processed/user_{0}/{1}'.format(dataset.uploader.id, \
 		str(time.time()) + filename)

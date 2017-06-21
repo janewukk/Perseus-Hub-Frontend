@@ -53,8 +53,7 @@ class DatasetViewController(LoginRequiredResource, View):
 			bookmarked = dataset in request.user.dataset_set.all()
 		except Exception as e:
 			dataset = None
-			bookmarked = False
-		
+					
 		# handle error
 		if dataset is None:
 			# TODO : Remove the error message after debugging!
