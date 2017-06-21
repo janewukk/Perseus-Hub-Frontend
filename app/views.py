@@ -222,8 +222,63 @@ def GetAdjMatrix(request):
 
 	return HttpResponse(json.dumps(response_data), content_type="application/json")
 
+def GetABOD(request):
+    file = "data/combined_scores_ABOD.csv"
+    data = pd.read_csv(file, skipinitialspace=True, escapechar="\\", header=None)
+
+    # Sort the data to get the top 10 anomaly scores
+    data = data.sort_values([0], ascending=[False])
+    nodes = data[0][0:10].index.tolist()
+    scores = data[0][0:10].tolist()
+
+    # Read aggregate data file in order to find which aggregate nodes correspond to the top 10 anomalous nodes
+    aggfile = "data/combined_data.csv"
+    fullfile = "data/full_data.csv"
+    aggdata = pd.read_csv(aggfile, skipinitialspace=True, escapechar="\\", header=None)
+    fulldata = pd.read_csv(fullfile, skipinitialspace=True, escapechar="\\", header=None)
+
+    # Perform filtering to find the relevant aggregate node ids
+    aggregate_node_ids = []
+    for row in nodes:
+        val = fulldata.loc[[row]]
+        # print val
+        degree = val[1].values[0]
+        count = val[2].values[0]
+        pagerank_t = val[4].values[0]
+        clustering_coef_t = val[7].values[0]
+        rel_points = aggdata.loc[(aggdata[0] == degree) & (aggdata[1] == count) & (aggdata[2] == pagerank_t) & (aggdata[4] == clustering_coef_t)]
+        aggregate_node_ids.append(rel_points.index.tolist()[0])
+
+
+    # TODO Update the bokeh plot so that only the top 10 anomalous points are selected
+    # Make all the nodes in the aggregate_node_ids selected and the rest unselected in the bokeh visualization
+
+    # Perform a reload of the template similar to DatasetViewController
+    # graph.change_selected_nodes(aggregate_node_ids)
+
+    # dataset = None
+    # graph_data = graph.graph_from_file('combined_data.csv')
+
+    # html = render_to_string('dashboard/dataset-template.html', {
+	# 			'dataset' : dataset,
+	# 			'graph_script' : graph_data['graph_script'],
+	# 			'graph' : graph_data['graph']})
+
+    # return HttpResponse(html)
+    # return render(request, 'dashboard/dataset-template.html',
+
+    response_data = {
+		'nodeid': nodes,
+		'score': scores,
+        'aggnodeid': aggregate_node_ids
+    }
+
+    print(json.dumps(response_data))
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+
 def GetGFADD(request):
-    file = "data/combined_scores.csv"
+    file = "data/combined_scores_GFADD.csv"
     data = pd.read_csv(file, skipinitialspace=True, escapechar="\\", header=None)
 
     # Sort the data to get the top 10 anomaly scores
@@ -277,4 +332,58 @@ def GetGFADD(request):
 
     print(json.dumps(response_data))
 
+    return HttpResponse(json.dumps(response_data), content_type="application/json")
+
+def GetCombAnScore(request):
+    file = "data/combined_scores.csv"
+    data = pd.read_csv(file, skipinitialspace=True, escapechar="\\", header=None)
+
+    # Sort the data to get the top 10 anomaly scores
+    data = data.sort_values([0], ascending=[False])
+    nodes = data[0][0:10].index.tolist()
+    scores = data[0][0:10].tolist()
+
+    # Read aggregate data file in order to find which aggregate nodes correspond to the top 10 anomalous nodes
+    aggfile = "data/combined_data.csv"
+    fullfile = "data/full_data.csv"
+    aggdata = pd.read_csv(aggfile, skipinitialspace=True, escapechar="\\", header=None)
+    fulldata = pd.read_csv(fullfile, skipinitialspace=True, escapechar="\\", header=None)
+
+    # Perform filtering to find the relevant aggregate node ids
+    aggregate_node_ids = []
+    for row in nodes:
+        val = fulldata.loc[[row]]
+        # print val
+        degree = val[1].values[0]
+        count = val[2].values[0]
+        pagerank_t = val[4].values[0]
+        clustering_coef_t = val[7].values[0]
+        rel_points = aggdata.loc[(aggdata[0] == degree) & (aggdata[1] == count) & (aggdata[2] == pagerank_t) & (aggdata[4] == clustering_coef_t)]
+        aggregate_node_ids.append(rel_points.index.tolist()[0])
+
+
+    # TODO Update the bokeh plot so that only the top 10 anomalous points are selected
+    # Make all the nodes in the aggregate_node_ids selected and the rest unselected in the bokeh visualization
+
+    # Perform a reload of the template similar to DatasetViewController
+    # graph.change_selected_nodes(aggregate_node_ids)
+
+    # dataset = None
+    # graph_data = graph.graph_from_file('combined_data.csv')
+
+    # html = render_to_string('dashboard/dataset-template.html', {
+	# 			'dataset' : dataset,
+	# 			'graph_script' : graph_data['graph_script'],
+	# 			'graph' : graph_data['graph']})
+
+    # return HttpResponse(html)
+    # return render(request, 'dashboard/dataset-template.html',
+
+    response_data = {
+		'nodeid': nodes,
+		'score': scores,
+        'aggnodeid': aggregate_node_ids
+    }
+
+    print(json.dumps(response_data))
     return HttpResponse(json.dumps(response_data), content_type="application/json")

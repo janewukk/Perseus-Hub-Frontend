@@ -41,4 +41,6 @@ urlpatterns = [
     url(r'^GetEgonet',GetEgonet),
     url(r'^GetAdjMatrix', GetAdjMatrix),
     url(r'^GetGFADD', GetGFADD),
+    url(r'^GetABOD', GetABOD),
+    url(r'^GetCombAnScore', GetCombAnScore),
 ]

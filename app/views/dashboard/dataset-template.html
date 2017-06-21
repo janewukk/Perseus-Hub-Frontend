@@ -2,6 +2,8 @@
 
 {% block tabstyles %}
 <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.5.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 <style type="text/css">
 #priority-selector a {
 	display: inline;
@@ -151,7 +153,16 @@ path.domain {
 									<th>Adj matrix</th>
 								</tr>
 							</thead>
-							<tbody></tbody>
+							<tbody data-bind="foreach: nodes">
+								<td data-bind="text: id"></td>
+								<td data-bind="text: score"></td>
+								<td>
+									<button data-bind="attr: { id : id }, click: function() { $parent.drawEgonet(id) }" class="btn btn-primary btn-sm btn-egonet">View</button>
+								</td>
+								<td>
+									<button data-bind="attr: { id : id }, click: function() { $parent.drawAdjMatrix(id) }" class="btn btn-primary btn-sm btn-adj-matrix">View</button>
+								</td>
+							</tbody>
 						</table>
 					</div>
 					<div role="tabpanel" class="tab-pane fade" id="CombAnScore">
@@ -181,6 +192,9 @@ path.domain {
 		</div>
 	</div>
 </div>
+
+
+
 <!-- Bookmark creator -->
 <div class="modal fade" id="bookmark-creator" tabindex="-1" role="dialog" aria-labelledby="bookmark-creator">
 	<div class="modal-dialog" role="document">
@@ -258,7 +272,67 @@ path.domain {
 		</div>
 	</div>
 </div>
+
+<!--This needs to be here and not in the block scripts because it otherwise doesn't trigger-->
+<script type="text/javascript">
+	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+		var tabname = $(e.target).attr("href");
+		console.log("Clicked on", tabname, "tab");
+		if (tabname === "#GFADD" || tabname === "#ABOD" || tabname === "#CombAnScore") {
+			url_route = "/";
+			if (tabname === "#GFADD") {
+				url_route += "GetGFADD/";
+			}
+			else if (tabname === "#ABOD") {
+				url_route += "GetABOD/";
+			}
+			else if (tabname === "#CombAnScore") {
+				url_route += "GetCombAnScore/";
+			}
+			$.ajax({
+				type: 'POST',
+				url: url_route,
+				contentType: "application/json; charset=UTF-8",
+				response: "application/json; charset=UTF-8",
+				data: JSON.stringify({
+					"dummy": "dummy"
+				}),
+				success: function (data) {
+					console.log("Success!")
+					console.log(data)
+					// extract node attributes
+					var nodes = data.nodeid
+					var scores = data.score
+					var aggnode = data.aggnodeid
+
+					// normalize data
+					var results = []
+					for (var i = 0; i < nodes.length; i++) {
+						results.push({
+							id : nodes[i],
+							score : scores[i],
+							targetId : aggnode[i]
+						})
+					}
+					console.log(results);
+					// populate respective view models
+					if (tabname === "#GFADD") {
+						gfaddNodesView.data().nodes(results);
+					}
+					else if (tabname === "#ABOD") {
+						ABODNodesView.data().nodes(results);
+					}
+					else if (tabname === "#CombAnScore") {
+						anomallyNodesView.data().nodes(results);
+					}
+					
+				}
+			});
+		}
+	});
+</script>
 {% endblock %}
+
 
 {% block scripts %}
 <!-- D3 JS -->
@@ -341,6 +415,22 @@ path.domain {
 		}
 	});
 
+	// init ABOD view model
+	var ABODNodesView = new View({
+		el : document.getElementById('ABOD_table'),
+		data : {
+			nodes : []
+		},
+		methods : {
+			drawEgonet : function (nodeId) {
+				getEgonet(nodeId);
+			},
+			drawAdjMatrix : function (nodeId) {
+				getAdjMatrix(nodeId);
+			}
+		}
+	});
+
 	// init anomally score view model
 	var anomallyNodesView = new View({
 		el : document.getElementById('CombAnScore_table'),
@@ -357,49 +447,60 @@ path.domain {
 		}
 	});
 
+	// TODO: Putting this here, when a tab is clicked this function isn't called. Why?
 	// fetch data for GFADD score and Combined anomally score
-	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-		var tabname = $(e.target).attr("href");
-		console.log("Clicked on", tabname, "tab");
-		if (tabname === "#GFADD" || tabname === "#CombAnScore") {
-			$.ajax({
-				type: 'POST',
-				url: '/GetGFADD/',
-				contentType: "application/json; charset=UTF-8",
-				response: "application/json; charset=UTF-8",
-				data: JSON.stringify({
-					"dummy": "dummy"
-				}),
-				success: function (data) {
-					console.log("Success!")
-					console.log(data)
-					// extract node attributes
-					var nodes = data.nodeid
-					var scores = data.score
-					var aggnode = data.aggnodeid
+	// $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+	// 	var tabname = $(e.target).attr("href");
+	// 	console.log("Clicked on", tabname, "tab");
+	// 	if (tabname === "#GFADD" || tabname === "#ABOD" || tabname === "#CombAnScore") {
+	// 		url = "/";
+	// 		if (tabname === "#GFADD") {
+	// 			url += "GetGFADD/";
+	// 		}
+	// 		else if (tabname === "#ABOD") {
+	// 			url += "GetABOD/";
+	// 		}
+	// 		else if (tabname === "#CombAnScore") {
+	// 			url += "GetCombAnScore/";
+	// 		}
+	// 		$.ajax({
+	// 			type: 'POST',
+	// 			url: '/GetGFADD/',
+	// 			contentType: "application/json; charset=UTF-8",
+	// 			response: "application/json; charset=UTF-8",
+	// 			data: JSON.stringify({
+	// 				"dummy": "dummy"
+	// 			}),
+	// 			success: function (data) {
+	// 				console.log("Success!")
+	// 				console.log(data)
+	// 				// extract node attributes
+	// 				var nodes = data.nodeid
+	// 				var scores = data.score
+	// 				var aggnode = data.aggnodeid
 
-					// normalize data
-					var results = []
-					for (var i = 0; i < nodes.length; i++) {
-						results.push({
-							id : nodes[i],
-							score : scores[i],
-							targetId : aggnode[i]
-						})
-					}
-					console.log(results);
-					// populate respective view models
-					if (tabname === "#GFADD") {
-						gfaddNodesView.data().nodes(results);
-					}
-					else if (tabname === "#CombAnScore") {
-						anomallyNodesView.data().nodes(results);
-					}
+	// 				// normalize data
+	// 				var results = []
+	// 				for (var i = 0; i < nodes.length; i++) {
+	// 					results.push({
+	// 						id : nodes[i],
+	// 						score : scores[i],
+	// 						targetId : aggnode[i]
+	// 					})
+	// 				}
+	// 				console.log(results);
+	// 				// populate respective view models
+	// 				if (tabname === "#GFADD") {
+	// 					gfaddNodesView.data().nodes(results);
+	// 				}
+	// 				else if (tabname === "#CombAnScore") {
+	// 					anomallyNodesView.data().nodes(results);
+	// 				}
 				
-				}
-			});
-		}
-	});
+	// 			}
+	// 		});
+	// 	}
+	// });
 
 	// graph callback function
 	function nodeSelected(x1, y1, x1_name, y1_name) {
