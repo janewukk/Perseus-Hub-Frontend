@@ -69,12 +69,23 @@ def ClickPlot(request):
 
 previousNodeID = 0
 storedNodes =  []
+global_dictionary = {}
+global_nodes = []
+global_links = []
 
 def GetEgonet(request):
     global previousNodeID
     global storedNodes
+    global global_dictionary
+    global global_nodes
+    global global_links
 
-    resultStr = ''
+    # Reset the globals
+    global_dictionary = {}
+    global_nodes = []
+    global_links = []
+    previousNodeID = -1
+    storedNodes = []
     
     data = json.loads(request.body)
     nodeid = data['id']
@@ -124,22 +135,120 @@ def GetEgonet(request):
 
     validEdges_selected = Edge.objects.filter(fromNode__in=nodes_ego, toNode__in=nodes_ego)
 
-    dictionary = {}
-    dictionary['Nodes'] = []
-    dictionary['Links'] = []
+    global_dictionary['Nodes'] = []
+    global_dictionary['Links'] = []
 
     for n in nodes_ego:
         temp_dic = {"Id": str(n)}
-        dictionary['Nodes'].append(temp_dic)
+        global_dictionary['Nodes'].append(temp_dic)
+        global_nodes.append(int(n))
 
     for e in validEdges_selected:
         temp_dic = {"Source": str(e.fromNode), "Target": str(e.toNode), "Value": str(e.weight)}
-        dictionary['Links'].append(temp_dic)
+        global_links.append([int(e.fromNode), int(e.toNode), int(e.weight)])
+        global_dictionary['Links'].append(temp_dic)
         # resultStr = resultStr + str(e.fromNode) + "\t" + str(e.toNode)+ "\t" + str(e.weight) + "\n"
 
-    json_data = json.dumps(dictionary)
+    previousNodeID = nodeid
+
+    print global_nodes
+    print global_links
+
+    json_data = json.dumps(global_dictionary)
 
     return HttpResponse(json_data, content_type="application/json")
+
+def ExpandEgonet(request):
+    global previousNodeID
+    global storedNodes
+    global global_dictionary
+    global global_nodes
+    global global_links
+    
+    data = json.loads(request.body)
+    nodeid = data['id']
+    data_nodes = data['nodes']
+    data_links = data['links']
+    print "Expanding egonet for node " + str(nodeid)
+
+    global_nodes = []
+    global_links = []
+    # Updating nodes from potential deletion
+    for val in data_nodes:
+        global_nodes.append(int(val['Id']))
+    
+    for val in data_links:
+        temp_link = [int(val['source']['Id']), int(val['target']['Id']), int(val['value'])]
+        global_links.append(temp_link)
+
+    outedges = Edge.objects.filter(fromNode = nodeid)
+    inedges = Edge.objects.filter(toNode = nodeid)
+    nodes = set()
+    nodes_ego = set()
+
+    for oe in outedges:
+        nodes.add(oe.toNode)
+
+    for ie in inedges:
+        nodes.add(ie.fromNode)
+
+    nodes.add(nodeid)
+
+    sampleNum = 10
+    
+    if previousNodeID != nodeid:
+        pagerankDict = dict()
+        for curNode in nodes:
+            curNode_pagerankList = Node.objects.filter(nodeid = curNode)
+            for temp in curNode_pagerankList:
+                curNode_pagerank = float(temp.pagerank)
+            pagerankDict.update({curNode: curNode_pagerank})
+        
+        pagerankDict_Sorted = sorted(pagerankDict.items(), key=lambda d:d[1], reverse = True)
+        
+        pagerankDict_Sorted_List = []
+        for temp in pagerankDict_Sorted:
+            pagerankDict_Sorted_List.append(temp[0])
+        
+        storedNodes = pagerankDict_Sorted_List          
+    else:
+        pagerankDict_Sorted_List = storedNodes[sampleNum:]
+        storedNodes = storedNodes[sampleNum:]
+
+    # sample the neighbor for egonet
+    if len(pagerankDict_Sorted_List) > sampleNum:
+        #nodes = random.sample(nodes,sampleNum)
+        nodes_ego = pagerankDict_Sorted_List[:sampleNum]
+        nodes_ego.append(nodeid)
+    else:
+        nodes_ego = pagerankDict_Sorted_List
+
+    validEdges_selected = Edge.objects.filter(fromNode__in=nodes_ego, toNode__in=nodes_ego)
+
+    for n in nodes_ego:
+        temp_dic = {"Id": str(n)}
+        if int(n) not in global_nodes:
+            print "Added node", n
+            global_dictionary['Nodes'].append(temp_dic)
+            global_nodes.append(int(n))
+
+    for e in validEdges_selected:
+        temp_dic = {"Source": str(e.fromNode), "Target": str(e.toNode), "Value": str(e.weight)}
+        temp_link = [int(e.fromNode), int(e.toNode), int(e.weight)]
+        if temp_link not in global_links:
+            print "Added link", e.fromNode, e.toNode, e.weight
+            global_dictionary['Links'].append(temp_dic)
+            global_links.append(temp_link)
+
+    print global_nodes
+    print global_links
+
+    previousNodeID = nodeid
+
+    json_data = json.dumps(global_dictionary)
+
+    return HttpResponse(json_data, content_type="application/json")
+
 
 def GetAdjMatrix(request):
 	data = json.loads(request.body)
