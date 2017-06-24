@@ -38,6 +38,9 @@ urlpatterns = [
 
     url(r'^ClickPlot',ClickPlot),
     url(r'^GetEgonet',GetEgonet),
+    url(r'^ExpandEgonet',ExpandEgonet),
     url(r'^GetAdjMatrix', GetAdjMatrix),
     url(r'^GetGFADD', GetGFADD),
+    url(r'^GetABOD', GetABOD),
+    url(r'^GetCombAnScore', GetCombAnScore),
 ]

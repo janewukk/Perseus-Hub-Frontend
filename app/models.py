@@ -56,8 +56,8 @@ class Dataset(models.Model):
 	analyzed_fulldata_file = models.FileField(upload_to=user_processed_dir, default = "")
 	# dataset's graph data file
 	analyzed_graph_file = models.FileField(upload_to=user_processed_dir, default = "")
-	# dataset's anomaly data file
-	anomaly_scores_file = models.FileField(upload_to=user_processed_dir, default = "")
+	# dataset's combined scores file path
+	combined_scores_files = models.CharField(max_length = 512, default = "")
 	# the user who uploads this dataset
 	uploader = models.ForeignKey(User, on_delete = models.CASCADE, default =1)
 	# timestamps

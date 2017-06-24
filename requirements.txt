@@ -1,4 +1,4 @@
-bokeh==0.12.5
+bokeh==0.12.6
 certifi==2017.4.17
 cffi==1.9.1
 click==6.7
