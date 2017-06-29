@@ -829,7 +829,8 @@ path.domain {
 						data: JSON.stringify({
 							"id": id,
 							"nodes": nodes,
-							"links": prevLinks
+							"links": prevLinks,
+							"dataset_id" : datasetId
 						}),
 						success: function (data) {
 							$("#egonet-id").empty();
@@ -1017,7 +1018,8 @@ path.domain {
 						data: JSON.stringify({
 							"id": id,
 							"nodes": nodes,
-							"links": prevLinks
+							"links": prevLinks,
+							"dataset_id" : datasetId
 						}),
 						success: function (data) {
 							$("#egonet-id").empty();
