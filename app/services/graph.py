@@ -519,7 +519,7 @@ class Graph:
             "graph": div
         }
     
-    # TODO change s
+    # TODO change selected nodes
     def change_selected_nodes(self, selected_ids):
         testcall = CustomJS(args=dict(source=self.source), code="""
             console.log("Selected callback was called");

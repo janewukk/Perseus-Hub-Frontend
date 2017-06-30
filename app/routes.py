@@ -38,6 +38,7 @@ urlpatterns = [
     url(r'^datasets/(?P<id>\d+)/query/$', DatasetQueryController.as_view()),
 
     url(r'^ClickPlot',ClickPlot),
+    url(r'^SearchNodeID',SearchNodeID),
     url(r'^GetEgonet',GetEgonet),
     url(r'^ExpandEgonet',ExpandEgonet),
     url(r'^GetAdjMatrix', GetAdjMatrix),

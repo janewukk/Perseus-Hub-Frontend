@@ -67,6 +67,28 @@ def ClickPlot(request):
 
     return HttpResponse(json_data)
 
+def SearchNodeID(request):
+    data = json.loads(request.body)
+    node_id = data['id']
+    print("Searching for Node Id:", node_id)
+
+    results = Node.objects.filter(nodeid = node_id)[:10]
+    output = []
+    print results
+
+    for result in results:
+        item = []
+        item.append(result.nodeid)
+        item.append(result.degree)
+        item.append(result.pagerank)
+        item.append(result.v_1)
+        output.append(item)
+
+    json_data = json.dumps(output)
+
+    return HttpResponse(json_data)
+
+
 previousNodeID = 0
 storedNodes =  []
 global_dictionary = {}

@@ -66,6 +66,10 @@ path.domain {
 <div class="row">
 	<div class="col-sm-10">
 		<!-- Graph -->
+		<div class="form-group">
+			<!--<input type="text" id="search-field" class="form-control" placeholder="Search datasets" autocomplete="off" size="35">-->
+			Search by Node ID: <input type="text" id="search-node-id" placeholder="Node ID" autocomplete="off" size="35">
+		</div>
 		{{ graph | safe }}
 		<!-- Data browser -->
 		<div class="row" style="margin-top: 20px" id="data-browser">
@@ -343,6 +347,37 @@ path.domain {
 <!-- Graph JS -->
 {{ graph_script | safe }}
 <script type="text/javascript">
+
+	// Request to search by node-id
+	document.getElementById('search-node-id').onkeydown = function(event) {
+		if (event.keyCode == 13) {
+			var id = document.getElementById('search-node-id').value;
+			console.log("Searching for Node with id:", id);
+			$('#loading-indicator').modal('show');
+			// fetch nodes when clicked
+			$.ajax({
+				type: 'POST',
+				url: '/SearchNodeID/',
+				contentType: "application/json; charset=UTF-8",
+				response: "application/json; charset=UTF-8",
+				data: JSON.stringify({
+					"id": id.toString()
+				}),
+				success: function (data) {
+					data = JSON.parse(data);
+					createInformationConsole(data)
+					// scroll to bottom
+					$('html, body').animate({
+						scrollTop: $("#data-browser").offset().top
+					}, 1000);
+					// jump to tab 1
+					$('#tabs li:eq(0) a').tab('show');
+					// hide loading indicator
+					$('#loading-indicator').modal('hide');
+				}
+			});
+		}
+	} 
 
 	// TODO: since we are not fetching database anyway, make it 1 by default
 	// var datasetId = {{ dataset.id }};
