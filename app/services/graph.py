@@ -38,7 +38,7 @@ from bokeh.client import push_session
 from tornado.ioloop import IOLoop
 from bokeh.palettes import Plasma11 as palette
 
-from bokeh.events import Tap, Press
+from bokeh.events import Tap, Press, ButtonClick
 
 import copy
 
@@ -167,7 +167,7 @@ class Graph:
         between_window_size = 40
         border_size = 6
 
-        def make_plot(xname, yname, isLog, needsColor, xcolor, needsS, xdr, ydr, xax=False, yax=False):
+        def make_plot(xname, yname, isLog, needsColor, xcolor, needsS, xdr, ydr, xax=False, yax=False, webgl=False):
             mbl = between_window_size if yax else 0
             mbb = between_window_size if xax else 0
 
@@ -179,16 +179,12 @@ class Graph:
             # ])
 
             if isLog:
-                plot = figure(
-                    x_range=xdr, y_range=ydr, background_fill_color="white",
-                    border_fill_color='white', plot_width=window_size + mbl, plot_height=window_size + mbb,
-                    min_border_left=border_size+mbl, min_border_right=border_size, min_border_top=border_size, min_border_bottom=2+mbb,
-                    y_axis_type="log", x_axis_type="log")
+                plot = figure(x_range=xdr, y_range=ydr, background_fill_color="white", border_fill_color='white', plot_width=window_size + mbl, plot_height=window_size + mbb,min_border_left=border_size+mbl, min_border_right=border_size, min_border_top=border_size, min_border_bottom=2+mbb,y_axis_type="log", x_axis_type="log")
             else:
                 plot = figure(
                     x_range=xdr, y_range=ydr, background_fill_color="white",
                     border_fill_color='white', plot_width=window_size + mbl, plot_height=window_size + mbb,
-                    min_border_left=border_size+mbl, min_border_right=border_size, min_border_top=border_size, min_border_bottom=2+mbb)
+                    min_border_left=border_size+mbl, min_border_right=border_size, min_border_top=border_size, min_border_bottom=2+mbb, output_backend="webgl")
             
             if not needsS:
                 plot.xaxis.axis_label = xname
@@ -278,8 +274,17 @@ class Graph:
         plots_row2 = gridplot(plots_row2)
 
         # plots_row = gridplot([[plot1, plot2, plot3],[plot4, plot5, plot6]])
+        button = Button(label="Button", button_type="success")
 
-        layout = bokeh.layouts.column(plots_row1, tickers_rowx, tickers_rowy, plots_row2, stats, sizing_mode='scale_width')
+        button = Button(label="Button", button_type="success")
+
+        button_callback = CustomJS(args=dict(source=source_state), code="""
+            console.log("These are anomally data points...", anomallyNodesView.data().nodes())
+        """)
+
+        button.js_on_event(ButtonClick, button_callback)
+
+        layout = bokeh.layouts.column(plots_row1, tickers_rowx, tickers_rowy, plots_row2, stats, button,sizing_mode='scale_width')
 
         callback_ticker1x = CustomJS(args=dict(source=self.source, source_true=source_true, plot=plot5), code="""
             console.log("Callback_ticker1x is called");

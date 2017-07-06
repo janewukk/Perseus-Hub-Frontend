@@ -26,6 +26,9 @@ path.domain {
 	fill: none;
 	stroke: black;
 }
+.bk-bs-btn {
+	display: none;
+}
 </style>
 
 {% endblock %}
@@ -279,7 +282,8 @@ path.domain {
 <!-- D3 JS -->
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <!-- Bokeh JS -->
-<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.6.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bokeh/0.12.6/bokeh.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bokeh/0.12.6/bokeh-gl.min.js"></script>
 <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.6.min.js"></script>
 <!-- Graph JS -->
 {{ graph_script | safe }}
@@ -472,8 +476,13 @@ path.domain {
 					}
 					else if (tabname === "#CombAnScore") {
 						anomallyNodesView.data().nodes(results);
+						// trigger bokeh button click 
+						// to load the data
+						$('.bk-bs-btn').click();
 					}
-				
+				},
+				error : function(){
+					$('.bk-bs-btn').click();
 				}
 			});
 		}
