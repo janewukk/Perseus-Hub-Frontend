@@ -445,6 +445,7 @@ path.domain {
 	function nodeSelected(x1, y1, x1_name, y1_name) {
 		// show loading indicator
 		$('#loading-indicator').modal('show');
+		console.log("Selected: ");
 		console.log(x1, y1, x1_name, y1_name)
 		// fetch nodes when clicked
 		$.ajax({
