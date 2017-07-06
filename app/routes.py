@@ -43,4 +43,5 @@ urlpatterns = [
     url(r'^GetGFADD', GetGFADD),
     url(r'^GetABOD', GetABOD),
     url(r'^GetCombAnScore', GetCombAnScore),
+    url(r'^SearchNodeID',SearchNodeID),
 ]
