@@ -26,6 +26,9 @@ from app.services.graph import *
 from app.controllers.dashboard import *
 from django.template.loader import render_to_string
 
+aggfile = "data/combined_data.csv"
+fullfile = "data/full_data.csv"
+
 def ClickPlot(request):
     val = "hi from ClickPlot"
     data = json.loads(request.body)
@@ -84,10 +87,67 @@ def SearchNodeID(request):
         item.append(result.v_1)
         output.append(item)
 
-    json_data = json.dumps(output)
+    json_data = json.dumps(output)    
 
     return HttpResponse(json_data)
 
+def UpdateGraph(request):
+    print "UpdateGraph called"
+    data = json.loads(request.body)
+    nodes = data['node_ids']
+
+    aggdata = pd.read_csv(aggfile, skipinitialspace=True, escapechar="\\", header=None)
+    fulldata = pd.read_csv(fullfile, skipinitialspace=True, escapechar="\\", header=None)
+    aggregate_node_ids = []
+
+    # TODO: Better filtering
+    for i in nodes:
+        i = int(i)
+        row = fulldata.iloc[i-1]
+        print row
+        degree = row[1]
+        count = row[2]
+        pagerank_t = row[4]
+        clustering_coef_t = row[7]
+        rel_points = aggdata.loc[(aggdata[0] == degree) & (aggdata[1] == count) & (aggdata[2] == pagerank_t) & (aggdata[4] == clustering_coef_t)]
+        print rel_points
+        aggregate_node_ids.append(rel_points.index.tolist()[0])
+
+    print "Corresponding aggregate nodes are:", aggregate_node_ids
+
+    graph.highlighted = True
+    graph.highlightedNodeIDs = aggregate_node_ids
+    graph_data = graph.graph_from_file('combined_data.csv')
+
+    return render(request, 'dashboard/graph.html',{
+            'graph_script' : graph_data['graph_script'],
+            'graph' : graph_data['graph']
+    })
+
+def ShowAnomalies(request):
+    data = json.loads(request.body)
+    aggnodes = data['aggnodes']
+
+    graph.highlighted = True
+    graph.highlightedNodeIDs = aggnodes
+    graph_data = graph.graph_from_file('combined_data.csv')
+
+    return render(request, 'dashboard/graph.html',{
+            'graph_script' : graph_data['graph_script'],
+            'graph' : graph_data['graph']
+    })
+
+
+def ResetGraph(request):
+    print "Resetting graph"
+    graph.highlighted = False
+    graph.highlightedNodeIDs = []
+    graph_data = graph.graph_from_file('combined_data.csv')
+
+    return render(request, 'dashboard/graph.html',{
+            'graph_script' : graph_data['graph_script'],
+            'graph' : graph_data['graph']
+    })
 
 previousNodeID = 0
 storedNodes =  []
@@ -363,8 +423,6 @@ def GetABOD(request):
     scores = data[0][0:10].tolist()
 
     # Read aggregate data file in order to find which aggregate nodes correspond to the top 10 anomalous nodes
-    aggfile = "data/combined_data.csv"
-    fullfile = "data/full_data.csv"
     aggdata = pd.read_csv(aggfile, skipinitialspace=True, escapechar="\\", header=None)
     fulldata = pd.read_csv(fullfile, skipinitialspace=True, escapechar="\\", header=None)
 
@@ -420,10 +478,10 @@ def GetGFADD(request):
 
 
     # Read aggregate data file in order to find which aggregate nodes correspond to the top 10 anomalous nodes
-    aggfile = "data/combined_data.csv"
-    fullfile = "data/full_data.csv"
     aggdata = pd.read_csv(aggfile, skipinitialspace=True, escapechar="\\", header=None)
     fulldata = pd.read_csv(fullfile, skipinitialspace=True, escapechar="\\", header=None)
+
+    print "Nodes are", nodes;
 
     # Perform filtering to find the relevant aggregate node ids
     aggregate_node_ids = []
@@ -436,24 +494,6 @@ def GetGFADD(request):
         clustering_coef_t = val[7].values[0]
         rel_points = aggdata.loc[(aggdata[0] == degree) & (aggdata[1] == count) & (aggdata[2] == pagerank_t) & (aggdata[4] == clustering_coef_t)]
         aggregate_node_ids.append(rel_points.index.tolist()[0])
-
-
-    # TODO Update the bokeh plot so that only the top 10 anomalous points are selected
-    # Make all the nodes in the aggregate_node_ids selected and the rest unselected in the bokeh visualization
-
-    # Perform a reload of the template similar to DatasetViewController
-    # graph.change_selected_nodes(aggregate_node_ids)
-
-    # dataset = None
-    # graph_data = graph.graph_from_file('combined_data.csv')
-
-    # html = render_to_string('dashboard/dataset-template.html', {
-	# 			'dataset' : dataset,
-	# 			'graph_script' : graph_data['graph_script'],
-	# 			'graph' : graph_data['graph']})
-
-    # return HttpResponse(html)
-    # return render(request, 'dashboard/dataset-template.html',
 
     response_data = {
 		'nodeid': nodes,
@@ -475,8 +515,6 @@ def GetCombAnScore(request):
     scores = data[0][0:10].tolist()
 
     # Read aggregate data file in order to find which aggregate nodes correspond to the top 10 anomalous nodes
-    aggfile = "data/combined_data.csv"
-    fullfile = "data/full_data.csv"
     aggdata = pd.read_csv(aggfile, skipinitialspace=True, escapechar="\\", header=None)
     fulldata = pd.read_csv(fullfile, skipinitialspace=True, escapechar="\\", header=None)
 
@@ -484,7 +522,6 @@ def GetCombAnScore(request):
     aggregate_node_ids = []
     for row in nodes:
         val = fulldata.loc[[row]]
-        # print val
         degree = val[1].values[0]
         count = val[2].values[0]
         pagerank_t = val[4].values[0]

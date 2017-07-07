@@ -68,7 +68,7 @@ class DatasetViewController(LoginRequiredResource, View):
 				'dataset' : dataset,
 				'graph_script' : graph_data['graph_script'],
 				'graph' : graph_data['graph']
-			})
+		})
 
 class BookmarkViewController(LoginRequiredResource, View):
 	login_url = '/login/'

@@ -23,6 +23,7 @@ from app.controllers.dashboard import DashboardController, DatasetViewController
 from app.controllers.dataset import DatasetSearchController, DatasetUploadController, DatasetQueryController
 
 from app.views import *
+from . import views
 
 urlpatterns = [
     url(r'^$', DashboardController.as_view()),
@@ -45,4 +46,8 @@ urlpatterns = [
     url(r'^GetGFADD', GetGFADD),
     url(r'^GetABOD', GetABOD),
     url(r'^GetCombAnScore', GetCombAnScore),
+    url(r'^UpdateGraph', UpdateGraph),
+    url(r'^ResetGraph', ResetGraph),
+    url(r'^ShowAnomalies', ShowAnomalies),
+
 ]

@@ -70,7 +70,9 @@ path.domain {
 			<!--<input type="text" id="search-field" class="form-control" placeholder="Search datasets" autocomplete="off" size="35">-->
 			Search by Node ID: <input type="text" id="search-node-id" placeholder="Node ID" autocomplete="off" size="35">
 		</div>
-		{{ graph | safe }}
+		<div id="graph_script">
+			{% include 'dashboard/graph.html' %}
+		</div>
 		<!-- Data browser -->
 		<div class="row" style="margin-top: 20px" id="data-browser">
 			<div class="col-sm-10">
@@ -283,6 +285,7 @@ path.domain {
 		var tabname = $(e.target).attr("href");
 		console.log("Clicked on", tabname, "tab");
 		if (tabname === "#GFADD" || tabname === "#ABOD" || tabname === "#CombAnScore") {
+			$('#loading-indicator').modal('show');
 			url_route = "/";
 			if (tabname === "#GFADD") {
 				url_route += "GetGFADD/";
@@ -329,10 +332,28 @@ path.domain {
 					else if (tabname === "#CombAnScore") {
 						anomallyNodesView.data().nodes(results);
 					}
-					
+
+					$.ajax({
+						type: 'POST',
+						url: '/ShowAnomalies/',
+						contentType: "application/json; charset=UTF-8",
+						response: "application/json; charset=UTF-8",
+						timeout: 15000,
+						data: JSON.stringify({
+							"aggnodes": aggnode
+						}),
+						success: function (data) {
+							$("#graph_script").html(data);
+							console.log("Displaying Anomalies")
+						}
+					});
 				}
 			});
 		}
+		// Finish Loading when all Ajax requests are completed
+		$(document).ajaxStop(function () {
+			$('#loading-indicator').modal('hide');
+		});
 	});
 </script>
 {% endblock %}
@@ -345,8 +366,11 @@ path.domain {
 <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.6.min.js"></script>
 <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.6.min.js"></script>
 <!-- Graph JS -->
-{{ graph_script | safe }}
 <script type="text/javascript">
+
+	// TODO: since we are not fetching database anyway, make it 1 by default
+	// var datasetId = {{ dataset.id }};
+	var datasetId = 1;
 
 	// Request to search by node-id
 	document.getElementById('search-node-id').onkeydown = function(event) {
@@ -373,15 +397,29 @@ path.domain {
 					// jump to tab 1
 					$('#tabs li:eq(0) a').tab('show');
 					// hide loading indicator
-					$('#loading-indicator').modal('hide');
 				}
+			});
+			ids = [id.toString()];
+			$.ajax({
+				type: 'POST',
+				url: '/UpdateGraph/',
+				contentType: "application/json; charset=UTF-8",
+				response: "application/json; charset=UTF-8",
+				timeout: 1500,
+				data: JSON.stringify({
+					"node_ids": ids
+				}),
+				success: function (data) {
+					$("#graph_script").html(data);
+					console.log("Updating graph")
+				}
+			});
+			// Finish Loading when all Ajax requests are completed
+			$(document).ajaxStop(function () {
+				$('#loading-indicator').modal('hide');
 			});
 		}
 	} 
-
-	// TODO: since we are not fetching database anyway, make it 1 by default
-	// var datasetId = {{ dataset.id }};
-	var datasetId = 1;
 
 	// star animation
 	var star = $(".star");
@@ -481,6 +519,29 @@ path.domain {
 			}
 		}
 	});
+
+
+	// Disables highlighting
+	function disableHighlighting() {
+		// Reload the graph to disable highlighting
+		$('#loading-indicator').modal('show');
+		$.ajax({
+			type: 'POST',
+			url: '/ResetGraph/',
+			contentType: "application/json; charset=UTF-8",
+			response: "application/json; charset=UTF-8",
+			timeout: 1500,
+			data: JSON.stringify({
+				"x1": "dummy"
+			}),
+			success: function (data) {
+				$("#graph_script").html(data);
+				console.log("Reset graph")
+				// hide loading indicator
+				$('#loading-indicator').modal('hide');
+			}
+		  });
+	}
 
 	// graph callback function
 	function nodeSelected(x1, y1, x1_name, y1_name) {

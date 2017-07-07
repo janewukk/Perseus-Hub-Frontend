@@ -54,12 +54,16 @@ Notice: dataset should be in the Django root data/ folder
 class Graph:
     def __init__(self):
         self.source = ColumnDataSource()
+        self.highlightSource = ColumnDataSource
+        self.highlighted = False
+        self.highlightedNodeIDs = []
 
     def graph_from_file(self, dataset_filename):
         pd.set_option('display.precision',20)
         data = pd.read_csv('data/' + dataset_filename, skipinitialspace=True, escapechar="\\", header=None)
         data_string = pd.read_csv('data/' + dataset_filename, skipinitialspace=True, escapechar="\\", header=None, dtype=str)
         color_mapper = LinearColorMapper(palette=palette)
+
 
         source_true_string = ColumnDataSource(
             data =dict(
@@ -93,7 +97,8 @@ class Graph:
 
         source_state = ColumnDataSource(
             data = dict(
-                state = [1]
+                state = [1],
+                highlighted = [self.highlighted]
             )
         )
 
@@ -135,6 +140,41 @@ class Graph:
                 v6=s_data['v6'],
                 v7=s_data['v7'],
                 v8=s_data['v8']
+            )
+        )
+
+        highlightedsource_true = ColumnDataSource(
+            data =dict(
+                v1=data.iloc[self.highlightedNodeIDs][6],
+                v2=data.iloc[self.highlightedNodeIDs][7],
+                v3=data.iloc[self.highlightedNodeIDs][8],
+                v4=data.iloc[self.highlightedNodeIDs][9],
+                v5=data.iloc[self.highlightedNodeIDs][10],
+                v6=data.iloc[self.highlightedNodeIDs][11],
+                v7=data.iloc[self.highlightedNodeIDs][12],
+                v8=data.iloc[self.highlightedNodeIDs][13],
+                v9=data.iloc[self.highlightedNodeIDs][14],
+                v10=data.iloc[self.highlightedNodeIDs][15]
+            )
+        )
+        highlighted_s_data = highlightedsource_true.data
+
+        self.highlightSource = ColumnDataSource(
+            data = dict(
+                degree=data.iloc[self.highlightedNodeIDs][0],
+                count=data.iloc[self.highlightedNodeIDs][1],
+                pagerank=data.iloc[self.highlightedNodeIDs][2],
+                pagerank_count=data.iloc[self.highlightedNodeIDs][3],
+                clustering_coefficient=data.iloc[self.highlightedNodeIDs][4],
+                clustering_coefficient_count=data.iloc[self.highlightedNodeIDs][5],
+                v1=highlighted_s_data['v1'],
+                v2=highlighted_s_data['v2'],
+                v3=highlighted_s_data['v3'],
+                v4=highlighted_s_data['v4'],
+                v5=highlighted_s_data['v5'],
+                v6=highlighted_s_data['v6'],
+                v7=highlighted_s_data['v7'],
+                v8=highlighted_s_data['v8']
             )
         )
 
@@ -197,16 +237,28 @@ class Graph:
                 plot.xaxis.axis_label = "s" + xname
                 plot.yaxis.axis_label = "s" + yname
             
-            if needsColor:
-                circle = Circle(x=xname, y=yname, fill_color={'field': xcolor, 'transform': color_mapper}, fill_alpha=0.6, size=5, line_color=None)
+
+            if self.highlighted:
+                    circle = Circle(x=xname, y=yname, fill_color = "grey", fill_alpha=0.6, size=5, line_color=None)
+                    highlightCircle = Circle(x=xname, y=yname, fill_color = "red", fill_alpha=0.6, size=10, line_color=None)
+                    r = plot.add_glyph(self.source, circle)
+                    r.nonselection_glyph = Circle(fill_color="grey", fill_alpha = 0.1, line_color=None)
+                    xdr.renderers.append(r)
+                    ydr.renderers.append(r)
+
+                    hr = plot.add_glyph(self.highlightSource, highlightCircle)
+                    hr.nonselection_glyph = Circle(fill_color="grey", fill_alpha = 0.1, line_color=None)
+                    xdr.renderers.append(hr)
+                    ydr.renderers.append(hr)
             else:
-                circle = Circle(x=xname, y=yname, fill_color = "blue", fill_alpha=0.6, size=5, line_color=None)
-
-            r = plot.add_glyph(self.source, circle)
-            r.nonselection_glyph = Circle(fill_color="grey", fill_alpha = 0.1, line_color=None)
-
-            xdr.renderers.append(r)
-            ydr.renderers.append(r)
+                if needsColor:
+                    circle = Circle(x=xname, y=yname, fill_color={'field': xcolor, 'transform': color_mapper}, fill_alpha=0.6, size=5, line_color=None)
+                else:
+                    circle = Circle(x=xname, y=yname, fill_color = "blue", fill_alpha=0.6, size=5, line_color=None)
+                r = plot.add_glyph(self.source, circle)
+                r.nonselection_glyph = Circle(fill_color="grey", fill_alpha = 0.1, line_color=None)
+                xdr.renderers.append(r)
+                ydr.renderers.append(r)
 
             xticker = BasicTicker()
             if xax:
@@ -453,34 +505,82 @@ class Graph:
 
         event_callback_1 = CustomJS(args=dict(source=source_state),code="""
             source['data']['state'] = [1];
+            h = source['data']['highlighted'][0];
+            if (h === true) {
+                console.log("Changing Highlighted Value");
+                source['data']['highlighted'] = [false];
+                disableHighlighting();
+            }
             console.log(1111111)
         """)
         event_callback_2 = CustomJS(args=dict(source=source_state),code="""
             source['data']['state'] = [2];
+            h = source['data']['highlighted'][0];
+            if (h === true) {
+                console.log("Changing Highlighted Value");
+                source['data']['highlighted'] = [false];
+                disableHighlighting();
+            }
             console.log(2222222)
         """)
         event_callback_3 = CustomJS(args=dict(source=source_state),code="""
             source['data']['state'] = [3];
+            h = source['data']['highlighted'][0];
+            if (h === true) {
+                console.log("Changing Highlighted Value");
+                source['data']['highlighted'] = [false];
+                disableHighlighting();
+            }
             console.log(3333333)
         """)
         event_callback_4 = CustomJS(args=dict(source=source_state),code="""
             source['data']['state'] = [4];
+            h = source['data']['highlighted'][0];
+            if (h === true) {
+                console.log("Changing Highlighted Value");
+                source['data']['highlighted'] = [false];
+                disableHighlighting();
+            }
             console.log(4444444)
         """)
         event_callback_5 = CustomJS(args=dict(source=source_state),code="""
             source['data']['state'] = [5];
+            h = source['data']['highlighted'][0];
+            if (h === true) {
+                console.log("Changing Highlighted Value");
+                source['data']['highlighted'] = [false];
+                disableHighlighting();
+            }
             console.log(5555555)
         """)
         event_callback_6 = CustomJS(args=dict(source=source_state),code="""
             source['data']['state'] = [6];
+            h = source['data']['highlighted'][0];
+            if (h === true) {
+                console.log("Changing Highlighted Value");
+                source['data']['highlighted'] = [false];
+                disableHighlighting();
+            }
             console.log(6666666)
         """)
         event_callback_7 = CustomJS(args=dict(source=source_state),code="""
             source['data']['state'] = [7];
+            h = source['data']['highlighted'][0];
+            if (h === true) {
+                console.log("Changing Highlighted Value");
+                source['data']['highlighted'] = [false];
+                disableHighlighting();
+            }
             console.log(7777777)
         """)
         event_callback_8 = CustomJS(args=dict(source=source_state),code="""
             source['data']['state'] = [8];
+            h = source['data']['highlighted'][0];
+            if (h === true) {
+                console.log("Changing Highlighted Value");
+                source['data']['highlighted'] = [false];
+                disableHighlighting();
+            }
             console.log(88888888)
         """)
 
