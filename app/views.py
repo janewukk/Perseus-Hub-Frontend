@@ -45,11 +45,9 @@ def ClickPlot(request):
     if (x_name == "degree" and y_name == "count"):
         results = Node.objects.filter(degree = x)[:10]
     elif (x_name == "pagerank_t" and y_name == "pagerank_t_count"):
-        print "pagerank_t vs. pagerank_t_count"
         results = Node.objects.raw("Select * from app_node where " + x_name + " = " + x + " LIMIT 10;")
         # results = Node.objects.filter(pagerank_t = x)[:10]
     else:
-        print 'here'
         results = Node.objects.raw("Select * from app_node where " + x_name + " = " + x + " and " + y_name + " = " + y + " LIMIT 10;")
         # results = Node.objects.filter(pagerank_t = y)[:10]
         # results = Node.objects.filter(**{x_name: x, y_name: y})[:10]
@@ -73,11 +71,10 @@ def ClickPlot(request):
 def SearchNodeID(request):
     data = json.loads(request.body)
     node_id = data['id']
-    print("Searching for Node Id:", node_id)
+    print "Searching for Node Id:", node_id
 
     results = Node.objects.filter(nodeid = node_id)[:10]
     output = []
-    print results
 
     for result in results:
         item = []
@@ -104,13 +101,11 @@ def UpdateGraph(request):
     for i in nodes:
         i = int(i)
         row = fulldata.iloc[i-1]
-        print row
         degree = row[1]
         count = row[2]
         pagerank_t = row[4]
         clustering_coef_t = row[7]
         rel_points = aggdata.loc[(aggdata[0] == degree) & (aggdata[1] == count) & (aggdata[2] == pagerank_t) & (aggdata[4] == clustering_coef_t)]
-        print rel_points
         aggregate_node_ids.append(rel_points.index.tolist()[0])
 
     print "Corresponding aggregate nodes are:", aggregate_node_ids

@@ -54,7 +54,7 @@ Notice: dataset should be in the Django root data/ folder
 class Graph:
     def __init__(self):
         self.source = ColumnDataSource()
-        self.highlightSource = ColumnDataSource
+        self.highlightSource = ColumnDataSource()
         self.highlighted = False
         self.highlightedNodeIDs = []
 
@@ -240,16 +240,21 @@ class Graph:
 
             if self.highlighted:
                     circle = Circle(x=xname, y=yname, fill_color = "grey", fill_alpha=0.6, size=5, line_color=None)
-                    highlightCircle = Circle(x=xname, y=yname, fill_color = "red", fill_alpha=0.6, size=10, line_color=None)
                     r = plot.add_glyph(self.source, circle)
                     r.nonselection_glyph = Circle(fill_color="grey", fill_alpha = 0.1, line_color=None)
                     xdr.renderers.append(r)
                     ydr.renderers.append(r)
 
-                    hr = plot.add_glyph(self.highlightSource, highlightCircle)
-                    hr.nonselection_glyph = Circle(fill_color="grey", fill_alpha = 0.1, line_color=None)
-                    xdr.renderers.append(hr)
-                    ydr.renderers.append(hr)
+                    # Highlighting colors
+                    colors = ['red', 'blue', 'aqua', 'green', 'gold', 'indigo', 'saddlebrown', 'teal', 'deeppink', 'lightsalmon']
+
+                    xval = self.highlightSource.data[xname]
+                    yval = self.highlightSource.data[yname]
+                    xval = xval.values
+                    yval = yval.values
+
+                    for i in range(len(xval)):
+                        plot.circle([xval[i]],[yval[i]], size=10, color=colors[i], fill_alpha=0.9, line_color=None)
             else:
                 if needsColor:
                     circle = Circle(x=xname, y=yname, fill_color={'field': xcolor, 'transform': color_mapper}, fill_alpha=0.6, size=5, line_color=None)
@@ -259,6 +264,7 @@ class Graph:
                 r.nonselection_glyph = Circle(fill_color="grey", fill_alpha = 0.1, line_color=None)
                 xdr.renderers.append(r)
                 ydr.renderers.append(r)
+
 
             xticker = BasicTicker()
             if xax:
@@ -278,7 +284,6 @@ class Graph:
 
             plot.xgrid.grid_line_color = None
             plot.ygrid.grid_line_color = None
-
 
             return plot
 
@@ -618,16 +623,3 @@ class Graph:
             "graph_script": script, 
             "graph": div
         }
-    
-    # TODO change selected nodes
-    def change_selected_nodes(self, selected_ids):
-        testcall = CustomJS(args=dict(source=self.source), code="""
-            console.log("Selected callback was called");
-            var inds = cb_obj.selected['1d'].indices;
-            console.log(inds);
-        """)
-        print "change_selected_nodes"
-        print self.source.selected['1d']
-        self.source.selected['1d']['indices'] = selected_ids
-        print self.source.selected['1d']
-        self.source.js_on_change("selected", testcall)
