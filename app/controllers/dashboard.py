@@ -59,9 +59,11 @@ class DatasetViewController(LoginRequiredResource, View):
 			raise Http404("Dataset does not exist!")
 
 		# make graph
-		graph_filepath = absolute_path(dataset.analyzed_graph_file.name)
-		print "path: " + graph_filepath
-		graph_data = graph.graph_from_file(graph_filepath)
+		# attempt cache first
+		graph_data = graph.graph_from_cache(dataset)
+		if not graph_data:
+			# load from file with cache
+			graph_data = graph.graph_from_file(dataset, cache=True)
 
 		return render(request, 'dashboard/dataset-template.html',{
 				'dataset' : dataset,

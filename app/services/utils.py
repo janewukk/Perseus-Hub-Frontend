@@ -1,6 +1,8 @@
 import sys
 import time
+import calendar
 import pandas as pd
+from datetime import datetime
 from django.contrib import messages
 from web.settings import MEDIA_ROOT
 """
@@ -39,6 +41,23 @@ Helper to load the absolute file path
 """
 def absolute_path(app_path):
 	return MEDIA_ROOT + app_path
+
+"""
+Convert datetime object to unix UTC timestamp
+"""
+def timestamp(dt):
+	return str(calendar.timegm(dt.utctimetuple()))
+
+"""
+Redis key name for dataset cache
+"""
+def dataset_cache_keys(dataset):
+	ts = timestamp(dataset.updated_at)
+	return {
+		'graph' : ts + '_' + str(dataset.id) + '_' + 'html',
+		'script' : ts + '_' + str(dataset.id) + '_' + 'script'
+	}
+
 
 """
 Generate SQL statements for edges to import

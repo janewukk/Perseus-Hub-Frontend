@@ -44,6 +44,8 @@ import copy
 
 import numpy as np
 import time 
+import redis
+from app.services.utils import dataset_cache_keys, timestamp, absolute_path
 
 """
 Make a graph from a dataset file (PD compatible)
@@ -54,9 +56,12 @@ Notice: dataset should be in the Django root data/ folder
 class Graph:
     def __init__(self):
         self.source = ColumnDataSource()
+        self.redis = redis.Redis(host='localhost', port=6379, db=0)
 
-    def graph_from_file(self, dataset_filename):
+    def graph_from_file(self, dataset, cache=False):
         pd.set_option('display.precision',20)
+        dataset_filename = absolute_path(dataset.analyzed_graph_file.name)
+
         data = pd.read_csv(dataset_filename, skipinitialspace=True, escapechar="\\", header=None)
         data_string = pd.read_csv(dataset_filename, skipinitialspace=True, escapechar="\\", header=None, dtype=str)
         color_mapper = LinearColorMapper(palette=palette)
@@ -519,11 +524,38 @@ class Graph:
     
         script, div = components(layout, CDN)
 
+        # check if cache is needed
+        if cache:
+            keys = dataset_cache_keys(dataset)
+            self.redis.set(keys['script'], script)
+            self.redis.set(keys['graph'], div)
+
         return {
             "graph_script": script, 
             "graph": div
         }
     
+    def graph_from_cache(self, dataset):
+        # get cache keys
+        cache_keys = dataset_cache_keys(dataset)
+        # validate dataset update timestamp 
+        # to make sure dataset files are not relinked
+        if cache_keys['graph'].split('_')[0] == timestamp(dataset.updated_at):
+            # attempt to load cache
+            graph_cache = self.redis.get(cache_keys['graph'])
+            if not graph_cache:
+                return None
+            script_cache = self.redis.get(cache_keys['script'])
+            return {
+                'graph' : graph_cache,
+                'graph_script' : script_cache
+            }
+        else:
+            # delete cache
+            self.redis.delete(cache_keys['graph'])
+            self.redis.delete(cache_keys['script'])
+            return None
+
     # TODO change selected nodes
     def change_selected_nodes(self, selected_ids):
         testcall = CustomJS(args=dict(source=self.source), code="""
