@@ -536,11 +536,22 @@ class Graph:
         }
     
     def graph_from_cache(self, dataset):
-        # get cache keys
-        cache_keys = dataset_cache_keys(dataset)
+        # get stale cache if possible
+        existing_cache_keys = {}
+        for key in self.redis.scan_iter():
+            if key.split('_')[1] == str(dataset.id):
+                cache_type = key.split('_')[2]
+                if cache_type == 'html':
+                    existing_cache_keys['graph'] = key
+                if cache_type == 'script':
+                    existing_cache_keys['script'] = key
+
+        print existing_cache_keys
+
         # validate dataset update timestamp 
-        # to make sure dataset files are not relinked
-        if cache_keys['graph'].split('_')[0] == timestamp(dataset.updated_at):
+        if 'graph' in existing_cache_keys.keys() and existing_cache_keys['graph'].split('_')[0] == timestamp(dataset.updated_at):
+             # get cache keys
+            cache_keys = dataset_cache_keys(dataset)
             # attempt to load cache
             graph_cache = self.redis.get(cache_keys['graph'])
             if not graph_cache:
@@ -551,9 +562,12 @@ class Graph:
                 'graph_script' : script_cache
             }
         else:
+            if 'graph' not in existing_cache_keys.keys():
+                return None
+            print "deleting cache..."
             # delete cache
-            self.redis.delete(cache_keys['graph'])
-            self.redis.delete(cache_keys['script'])
+            self.redis.delete(existing_cache_keys['graph'])
+            self.redis.delete(existing_cache_keys['script'])
             return None
 
     # TODO change selected nodes
