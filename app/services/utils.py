@@ -69,9 +69,9 @@ def create_edges_sql(edges_input_filename, edges_sql_filename):
 		
 	edges_sql.write("INSERT INTO app_edge (fromNode, toNode, weight, dataset_id) VALUES")
 	
-	for (fromNode, toNode, weight) in zip(data[0], data[1], data[2]):
+	for (fromNode, toNode, weight, dataset_id) in zip(data[0], data[1], data[2], data[3]):
 		
-		insert_string = "(" + str(fromNode) + "," + str(toNode) + "," + str(weight.split(',')[0]) + "," + str(weight.split(',')[1]) + "),\n"
+		insert_string = "(" + str(fromNode) + "," + str(toNode) + "," + str(weight) + "," + str(dataset_id) + "),\n"
 		edges_sql.write(insert_string)
 	
 	edges_sql.seek(-2, os.SEEK_CUR)
