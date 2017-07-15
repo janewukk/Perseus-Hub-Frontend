@@ -272,8 +272,7 @@ class Graph:
         ticker4x = Select(title="x4-axis:", value="sv7", options=["sv1", "sv2", "sv3", "sv4", "sv5", "sv6", "sv7", "sv8", "sv9", "sv10"])
         ticker4y = Select(title="y4-axis:", value="sv8", options=["sv1", "sv2", "sv3", "sv4", "sv5", "sv6", "sv7", "sv8", "sv9", "sv10"])
 
-        tickers_rowx = bokeh.layouts.row(ticker1x, ticker2x, ticker3x, ticker4x)
-        tickers_rowy = bokeh.layouts.row(ticker1y, ticker2y, ticker3y, ticker4y)
+        tickers_row = bokeh.layouts.row(ticker1x, ticker1y, ticker2x, ticker2y, ticker3x, ticker3y, ticker4x, ticker4y)
 
         plots_row1 = gridplot(plots_row1)
         plots_row2 = gridplot(plots_row2)
@@ -289,7 +288,7 @@ class Graph:
 
         button.js_on_event(ButtonClick, button_callback)
 
-        layout = bokeh.layouts.column(plots_row1, tickers_rowx, tickers_rowy, plots_row2, stats, button,sizing_mode='scale_width')
+        layout = bokeh.layouts.column(plots_row1, tickers_row, plots_row2, stats, button,sizing_mode='scale_width')
 
         callback_ticker1x = CustomJS(args=dict(source=self.source, source_true=source_true, plot=plot5), code="""
             console.log("Callback_ticker1x is called");
