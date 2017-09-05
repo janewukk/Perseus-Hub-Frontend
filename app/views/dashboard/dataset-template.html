@@ -208,7 +208,6 @@ path.domain {
 	</div>
 </div>
 
-
 <!-- Bookmark creator -->
 <div class="modal fade" id="bookmark-creator" tabindex="-1" role="dialog" aria-labelledby="bookmark-creator">
 	<div class="modal-dialog" role="document">
@@ -251,11 +250,12 @@ path.domain {
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-primary">Create</button>
+				<button type="button" class="btn btn-primary" id="create-bookmark-btn">Create</button>
 			</div>
 		</div>
 	</div>
 </div>
+
 <!-- Bookmark remover -->
 <div class="modal fade" id="bookmark-remover" tabindex="-1" role="dialog" aria-labelledby="bookmark-remover">
 	<div class="modal-dialog" role="document">
@@ -276,6 +276,7 @@ path.domain {
 		</div>
 	</div>
 </div>
+
 <!-- Loading indicator -->
 <div class="modal fade" id="loading-indicator" tabindex="-1" role="dialog" aria-labelledby="loading-indicator">
 	<div class="modal-dialog modal-sm" role="document">
@@ -291,12 +292,15 @@ path.domain {
 {% block scripts %}
 <!-- D3 JS -->
 <script src="http://d3js.org/d3.v3.min.js"></script>
+
 <!-- Bokeh JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bokeh/0.12.6/bokeh.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bokeh/0.12.6/bokeh-gl.min.js"></script>
 <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.6.min.js"></script>
+
 <!-- Graph JS -->
 {{ graph_script | safe }}
+
 <script type="text/javascript">
 
 	var datasetId = {{ dataset.id }};
@@ -323,9 +327,9 @@ path.domain {
 			priority : 'medium',
 			priorityVal : 0,
 			publicized : false,
-			metadata : {
-				nodeId : 'xxxx'
-			},
+			propertyName: "",
+			xCoord: "",
+			yCoord: "",
 			nodeSelected : false
 		},
 		methods : {
@@ -433,6 +437,39 @@ path.domain {
 		}
 	});
 	
+	// create bookmark button clicked
+	$('#create-bookmark-btn').click(function(e) {
+
+		// show loading indicator
+		$('#loading-indicator').modal('show');
+
+		$.ajax({
+			type: 'POST'
+			url : '/bookmarks',
+			data : {
+				'priority': bookmarkView.data().priority(),
+				'x_coord': bookmarkView.data().xCoord(),
+				'y_coord': bookmarkView.data().yCoord(),
+				'prop': bookmarkView.data().propertyName(),
+				'dataset_id': datasetId
+			}
+		}).done(function(response) {
+
+			showModal("Created successfully!");
+
+			// hide loading indicator
+			$('#loading-indicator').modal('hide');
+
+		}).fail(function(e) {
+
+			showModal("Failed to create bookmark!");
+
+			// hide loading indicator
+			$('#loading-indicator').modal('hide');
+
+		});
+
+	});
 
 	// fetch data for GFADD score and Combined anomally score
 	$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -504,6 +541,12 @@ path.domain {
 		$('#loading-indicator').modal('show');
 		console.log("Selected: ");
 		console.log(x1, y1, x1_name, y1_name)
+
+		// save node property to bookmark view model
+		bookmarkView.data().propertyName(x1_name + " vs " + y1_name);
+		bookmarkView.data().xCoord(x1);
+		bookmarkView.data().yCoord(y1);
+
 		// fetch nodes when clicked
 		$.ajax({
 			type: 'POST',

@@ -103,7 +103,21 @@ class BookmarkViewController(LoginRequiredResource, View):
 			})
 
 	def post(self, request):
-		# create a bookmark
-		# TODO
-		pass
+		# TODO: Form validation
+		# extract attribute
+		publicized = False if request.POST['is_publicized'] == "false" else True
+		# grab the request data and create dataset
+		bookmark = Bookmark(priority = request.POST['priority'], \
+							x_coord = request.POST['x_coord'], \
+							y_coord = request.POST['y_coord'], \
+							prop = request.POST['prop'], \
+							dataset = Dataset.objects.get(id = request.POST['id'])
+						)
+		# save to db
+		bookmark.save()
+
+		return JsonResponse({
+				'status': "success",
+				'message': "Bookmark created successfully!"
+			})
 

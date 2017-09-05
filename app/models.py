@@ -93,8 +93,8 @@ class Bookmark(models.Model):
 	x_coord = models.CharField(max_length = 256, default = "")
 	# y coordinate the bookmrk refers to
 	y_coord = models.CharField(max_length = 256, default = "")
-	# index of the properties that this bookmark refers to
-	property_index = models.IntegerField(default = 0)
+	# name of the properties that this bookmark refers to
+	prop = models.CharField(max_length = 1024, default = "")
 	# dataset that this bookmark resides on
 	dataset = models.ForeignKey(Dataset, on_delete = models.CASCADE)
 	# whether this bookmark should be publicize
