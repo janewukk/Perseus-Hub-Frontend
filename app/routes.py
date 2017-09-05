@@ -19,22 +19,26 @@ from django.contrib import admin
 # import controllers
 from app.controllers.settings import SettingsController
 from app.controllers.auth import LoginController, LogoutController, RegisterController
-from app.controllers.dashboard import DashboardController, DatasetViewController, BookmarkViewController
+from app.controllers.pages import DashboardViewController, DatasetViewController, BookmarkViewController
 from app.controllers.dataset import DatasetSearchController, DatasetUploadController
+from app.controllers.bookmark import BookmarkCreateController, BookmarkValidateController
 
+# Graph apis
 from app.views import *
 
 urlpatterns = [
-    url(r'^$', DashboardController.as_view()),
-	url(r'^login/$', LoginController.as_view()),
-    url(r'^logout/$', LogoutController.as_view()),
-	url(r'^register/$', RegisterController.as_view()),
-    url(r'^dashboard/$', DashboardController.as_view()),
-    url(r'^settings/$', SettingsController.as_view()),
-    url(r'^upload/$', DatasetUploadController.as_view()),
-    url(r'^bookmarks/$', BookmarkViewController.as_view()),
-    url(r'^search/$', DatasetSearchController.as_view()),
-    url(r'^datasets/(?P<id>\d+)/$', DatasetViewController.as_view()),
+    url(r'^$', DashboardViewController.as_view()),
+	url(r'^login', LoginController.as_view()),
+    url(r'^logout', LogoutController.as_view()),
+	url(r'^register', RegisterController.as_view()),
+    url(r'^dashboard', DashboardViewController.as_view()),
+    url(r'^settings', SettingsController.as_view()),
+    url(r'^upload', DatasetUploadController.as_view()),
+    url(r'^bookmarks', BookmarkViewController.as_view()),
+    url(r'^bookmarks/create', BookmarkCreateController.as_view()),
+    url(r'^bookmarks/validate', BookmarkValidateController.as_view()),
+    url(r'^search', DatasetSearchController.as_view()),
+    url(r'^datasets/(?P<id>\d+)', DatasetViewController.as_view()),
 
     url(r'^ClickPlot',ClickPlot),
     url(r'^GetEgonet',GetEgonet),

@@ -287,6 +287,9 @@ path.domain {
 		</div>
 	</div>
 </div>
+
+{% include 'components/modal.html' %}
+
 {% endblock %}
 
 {% block scripts %}
@@ -447,7 +450,7 @@ path.domain {
 
 		$.ajax({
 			type: 'POST',
-			url : '/bookmarks/',
+			url : '/bookmarks/create',
 			data : {
 				'priority': bookmarkView.data().priorityVal(),
 				'x_coord': bookmarkView.data().xCoord(),
@@ -465,6 +468,7 @@ path.domain {
 
 		}).fail(function(e) {
 
+			console.log(e);
 			showModal("Failed to create bookmark!");
 
 			// hide loading indicator
@@ -538,8 +542,36 @@ path.domain {
 		}
 	});
 
+
+	// bookmark validation callback
+	function validateBookmark(data, callback) {
+
+		$.ajax({
+			type: "POST",
+			url: "/bookmarks/validate",
+			data: {
+				'x_coord': data['x_coord'],
+				'y_coord': data['y_coord'],
+				'prop': data['x_name'] + " vs " + data['y_name'],
+				'dataset_id': datasetId 
+			},
+			success: function(response){
+				if (response['data']['existed'] == "True") {
+					callback(true);
+				} else {
+					callback(false);
+				}
+			},
+			error: function(e) {
+				console.log(e);
+			}
+		})
+
+	}
+
 	// graph callback function
 	function nodeSelected(x1, y1, x1_name, y1_name) {
+
 		// show loading indicator
 		$('#loading-indicator').modal('show');
 		console.log("Selected: ");
@@ -564,16 +596,33 @@ path.domain {
 				"dataset_id": datasetId
 			}),
 			success: function (data) {
+				// parse the response
 				data = JSON.parse(data);
-				createInformationConsole(data)
-				// scroll to bottom
-				$('html, body').animate({
-					scrollTop: $("#data-browser").offset().top
-				}, 1000);
-				// jump to tab 1
-				$('#tabs li:eq(0) a').tab('show');
-				// hide loading indicator
-				$('#loading-indicator').modal('hide');
+				
+				// validate bookmark 
+				// @notice: for now, we are validating all from one bookmark
+				validateBookmark({
+					'x_coord': x1,
+					'y_coord': y1,
+					'x_name': x1_name,
+					'y_name': y1_name]
+				}, function(result) {
+
+					// fill the info console
+					createInformationConsole(data);
+
+					// scroll to bottom
+					$('html, body').animate({
+						scrollTop: $("#data-browser").offset().top
+					}, 1000);
+					// jump to tab 1
+					$('#tabs li:eq(0) a').tab('show');
+					// hide loading indicator
+					$('#loading-indicator').modal('hide');
+
+				});
+
+				
 			}
 		});
 	}
@@ -759,97 +808,6 @@ path.domain {
 			prevLinks = edges;
 			nodes = data.Nodes;
 
-			// force.nodes(nodes)
-			// 	.links(edges)
-			// 	.start();
-
-			// var link = svg.selectAll(".link")
-			// 			.data(edges)
-			// 			.enter().append("line")
-			// 			.attr("class", "link");
-
-			// node = svg.selectAll(".node")
-			// 				.data(data.Nodes)
-			// 				.enter().append("g")
-			// 				.attr("class", "node")
-			// 				.call(force.drag);
-
-			// node.append("circle")
-			// 	.attr("class", "node")
-			// 	.attr("r", 5);
-
-			// node.append("svg:a")
-			// 	.attr("xlink:href", function(d){return d.Id;})
-			// 	.append("text")
-			// 	.attr("dx", 12)
-			// 	.attr("dy", ".35em")
-			// 	.text(function(d) { return d.Id})
-
-			
-			// force.on("tick", function() {
-			// 	link.attr("x1", function(d) { return d.source.x; })
-			// 		.attr("y1", function(d) { return d.source.y; })
-			// 		.attr("x2", function(d) { return d.target.x; })
-			// 		.attr("y2", function(d) { return d.target.y; });
-
-			// 	node.attr("transform", function(d) { 
-			// 		return "translate(" + d.x + "," + d.y + ")"; 
-			// 	});
-			// });
-
-			// d3.json("/datasets/" + datasetId + "/query/?type=egonet", function(error, json) {
-			// 	var edges = [];
-			// 	json.Links.forEach(function(e) { 
-			// 		var sourceNode = json.Nodes.filter(function(n) { return n.Id === e.Source; })[0],
-			// 		targetNode = json.Nodes.filter(function(n) { return n.Id === e.Target; })[0];
-
-			// 		edges.push({source: sourceNode, target: targetNode, value: e.Value});
-			// 	});
-
-			// 	prevLinks = edges;
-			// 	nodes = json.Nodes;
-
-			// 	console.log(edges);
-
-			// 	force.nodes(json.Nodes)
-			// 		.links(edges)
-			// 		.start();
-
-			// 	var link = svg.selectAll(".link")
-			// 				.data(edges)
-			// 				.enter().append("line")
-			// 				.attr("class", "link");
-
-			// 	node = svg.selectAll(".node")
-			// 					.data(json.Nodes)
-			// 					.enter().append("g")
-			// 					.attr("class", "node")
-			// 					.call(force.drag);
-
-			// 	node.append("circle")
-			// 		.attr("class", "node")
-			// 		.attr("r", 5);
-
-			// 	node.append("svg:a")
-			// 		.attr("xlink:href", function(d){return d.Url;})
-			// 		.append("text")
-			// 		.attr("dx", 12)
-			// 		.attr("dy", ".35em")
-			// 		.text(function(d) { return d.Name})
-
-				
-			// 	force.on("tick", function() {
-			// 		link.attr("x1", function(d) { return d.source.x; })
-			// 			.attr("y1", function(d) { return d.source.y; })
-			// 			.attr("x2", function(d) { return d.target.x; })
-			// 			.attr("y2", function(d) { return d.target.y; });
-
-			// 		node.attr("transform", function(d) { 
-			// 			return "translate(" + d.x + "," + d.y + ")"; 
-			// 		});
-			// 	});
-			// });
-
 			var w = 500,
 				h = 500,
 				fill = d3.scale.category20()
@@ -1007,10 +965,6 @@ path.domain {
 				if (flag == true)
 					prevNodesArray.push(nodes[d]); 
 			}
-
-			// for (i=0; i<node_deletion_indices.length; i++) {
-			// 	delete nodes[node_deletion_indices[i]];
-			// }
 
 			prevLinks=prevLinksArray;
 			nodes = prevNodesArray;

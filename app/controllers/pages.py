@@ -11,7 +11,7 @@ from app.services.utils import flash_session_message, absolute_path
 
 graph = Graph()
 
-class DashboardController(LoginRequiredResource, View):
+class DashboardViewController(LoginRequiredResource, View):
 	login_url = '/login/'
 	redirect_field_name = 'redirect_to'
 
@@ -101,25 +101,5 @@ class BookmarkViewController(LoginRequiredResource, View):
 
 		return render(request, 'dashboard/bookmarks.html', {
 				'bookmarks' : bookmarks
-			})
-
-	def post(self, request):
-		# TODO: Form validation
-		# extract attribute
-		publicized = False if request.POST['is_publicized'] == "false" else True
-		# grab the request data and create dataset
-		bookmark = Bookmark(priority = request.POST['priority'], \
-							x_coord = request.POST['x_coord'], \
-							y_coord = request.POST['y_coord'], \
-							prop = request.POST['prop'], \
-							dataset = Dataset.objects.get(id = request.POST['dataset_id']),
-							creator = request.user
-						)
-		# save to db
-		bookmark.save()
-
-		return JsonResponse({
-				'status': "success",
-				'message': "Bookmark created successfully!"
-			})
+			})		
 

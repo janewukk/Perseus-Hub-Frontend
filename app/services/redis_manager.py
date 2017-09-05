@@ -25,7 +25,7 @@ def bootstrap():
 	p.subscribe(**{ 'perseus:process_finished': handle_process_finished })
 
 	try:
-		print "Starting thread..."
+		print "Starting redis thread..."
 		thread.start_new_thread(check_redis_messages, ())
 	except Exception as e:
 		print e

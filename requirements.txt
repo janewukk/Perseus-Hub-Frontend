@@ -4,7 +4,6 @@ bokeh==0.12.6
 certifi==2017.4.17
 cffi==1.9.1
 click==6.7
-conda==4.3.13
 cryptography==1.7.1
 Django==1.10.6
 enum34==1.1.6
@@ -40,7 +39,6 @@ pytz==2017.2
 PyYAML==3.12
 redis==2.10.5
 requests==2.13.0
-selenium==3.4.3
 singledispatch==3.4.0.3
 six==1.10.0
 tornado==4.5.1
