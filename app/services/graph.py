@@ -44,8 +44,9 @@ import copy
 
 import numpy as np
 import time 
-import redis
+
 from app.services.utils import dataset_cache_keys, timestamp, absolute_path
+from app.services.redis_manager import r
 
 """
 Make a graph from a dataset file (PD compatible)
@@ -56,7 +57,7 @@ Notice: dataset should be in the Django root data/ folder
 class Graph:
     def __init__(self):
         self.source = ColumnDataSource()
-        self.redis = redis.Redis(host='localhost', port=6379, db=0)
+        self.redis = r
 
     def graph_from_file(self, dataset, cache=False):
         pd.set_option('display.precision',20)
@@ -538,7 +539,8 @@ class Graph:
         # get stale cache if possible
         existing_cache_keys = {}
         for key in self.redis.scan_iter():
-            if key.split('_')[1] == str(dataset.id):
+            splited = key.split('_')
+            if len(splited) > 1 and splited[1] == str(dataset.id):
                 cache_type = key.split('_')[2]
                 if cache_type == 'html':
                     existing_cache_keys['graph'] = key

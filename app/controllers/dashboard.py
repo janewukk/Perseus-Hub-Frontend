@@ -1,5 +1,6 @@
 from django.views import View
 from django.db.models import F
+from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse, Http404
 from django.contrib.auth.mixins import LoginRequiredMixin as LoginRequiredResource
@@ -80,7 +81,7 @@ class BookmarkViewController(LoginRequiredResource, View):
 		# with all publicized bookmarks or user specific
 		# TODO: Pagination
 		if 'my' in request.GET.keys():
-			bookmarks = request.user.dataset_set
+			bookmarks = request.user.bookmark_set
 		elif 'user' in request.GET.keys():
 			users = User.objects.filter(id = request.GET['user'])
 			if len(users) == 0:
@@ -111,7 +112,8 @@ class BookmarkViewController(LoginRequiredResource, View):
 							x_coord = request.POST['x_coord'], \
 							y_coord = request.POST['y_coord'], \
 							prop = request.POST['prop'], \
-							dataset = Dataset.objects.get(id = request.POST['id'])
+							dataset = Dataset.objects.get(id = request.POST['dataset_id']),
+							creator = request.user
 						)
 		# save to db
 		bookmark.save()

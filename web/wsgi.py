@@ -14,3 +14,7 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings")
 
 application = get_wsgi_application()
+
+from app.services.redis_manager import bootstrap
+
+bootstrap()

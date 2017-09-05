@@ -303,6 +303,7 @@ path.domain {
 
 <script type="text/javascript">
 
+	// render dataset id
 	var datasetId = {{ dataset.id }};
 
 	// star animation
@@ -438,19 +439,21 @@ path.domain {
 	});
 	
 	// create bookmark button clicked
+	// @notice: Currently not differentiating between rows...
 	$('#create-bookmark-btn').click(function(e) {
 
 		// show loading indicator
 		$('#loading-indicator').modal('show');
 
 		$.ajax({
-			type: 'POST'
-			url : '/bookmarks',
+			type: 'POST',
+			url : '/bookmarks/',
 			data : {
-				'priority': bookmarkView.data().priority(),
+				'priority': bookmarkView.data().priorityVal(),
 				'x_coord': bookmarkView.data().xCoord(),
 				'y_coord': bookmarkView.data().yCoord(),
 				'prop': bookmarkView.data().propertyName(),
+				'is_publicized': bookmarkView.data().publicized(),
 				'dataset_id': datasetId
 			}
 		}).done(function(response) {
@@ -547,7 +550,7 @@ path.domain {
 		bookmarkView.data().xCoord(x1);
 		bookmarkView.data().yCoord(y1);
 
-		// fetch nodes when clicked
+		// fetch nodes data when clicked
 		$.ajax({
 			type: 'POST',
 			url: '/ClickPlot/',
@@ -572,7 +575,7 @@ path.domain {
 				// hide loading indicator
 				$('#loading-indicator').modal('hide');
 			}
-		  });
+		});
 	}
 
 	function getEgonet(id) {
