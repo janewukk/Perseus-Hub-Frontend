@@ -187,11 +187,3 @@ a {
     transform: translate(0, 0px);
   }
 }
-/* Graph related */
-.graph-stats-table {
-  border: solid black 1px;
-}
-.graph-stats-table th,td {
-  border: solid black 1px;
-  padding: 5px;
-}

@@ -38,7 +38,14 @@ path.domain {
 .bk-root .bk-grid-row .bk-widget-box:nth-child(odd) .bk-widget {
 	left: 40%;
 }
-
+/* Graph related */
+.graph-stats-table {
+  border: solid black 1px;
+}
+.graph-stats-table th,td {
+  border: solid black 1px;
+  padding: 5px;
+}
 </style>
 
 {% endblock %}
@@ -278,15 +285,7 @@ path.domain {
 </div>
 
 <!-- Loading indicator -->
-<div class="modal fade" id="loading-indicator" tabindex="-1" role="dialog" aria-labelledby="loading-indicator">
-	<div class="modal-dialog modal-sm" role="document">
-		<div class="modal-content">
-			<div align="center" style="font-size: 20px">
-				<i class="fa fa-spinner fa-spin fa-fw"></i>
-			</div>
-		</div>
-	</div>
-</div>
+{% include 'components/loading-indicator.html' %}
 
 {% include 'components/modal.html' %}
 
@@ -328,7 +327,7 @@ path.domain {
 	var bookmarkView = new View({
 		el : document.getElementById('bookmark-creator'),
 		data : {
-			priority : 'medium',
+			priority : 'low',
 			priorityVal : 0,
 			publicized : false,
 			propertyName: "",
@@ -548,7 +547,7 @@ path.domain {
 
 		$.ajax({
 			type: "POST",
-			url: "/bookmarks/validate",
+			url: "/bookmarks/validate/",
 			data: {
 				'x_coord': data['x_coord'],
 				'y_coord': data['y_coord'],
@@ -563,7 +562,8 @@ path.domain {
 				}
 			},
 			error: function(e) {
-				console.log(e);
+				console.log(e.message);
+				callback(false);
 			}
 		})
 
@@ -605,7 +605,7 @@ path.domain {
 					'x_coord': x1,
 					'y_coord': y1,
 					'x_name': x1_name,
-					'y_name': y1_name]
+					'y_name': y1_name
 				}, function(result) {
 
 					// fill the info console

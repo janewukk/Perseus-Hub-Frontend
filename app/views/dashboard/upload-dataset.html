@@ -86,7 +86,15 @@
 {% endblock %}
 
 {% block tabscripts %}
+<!-- Bootstrap validate -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"></script>
+<!-- Axios js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.15.3/axios.min.js"></script>
 <script type="text/javascript">
+	// config csrf token for Axios
+	axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
+	window.http = axios;
+	
 	// decorate custom file uploader 
 	var inputs = document.querySelectorAll('.input-file')
 	for (var i = 0, len = inputs.length; i < len; i++) {

@@ -42,9 +42,10 @@
 {% endblock %}
 
 {% block tabdetails %}
+
 {% if bookmarks %}
 <div class="row" style="margin-top: 20px">
-	<div class="col-sm-10 col-offset-sm-1">
+	<div class="col-sm-12 col-offset-sm-1">
 		<table class="table table-hover">
 		  <thead>
 		  	<tr>
@@ -56,21 +57,32 @@
 		  		<th>Created at</th>
 		  		<th>View dataset</th>
 		  		<th>Uploader</th>
+		  		{% if can_edit %}
+		  		<th></th>
+		  		{% endif %}
 		  	</tr>
 		  </thead>
 		  <tbody>
 		  	{% for bookmark in bookmarks %}
-		  	<tr>
+		  	<tr data-row="{{ bookmark.id }}" data-priority="">
 		  		<td>{{ bookmark.x_coord }}</td>
 		  		<td>{{ bookmark.y_coord }}</td>
-		  		<th>{{ bookmark.prop }}</th>
-		  		<th>{{ bookmark.priority }}</th>
-		  		<th>{{ bookmark.publicized|yesno:"Yes,No" }}</th>
-		  		<th>{{ bookmark.created_at }}</th>
-		  		<th>
+		  		<td>{{ bookmark.prop }}</td>
+		  		<td class="priority">{{ bookmark.priority }}</td>
+		  		<td class="publicized">{{ bookmark.publicized|yesno:"Yes,No" }}</td>
+		  		<td>{{ bookmark.created_at }}</td>
+		  		<td>
 		  			<button type="button" class="btn btn-primary" onclick="window.location.href='/datasets/{{ bookmark.dataset.id }}/'">View</button>
-		  		</th>
-		  		<th><a href="mailto:{{ bookmark.creator.email }}">{{ bookmark.creator.email }}</a></th>
+		  		</td>
+		  		<td>
+		  			<a href="mailto:{{ bookmark.creator.email }}">{{ bookmark.creator.email }}</a>
+		  		</td>
+		  		{% if can_edit %}
+		  		<td>
+		  			<a class="delete-btn btn btn-danger" data-delete="{{ bookmark.id }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i></a>
+		  			<a class="edit-btn btn btn-primary" data-publicized="{{ bookmark.publicized|yesno:"1,0" }}" data-priority="{{ bookmark.priority }}" data-edit="{{ bookmark.id }}" class="btn btn-primary"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+		  		</td>
+		  		{% endif %}
 		  	</tr>
 		  	{% endfor %}
 		  </tbody>
@@ -84,12 +96,173 @@
 	</div>
 </div>
 {% endif %}
+
+<!-- Edit modal -->
+<div class="modal fade" id="bookmark-editor" tabindex="-1" role="dialog" aria-labelledby="bookmark-editor">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="bookmark-editor">Edit the bookmark</h4>
+			</div>
+			<div class="modal-body">
+				<div>
+					<div class="form-group">
+						<label for="priority">Please select a priority</label>
+						<div class="dropdown">
+							<button class="btn btn-default dropdown-toggle" type="button" id="priority-selector" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+								<span data-bind="text: priority"></span>
+								<span class="caret"></span>
+							</button>
+							<ul class="dropdown-menu" id="priority-selector" aria-labelledby="priority-selector">
+								<li style="padding: 10px">
+									<span style="background-color: red; width: 20px; height: 20px; float: left"></span>
+									<a data-bind="click: selectPriority('high', 2), text: priority"></a>
+								</li>
+								<li style="padding: 10px">
+									<span style="background-color: yellow; width: 20px; height: 20px; float: left"></span>
+									<a data-bind="click: selectPriority('medium', 1), text: priority"></a>
+								</li>
+								<li style="padding: 10px">
+									<span style="background-color: green; width: 20px; height: 20px; float: left"></span>
+									<a data-bind="click: selectPriority('low', 0), text: priority"></a>
+								</li>
+							</ul>
+						</div>
+					</div>
+					<div class="checkbox">
+						<label>
+						<input type="checkbox" data-bind="checked: publicized">
+							Publish status
+						</label>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" id="update-bookmark-btn">Update</button>
+			</div>
+		</div>
+	</div>
+</div>
+
 {% include 'components/modal.html' %}
+{% include 'components/loading-indicator.html' %}
 
 {% endblock %}
 
 {% block tabscripts %}
 <script type="text/javascript">
 	
+	// init bookmark models
+	var bookmarkView = new View({
+		el : document.getElementById('bookmark-editor'),
+		data : {
+			priorityVal : 0,
+			publicized : false,
+			id : -1
+		},
+		computed: {
+			priority : function () {
+				var texts = [ "low", "medium", "hight" ];
+				return texts[this.priorityVal()];
+			}
+		},
+		methods : {
+			selectPriority : function (val, level) {
+				this.priority(val);
+				this.priorityVal(level);
+			}
+		}
+	});
+
+	// delete btn pressed
+	$('.delete-btn').click(function(e) {
+
+		var $this = $(this);
+
+		// let user confirm
+		if (confirm("Are you sure you want to delete this bookmark?")) {
+
+			// delete the bookmark
+			$.ajax({
+				'url': "/bookmarks/" + $this.attr('data-delete') + "/delete",
+				'method': "POST"
+			}).done(function(res){
+
+				if (res['status'] == 'success') {
+					// deleted successfully, remove the current row
+					console.log($('tr[data-row="' + $this.attr('data-delete') + '"]'));
+					$('tr[data-row="' + $this.attr('data-delete') + '"]').fadeOut();
+				}
+
+				showModal(res['message']);
+
+			}).fail(function(e){
+				console.log(e);
+				showModal("Failed to delete bookmark!");
+
+			})
+
+		}
+
+	});
+
+	// edit btn pressed
+	$('.edit-btn').click(function(e) {
+
+		// update bookmark book
+		bookmarkView.data().id($(this).attr('data-edit'));
+		bookmarkView.data().priorityVal($(this).attr('data-priority'));
+		bookmarkView.data().publicized(Boolean($(this).attr('data-publicized')));
+		// show editing modal
+		// @notice: current only support updating of priority and publicized status
+		$('#bookmark-editor').model('show');
+
+	});
+
+	// update bookmark btn pressed
+	$('#update-bookmark-btn').click(function(e) {
+
+		// show loading indicator
+		$('#loading-indicator').modal('show');
+
+		// send update request
+		var bookmarkId = bookmarkView.data().id();
+		var priority = bookmarkView.data().priorityVal();
+		var publicized = bookmarkView.data().publicized();
+
+		$.ajax({
+			url: "/bookmark/" + bookmarkId + "/update",
+			method: "POST",
+			data: {
+				'updates': JSON.stringify({
+					'publicized': publicized,
+					'priority': priority
+				})
+			}
+		}).done(function(res){
+
+			if (res['status'] == 'success') {
+
+				// update UI priority
+				var priorityTexts = [ "low", "medium", "hight" ];
+
+				$('tr[data-row="' + bookmarkId + '"] td.priority').html(priorityTexts[priority]);
+
+				// update UI publicized
+				$('tr[data-row="' + bookmarkId + '"] td.publicized').html(publicized ? "Yes" : "No");
+
+			}
+
+		}).fail(function(e) {
+
+			console.log(e);
+			showModal("Failed to update bookmark!");
+
+		});
+
+	});
+
 </script>
 {% endblock %}

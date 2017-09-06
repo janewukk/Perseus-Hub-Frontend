@@ -1,3 +1,4 @@
+import json
 from django.views import View
 from django.db.models import F
 from django.core.serializers.json import DjangoJSONEncoder
@@ -40,6 +41,77 @@ class BookmarkCreateController(LoginRequiredResource, View):
 				'message': "Bookmark created successfully!"
 			})
 
+class BookmarkDeleteController(LoginRequiredResource, View):
+	"""
+	Handle the deletion of bookmarks
+	
+	Extends:
+		LoginRequiredResource
+		View
+	"""
+	login_url = '/login/'
+	redirect_field_name = 'redirect_to'
+
+	def post(self, request, *args, **kwargs):
+		# extract bookmark id
+		bookmark_id = kwargs.get('id')
+
+		# check if bookmark exists
+		bookmark = Bookmark.objects.get(id = bookmark_id)
+
+		if not bookmark:
+			return JsonResponse({
+					'status': "error",
+					'message': "Bookmark not exists!"
+				})
+
+		# delete bookmark
+		bookmark.delete()
+
+		return JsonResponse({
+				'status': "success",
+				'message': "Bookmark created successfully!"
+			})
+
+class BookmarkUpdateController(LoginRequiredResource, View):
+	"""
+	Handle the deletion of bookmarks
+	
+	Extends:
+		LoginRequiredResource
+		View
+	"""
+	login_url = '/login/'
+	redirect_field_name = 'redirect_to'
+
+	def post(self, request, *args, **kwargs):
+
+		# extract bookmark id
+		bookmark_id = kwargs.get('id')
+
+		# check if bookmark exists
+		bookmark = Bookmark.objects.get(id = bookmark_id)
+
+		if not bookmark:
+			return JsonResponse({
+					'status': "error",
+					'message': "Bookmark not exists!"
+				})
+
+		# update bookmark
+		updates = json.loads(request.POST['updates'])
+
+		for key, value in updates:
+			setattr(bookmark, key, value)
+
+		# save updates
+		bookmark.save(update_fields=['priority', 'x_coord', 'y_coord', 'prop', 'publicized'])
+
+		return JsonResponse({
+				'status': "success",
+				'message': "Bookmark updated successfully!"
+			})
+
 class BookmarkValidateController(LoginRequiredResource, View):
 	"""
 	Handle the check of bookmark existence
@@ -52,6 +124,7 @@ class BookmarkValidateController(LoginRequiredResource, View):
 	redirect_field_name = 'redirect_to'
 
 	def post(self, request):
+
 		# extract request attributes
 		x_coord = request.POST['x_coord']
 		y_coord = request.POST['y_coord']

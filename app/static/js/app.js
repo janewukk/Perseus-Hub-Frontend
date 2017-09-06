@@ -13,10 +13,6 @@ $.ajaxSetup({
 	}
 });
 
-// config csrf token for Axios
-axios.defaults.headers.common['X-CSRFToken'] = csrftoken;
-window.http = axios;
-
 // ============== HELPER FUNCTIONS
 /**
  * Requires a modal#modal element present

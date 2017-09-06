@@ -21,7 +21,7 @@ from app.controllers.settings import SettingsController
 from app.controllers.auth import LoginController, LogoutController, RegisterController
 from app.controllers.pages import DashboardViewController, DatasetViewController, BookmarkViewController
 from app.controllers.dataset import DatasetSearchController, DatasetUploadController
-from app.controllers.bookmark import BookmarkCreateController, BookmarkValidateController
+from app.controllers.bookmark import BookmarkCreateController, BookmarkValidateController, BookmarkDeleteController, BookmarkUpdateController
 
 # Graph apis
 from app.views import *
@@ -34,9 +34,11 @@ urlpatterns = [
     url(r'^dashboard', DashboardViewController.as_view()),
     url(r'^settings', SettingsController.as_view()),
     url(r'^upload', DatasetUploadController.as_view()),
-    url(r'^bookmarks', BookmarkViewController.as_view()),
     url(r'^bookmarks/create', BookmarkCreateController.as_view()),
     url(r'^bookmarks/validate', BookmarkValidateController.as_view()),
+    url(r'^bookmarks/(?P<id>\d+)/delete', BookmarkDeleteController.as_view()),
+    url(r'^bookmarks/(?P<id>\d+)/update', BookmarkUpdateController.as_view()),
+    url(r'^bookmarks/$', BookmarkViewController.as_view()),
     url(r'^search', DatasetSearchController.as_view()),
     url(r'^datasets/(?P<id>\d+)', DatasetViewController.as_view()),
 

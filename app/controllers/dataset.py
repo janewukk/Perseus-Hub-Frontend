@@ -19,15 +19,10 @@ class DatasetSearchController(LoginRequiredResource, View):
 			request {HTTPRequest} -- Request object
 		"""
 		# check for request param
-		body = json.loads(request.body.decode('utf-8'))
-		query = body.get('query', False)
+		query = request.POST['query']
 
-		if query == False:
-			# if empty, then simply return empty list
-			datasets = []
-		else:
-			# search for datasets
-			datasets = Dataset.objects.filter(title__icontains = query)
+		# search for datasets
+		datasets = Dataset.objects.filter(title__icontains = query)	
 
 		if len(datasets) == 0:
 			response = {

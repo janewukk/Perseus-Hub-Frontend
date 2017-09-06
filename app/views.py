@@ -24,7 +24,6 @@ import sys
 
 from decimal import *
 from app.services.graph import *
-from app.controllers.dashboard import *
 from django.template.loader import render_to_string
 from django.http import HttpResponseForbidden
 

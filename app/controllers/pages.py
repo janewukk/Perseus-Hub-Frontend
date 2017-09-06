@@ -82,6 +82,7 @@ class BookmarkViewController(LoginRequiredResource, View):
 		# TODO: Pagination
 		if 'my' in request.GET.keys():
 			bookmarks = request.user.bookmark_set
+			can_edit = True
 		elif 'user' in request.GET.keys():
 			users = User.objects.filter(id = request.GET['user'])
 			if len(users) == 0:
@@ -89,8 +90,10 @@ class BookmarkViewController(LoginRequiredResource, View):
 				bookmarks = []
 			else:
 				bookmarks = users[0].bookmarks().filter(publicized = True)
+			can_edit = False
 		else:
 			bookmarks = Bookmark.objects.filter(publicized = True)
+			can_edit = False
 
 		# sort bookmarks
 		try:
@@ -100,6 +103,7 @@ class BookmarkViewController(LoginRequiredResource, View):
 			print "Bookmark fetch error:", e
 
 		return render(request, 'dashboard/bookmarks.html', {
-				'bookmarks' : bookmarks
+				'bookmarks' : bookmarks,
+				'can_edit' : can_edit
 			})		
 
