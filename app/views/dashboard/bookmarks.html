@@ -1,5 +1,7 @@
 {% extends 'dashboard/base.html' %}
 
+{% load priority_string %}
+
 {% block tabstyles %}
 <style type="text/css">
 	.panel {
@@ -68,7 +70,7 @@
 		  		<td>{{ bookmark.x_coord }}</td>
 		  		<td>{{ bookmark.y_coord }}</td>
 		  		<td>{{ bookmark.prop }}</td>
-		  		<td class="priority">{{ bookmark.priority }}</td>
+		  		<td class="priority">{{ bookmark.priority|to_priority_string }}</td>
 		  		<td class="publicized">{{ bookmark.publicized|yesno:"Yes,No" }}</td>
 		  		<td>{{ bookmark.created_at }}</td>
 		  		<td>
@@ -164,7 +166,7 @@
 		},
 		computed: {
 			priority : function () {
-				var texts = [ "low", "medium", "hight" ];
+				var texts = [ "low", "medium", "high" ];
 				return texts[this.priorityVal()];
 			}
 		},
@@ -246,7 +248,7 @@
 			if (res['status'] == 'success') {
 
 				// update UI priority
-				var priorityTexts = [ "low", "medium", "hight" ];
+				var priorityTexts = [ "low", "medium", "high" ];
 
 				$('tr[data-row="' + bookmarkId + '"] td.priority').html(priorityTexts[priority]);
 
