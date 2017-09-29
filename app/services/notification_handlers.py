@@ -7,7 +7,7 @@ def process_finished(message):
 	Handling notification when dataset is processed
 	
 	Arguments:
-		message {String} -- Incoming message
+		message {Dict} -- Incoming message
 	"""
 	print message['data']
 	

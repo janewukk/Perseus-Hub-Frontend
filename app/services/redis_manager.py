@@ -16,7 +16,7 @@ def check_redis_messages():
 
 def bootstrap():
 	"""
-	Boostrap the app with some stuff
+	Boostrap the redis listener
 	"""
 	p.subscribe(**{ 'perseus:process_finished': process_finished })
 
