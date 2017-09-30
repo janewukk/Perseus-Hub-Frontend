@@ -127,7 +127,7 @@ path.domain {
 									<button data-bind="attr: { id : id }, click: function() { $parent.drawAdjMatrix(id) }" class="btn btn-primary btn-sm btn-adj-matrix">View</button>
 								</td>
 								<td>
-									<span class="star" data-toggle="tooltip" data-placement="right" title="Click to bookmark/unbookmark" data-bind="attr: { 'data-node-id': id }, click: function() { if (!bookmarked) { $('#bookmark-creator').modal(); bookmarkView.data().nodeId(id);} else { $('#bookmark-remover').modal(); } }">
+									<span class="star" data-toggle="tooltip" data-placement="right" title="Click to bookmark/unbookmark" data-bind="attr: { 'data-node-id': id }, click: function() { if (!bookmarked) { $('#bookmark-creator').modal(); bookmarkView.data().nodeId(id);} else { $('#bookmark-remover').modal();} bindedNode = this }">
 										<span class="star-icon fa fa-star"></span>
 									</span>
 								</td>
@@ -278,7 +278,7 @@ path.domain {
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-danger">Remove</button>
+				<button type="button" class="btn btn-danger" id="remove-bookmark-btn">Remove</button>
 			</div>
 		</div>
 	</div>
@@ -425,8 +425,9 @@ path.domain {
 		}
 	});
 	
+	var bindedNode = null;
+
 	// create bookmark button clicked
-	// @notice: Currently not differentiating between rows...
 	$('#create-bookmark-btn').click(function(e) {
 
 		// show loading indicator
@@ -444,23 +445,49 @@ path.domain {
 				'is_publicized': bookmarkView.data().publicized(),
 				'dataset_id': datasetId
 			}
-		}).done(function(response) {
+		}).done(function(res) {
 
-			showModal("Created successfully!");
+			if (res['status'] == 'success') {
+				// turn on star
+				$('.star[data-node-id=' + bindedNode['id'] + ']').addClass("starred").removeClass('unstarred');
+				// set bookmarked to be true
+				bindedNode['bookmarked'] = true;
+				// save bookmark id
+				bindedNode['bookmarkId'] = res['data']['bookmark_id'];
+			}
+
+			showModal(res['message']);
 
 			// hide loading indicator
 			$('#loading-indicator').modal('hide');
 
 		}).fail(function(e) {
-
 			console.log(e);
 			showModal("Failed to create bookmark!");
-
 			// hide loading indicator
 			$('#loading-indicator').modal('hide');
-
 		});
+	});
 
+	// remove bookmark button clicked
+	$('#remove-bookmark-btn').click(function(e) {
+		console.log(bindedNode);
+		if (bindedNode) {
+			$.ajax({
+				url: "/bookmarks/" + bindedNode['bookmarkId'] + "/delete",
+				method: "POST"
+			}).done(function(res){
+				if (res['status'] == 'success') {
+					// turn off star
+					$('.star[data-node-id=' + bindedNode['id'] + ']').removeClass("starred").addClass('unstarred');
+					// set bookmarked to be false
+					bindedNode['bookmarked'] = false;
+				}
+				showModal(res['message']);
+			}).fail(function(e) {
+				console.log(e);
+			});
+		}
 	});
 
 	// fetch data for GFADD score and Combined anomally score
@@ -576,6 +603,8 @@ path.domain {
 							$('.star[data-node-id=' + node[0] + ']').addClass("starred");
 							// update bookmarked flag for each node
 							nodesView.data().nodes()[index]['bookmarked'] = true;
+							// save bookmark id
+							nodesView.data().nodes()[index]['bookmarkId'] = res['data']['bookmark_id'];
 						}
 					}).fail(function(e) {
 						console.log(e['message']);

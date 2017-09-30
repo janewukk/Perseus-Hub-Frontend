@@ -40,7 +40,10 @@ class BookmarkCreateController(LoginRequiredResource, View):
 
 		return JsonResponse({
 				'status': "success",
-				'message': "Bookmark created successfully!"
+				'message': "Bookmark created successfully!",
+				'data': {
+					'bookmark_id': bookmark.id
+				}
 			})
 
 class BookmarkDeleteController(LoginRequiredResource, View):
@@ -130,9 +133,9 @@ class BookmarkValidateController(LoginRequiredResource, View):
 		node_id = request.POST['node_id']
 
 		# check if bookmark exists
-		bookmark = Bookmark.objects.filter(dataset_id = dataset_id, node_id = node_id)
+		bookmarks = Bookmark.objects.filter(dataset_id = dataset_id, node_id = node_id)
 
-		if not bookmark:
+		if len(bookmarks) == 0:
 			return JsonResponse({
 					'status': "success",
 					'data': {
@@ -143,7 +146,8 @@ class BookmarkValidateController(LoginRequiredResource, View):
 		return JsonResponse({
 				'status': "success",
 				'data': {
-					'exists': True
+					'exists': True,
+					'bookmark_id': bookmarks[0].id
 				}
 			})
 

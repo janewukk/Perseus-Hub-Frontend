@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime
 from django.contrib import messages
 from web.settings import MEDIA_ROOT
+
 """
 Flash a one-time short message to session
 """

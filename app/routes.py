@@ -24,7 +24,7 @@ from app.controllers.dataset import DatasetSearchController, DatasetUploadContro
 from app.controllers.bookmark import BookmarkCreateController, BookmarkValidateController, BookmarkDeleteController, BookmarkUpdateController
 
 # Graph apis
-from app.views import *
+from app.controllers.graph import *
 
 urlpatterns = [
     url(r'^$', DashboardViewController.as_view()),

@@ -16,7 +16,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "web.settings")
 # Bootstrap WSGI application
 application = get_wsgi_application()
 
-# Boostrap redis client
+# Boostrap Redis client
 from app.services.redis_manager import bootstrap
 
 bootstrap()
