@@ -10,6 +10,9 @@
 	.progress {
 		display: none;
 	}
+	#priority-selector a {
+		display: inline;
+	}
 </style>
 {% endblock %}
 
@@ -51,6 +54,7 @@
 		<table class="table table-hover">
 		  <thead>
 		  	<tr>
+		  		<th>Node Id</th>
 		  		<th>X coordinate</th>
 		  		<th>Y coordinate</th>
 		  		<th>Property name</th>
@@ -66,7 +70,8 @@
 		  </thead>
 		  <tbody>
 		  	{% for bookmark in bookmarks %}
-		  	<tr data-row="{{ bookmark.id }}" data-priority="">
+		  	<tr data-row="{{ bookmark.id }}">
+		  		<td>{{ bookmark.node_id }}</td>
 		  		<td>{{ bookmark.x_coord }}</td>
 		  		<td>{{ bookmark.y_coord }}</td>
 		  		<td>{{ bookmark.prop }}</td>
@@ -119,15 +124,15 @@
 							<ul class="dropdown-menu" id="priority-selector" aria-labelledby="priority-selector">
 								<li style="padding: 10px">
 									<span style="background-color: red; width: 20px; height: 20px; float: left"></span>
-									<a data-bind="click: selectPriority('high', 2), text: priority"></a>
+									<a data-bind="click: selectPriority(2)">High</a>
 								</li>
 								<li style="padding: 10px">
 									<span style="background-color: yellow; width: 20px; height: 20px; float: left"></span>
-									<a data-bind="click: selectPriority('medium', 1), text: priority"></a>
+									<a data-bind="click: selectPriority(1)">Medium</a>
 								</li>
 								<li style="padding: 10px">
 									<span style="background-color: green; width: 20px; height: 20px; float: left"></span>
-									<a data-bind="click: selectPriority('low', 0), text: priority"></a>
+									<a data-bind="click: selectPriority( 0)">Low</a>
 								</li>
 							</ul>
 						</div>
@@ -167,12 +172,11 @@
 		computed: {
 			priority : function () {
 				var texts = [ "low", "medium", "high" ];
-				return texts[this.priorityVal()];
+				return texts[ this.priorityVal() ];
 			}
 		},
 		methods : {
-			selectPriority : function (val, level) {
-				this.priority(val);
+			selectPriority : function (level) {
 				this.priorityVal(level);
 			}
 		}
@@ -216,10 +220,10 @@
 		// update bookmark book
 		bookmarkView.data().id($(this).attr('data-edit'));
 		bookmarkView.data().priorityVal($(this).attr('data-priority'));
-		bookmarkView.data().publicized(Boolean($(this).attr('data-publicized')));
+		bookmarkView.data().publicized(Boolean(parseInt($(this).attr('data-publicized'))));
 		// show editing modal
 		// @notice: current only support updating of priority and publicized status
-		$('#bookmark-editor').model('show');
+		$('#bookmark-editor').modal('show');
 
 	});
 
@@ -235,7 +239,7 @@
 		var publicized = bookmarkView.data().publicized();
 
 		$.ajax({
-			url: "/bookmark/" + bookmarkId + "/update",
+			url: "/bookmarks/" + bookmarkId + "/update",
 			method: "POST",
 			data: {
 				'updates': JSON.stringify({
@@ -255,7 +259,11 @@
 				// update UI publicized
 				$('tr[data-row="' + bookmarkId + '"] td.publicized').html(publicized ? "Yes" : "No");
 
+				// hide loading indicator
+				$('#loading-indicator').modal("hide");
 			}
+
+			showModal(res['message']);
 
 		}).fail(function(e) {
 

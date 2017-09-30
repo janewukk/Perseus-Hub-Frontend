@@ -95,6 +95,8 @@ class Bookmark(models.Model):
 	y_coord = models.CharField(max_length = 256, default = "")
 	# name of the properties that this bookmark refers to
 	prop = models.CharField(max_length = 1024, default = "")
+	# id of the node that is marked
+	node_id = models.IntegerField()
 	# dataset that this bookmark resides on
 	dataset = models.ForeignKey(Dataset, on_delete = models.CASCADE)
 	# whether this bookmark should be publicize

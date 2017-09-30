@@ -30,6 +30,8 @@ class BookmarkCreateController(LoginRequiredResource, View):
 							x_coord = request.POST['x_coord'], \
 							y_coord = request.POST['y_coord'], \
 							prop = request.POST['prop'], \
+							node_id = request.POST['node_id'], \
+							publicized = publicized, \
 							dataset = Dataset.objects.get(id = request.POST['dataset_id']),
 							creator = request.user
 						)
@@ -70,7 +72,7 @@ class BookmarkDeleteController(LoginRequiredResource, View):
 
 		return JsonResponse({
 				'status': "success",
-				'message': "Bookmark created successfully!"
+				'message': "Bookmark deleted successfully!"
 			})
 
 class BookmarkUpdateController(LoginRequiredResource, View):
@@ -85,7 +87,6 @@ class BookmarkUpdateController(LoginRequiredResource, View):
 	redirect_field_name = 'redirect_to'
 
 	def post(self, request, *args, **kwargs):
-
 		# extract bookmark id
 		bookmark_id = kwargs.get('id')
 
@@ -101,7 +102,7 @@ class BookmarkUpdateController(LoginRequiredResource, View):
 		# update bookmark
 		updates = json.loads(request.POST['updates'])
 
-		for key, value in updates:
+		for key, value in updates.items():
 			setattr(bookmark, key, value)
 
 		# save updates
@@ -124,32 +125,26 @@ class BookmarkValidateController(LoginRequiredResource, View):
 	redirect_field_name = 'redirect_to'
 
 	def post(self, request):
-
-		# extract request attributes
-		x_coord = request.POST['x_coord']
-		y_coord = request.POST['y_coord']
-		prop = request.POST['prop']
+		# extract node id and dataset id
 		dataset_id = request.POST['dataset_id']
+		node_id = request.POST['node_id']
 
-		# check bookmark existence
-		bookmark = request.user.bookmark_set.filter(x_coord=x_coord, y_coord=y_coord, \
-													prop=prop, dataset_id=dataset_id)
+		# check if bookmark exists
+		bookmark = Bookmark.objects.filter(dataset_id = dataset_id, node_id = node_id)
 
-		if bookmark:
-			json = {
-				"status": "success",
-				"message": "Bookmark exists!",
-				"data": {
+		if not bookmark:
+			return JsonResponse({
+					'status': "success",
+					'data': {
+						'exists': False
+					}
+				})
+
+		return JsonResponse({
+				'status': "success",
+				'data': {
 					'exists': True
 				}
-			}
-		else:
-			json = {
-				"status": "success",
-				"message": "Bookmark not exists!",
-				"data": {
-					"exists": False
-				}
-			}
-		
-		return JsonResponse(json)
+			})
+
+

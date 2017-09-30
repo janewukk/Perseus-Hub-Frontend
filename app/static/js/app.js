@@ -117,7 +117,6 @@ function View(options) {
 	} else {
 		ko.applyBindings(this.viewModel);
 	}
-
 }
 
 /**

@@ -127,7 +127,7 @@ path.domain {
 									<button data-bind="attr: { id : id }, click: function() { $parent.drawAdjMatrix(id) }" class="btn btn-primary btn-sm btn-adj-matrix">View</button>
 								</td>
 								<td>
-									<span class="star" data-toggle="tooltip" data-placement="right" title="Click to bookmark/unbookmark" data-bind="click: function() { if (! bookmarked) { $('#bookmark-creator').modal(); } else { $('#bookmark-remover').modal(); } }">
+									<span class="star" data-toggle="tooltip" data-placement="right" title="Click to bookmark/unbookmark" data-bind="attr: { 'data-node-id': id }, click: function() { if (!bookmarked) { $('#bookmark-creator').modal(); bookmarkView.data().nodeId(id);} else { $('#bookmark-remover').modal(); } }">
 										<span class="star-icon fa fa-star"></span>
 									</span>
 								</td>
@@ -308,21 +308,6 @@ path.domain {
 	// render dataset id
 	var datasetId = {{ dataset.id }};
 
-	// star animation
-	var star = $(".star");
-	star.on('star:toggled', function(event) {
-		var on = event['on'];
-		if (!on) {
-			// turn off star
-			star.removeClass("starred");
-			star.addClass("unstarred");
-		} else {
-			// turn on star
-			star.removeClass("unstarred");
-			star.addClass("starred");
-		}
-	});
-
 	// init bookmark models
 	var bookmarkView = new View({
 		el : document.getElementById('bookmark-creator'),
@@ -333,7 +318,7 @@ path.domain {
 			propertyName: "",
 			xCoord: "",
 			yCoord: "",
-			nodeSelected : false
+			nodeId: ""
 		},
 		methods : {
 			selectPriority : function (val, level) {
@@ -455,6 +440,7 @@ path.domain {
 				'x_coord': bookmarkView.data().xCoord(),
 				'y_coord': bookmarkView.data().yCoord(),
 				'prop': bookmarkView.data().propertyName(),
+				'node_id': bookmarkView.data().nodeId(),
 				'is_publicized': bookmarkView.data().publicized(),
 				'dataset_id': datasetId
 			}
@@ -541,34 +527,6 @@ path.domain {
 		}
 	});
 
-
-	// bookmark validation callback
-	function validateBookmark(data, callback) {
-
-		$.ajax({
-			type: "POST",
-			url: "/bookmarks/validate/",
-			data: {
-				'x_coord': data['x_coord'],
-				'y_coord': data['y_coord'],
-				'prop': data['x_name'] + " vs " + data['y_name'],
-				'dataset_id': datasetId 
-			},
-			success: function(response){
-				if (response['data']['existed'] == "True") {
-					callback(true);
-				} else {
-					callback(false);
-				}
-			},
-			error: function(e) {
-				console.log(e.message);
-				callback(false);
-			}
-		})
-
-	}
-
 	// graph callback function
 	function nodeSelected(x1, y1, x1_name, y1_name) {
 
@@ -599,30 +557,39 @@ path.domain {
 				// parse the response
 				data = JSON.parse(data);
 				
-				// validate bookmark 
-				// @notice: for now, we are validating all from one bookmark
-				validateBookmark({
-					'x_coord': x1,
-					'y_coord': y1,
-					'x_name': x1_name,
-					'y_name': y1_name
-				}, function(result) {
+				// fill the info console
+				createInformationConsole(data);
 
-					// fill the info console
-					createInformationConsole(data);
+				// validate bookmark's existence
+				data.forEach(function(node, index) {
 
-					// scroll to bottom
-					$('html, body').animate({
-						scrollTop: $("#data-browser").offset().top
-					}, 1000);
-					// jump to tab 1
-					$('#tabs li:eq(0) a').tab('show');
-					// hide loading indicator
-					$('#loading-indicator').modal('hide');
+					$.ajax({
+						url: "/bookmarks/validate",
+						method: "POST",
+						data: {
+							'node_id': node[0],
+							'dataset_id': datasetId
+						}
+					}).done(function(res) {
 
+						if (res['status'] == 'success' && res['data']['exists']) {
+							$('.star[data-node-id=' + node[0] + ']').addClass("starred");
+							// update bookmarked flag for each node
+							nodesView.data().nodes()[index]['bookmarked'] = true;
+						}
+					}).fail(function(e) {
+						console.log(e['message']);
+					})
 				});
 
-				
+				// scroll to bottom
+				$('html, body').animate({
+					scrollTop: $("#data-browser").offset().top
+				}, 1000);
+				// jump to tab 1
+				$('#tabs li:eq(0) a').tab('show');
+				// hide loading indicator
+				$('#loading-indicator').modal('hide');				
 			}
 		});
 	}
