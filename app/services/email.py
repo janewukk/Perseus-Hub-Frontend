@@ -28,12 +28,13 @@ def send(sender, recipient, subject, html = None, view = None):
 	# check recipient
 	if isinstance(recipient, str):
 		recipient = [ recipient ]
+		print recipient
 
 	return requests.post(
         "https://api.mailgun.net/v3/%s/messages" % MAILGUN['domain'],
         auth=("api", MAILGUN['api_key']),
         data={"from": sender,
               "to": recipient,
-              "subject": "Hello",
+              "subject": subject,
               "text": view_string}
     )

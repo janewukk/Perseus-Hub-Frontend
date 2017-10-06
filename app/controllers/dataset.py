@@ -1,4 +1,4 @@
-import json
+import json, subprocess
 from django.views import View
 from django.core import serializers
 from django.http import HttpResponse, JsonResponse
@@ -67,6 +67,8 @@ class DatasetUploadController(LoginRequiredResource, View):
 		# TODO: Notify spark with dataset raw data path
 		# and the dataset id so that later Spark callback
 		# can retrieve the user related to this dataset
+		# subprocess.Popen(["bash", absolute_path('test.sh')])
+
 		return JsonResponse({
 				'status' : "success",
 				'message' : "Your dataset has been uploaded and is being processed. \

@@ -1,10 +1,10 @@
-import sys
+import sys, os
 import time
 import calendar
 import pandas as pd
 from datetime import datetime
 from django.contrib import messages
-from web.settings import MEDIA_ROOT
+from web.settings import MEDIA_ROOT, BASE_DIR
 
 """
 Flash a one-time short message to session
@@ -27,15 +27,21 @@ def flash_session_message(request, status, message):
 Define the custom user upload directory
 """
 def user_upload_dir(dataset, filename):
-	return 'data/uploads/user_{0}/{1}'.format(dataset.uploader.id, \
+	return 'data/uploaded/user_{0}/{1}'.format(dataset.uploader.id, \
 		str(time.time()) + filename)
 
 """
 Define the custom user processed file directory
 """
-def user_processed_dir(dataset, filename):
-	return 'data/processed/user_{0}/{1}'.format(dataset.uploader.id, \
-		str(time.time()) + filename)
+def user_processed_dir(dataset, filename, hashed = True):
+
+	if hashed:
+		filename = str(time.time()) + "_" + filename
+
+	return 'data/processed/user_{0}/{1}'.format(dataset.uploader.id, filename)
+
+def base_path(app_path):
+	return BASE_DIR + app_path
 
 """
 Helper to load the absolute file path
