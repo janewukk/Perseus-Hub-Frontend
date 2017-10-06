@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin as LoginRequiredResource
 
 from app.models import Dataset
+from app.services.utils import absolute_path
 
 class DatasetSearchController(LoginRequiredResource, View):
 	login_url = '/login/'
@@ -67,7 +68,8 @@ class DatasetUploadController(LoginRequiredResource, View):
 		# TODO: Notify spark with dataset raw data path
 		# and the dataset id so that later Spark callback
 		# can retrieve the user related to this dataset
-		subprocess.Popen(["bash", absolute_path('runSpark.sh')])
+		filename = dataset.raw_data_file.name.split('/')[-1]
+		subprocess.Popen(["bash", absolute_path('runSpark.sh'), filename, str(request.user.id), str(dataset.id)], close_fds=True)
 
 		return JsonResponse({
 				'status' : "success",

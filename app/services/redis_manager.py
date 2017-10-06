@@ -1,6 +1,6 @@
 import redis, time, thread
 from app.models import Dataset
-from app.services.notification_handlers import process_finished
+from app.services.notification_handlers import process_finished, test_popen, test_receive
 
 # instantiate redis
 r = redis.Redis(host='localhost', port=6379, db=0)
@@ -18,7 +18,11 @@ def bootstrap():
 	"""
 	Boostrap the redis listener
 	"""
-	p.subscribe(**{ 'perseus:process_finished': process_finished })
+	p.subscribe(**{ 
+		'perseus:process_finished': process_finished,
+		'test:popen': test_popen,
+		'test:receive': test_receive
+	})
 
 	try:
 		print "Starting redis listener thread..."

@@ -1,9 +1,17 @@
-import json, os, time, multiprocessing as mp
+import json, os, time, subprocess, multiprocessing as mp
 from datetime import datetime
 from web.settings import DATABASES
 from app.services import email 
 from app.models import User, Dataset
 from app.services.utils import user_processed_dir, absolute_path, timestamp, create_edges_sql, create_data_sql
+
+def test_popen(message):
+	print("received")
+	subprocess.Popen(["sleep", "100"], close_fds=True)
+	print("instantly")
+
+def test_receive(message):
+	print("received: " + message['data'])
 
 def process_finished(message):
 	"""
@@ -29,15 +37,15 @@ def process_finished(message):
 	tmp_nodes_sql_path = absolute_path('data/tmp/') + timestamp(datetime.now()) + "_nodes.sql"
 	tmp_edges_sql_path = absolute_path('data/tmp/') + timestamp(datetime.now()) + "_edges.sql"
 
-	########### Multiprocessing, speed up from 41s -> 18s ###########
+	########### Multiprocessing, speed up 2x ###########
 
 	def create_nodes():
 		create_data_sql(absolute_path(user_processed_dir(dataset, data[2], False)), tmp_nodes_sql_path)
-		os.system("/Applications/MAMP/Library/bin/mysql -u%s -p%s %s < \"%s\"" % ( db['USER'], db['PASSWORD'], db['NAME'], tmp_nodes_sql_path ))
+		os.system("mysql -u%s -p%s %s < \"%s\"" % ( db['USER'], db['PASSWORD'], db['NAME'], tmp_nodes_sql_path ))
 
 	def create_edges():
 		create_edges_sql(absolute_path(user_processed_dir(dataset, data[4], False)), tmp_edges_sql_path)
-		os.system("/Applications/MAMP/Library/bin/mysql -u%s -p%s %s < \"%s\"" % ( db['USER'], db['PASSWORD'], db['NAME'], tmp_edges_sql_path ))
+		os.system("mysql -u%s -p%s %s < \"%s\"" % ( db['USER'], db['PASSWORD'], db['NAME'], tmp_edges_sql_path ))
 
 	processes = [ mp.Process(target=create_nodes, args=()), mp.Process(target=create_edges, args=()) ]
 

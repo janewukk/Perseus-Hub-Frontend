@@ -25,7 +25,7 @@ SECRET_KEY = '(ekbb8_l@qz1%e*ehkh_gi4*ts+w6fguaa2t1qs)p0w8o6k#^o'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['perseushub.com', '127.0.0.1']
 
 # Application definition
 

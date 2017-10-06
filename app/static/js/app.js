@@ -1,6 +1,6 @@
 // ============= GLOBAL INITIALIZATION
 // config csrf token for jQuery ajax
-var csrftoken = Cookies.get('csrftoken');
+var csrftoken = $("[name=csrfmiddlewaretoken]").val();
 function csrfSafeMethod(method) {
     // these HTTP methods do not require CSRF protection
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
