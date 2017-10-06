@@ -67,7 +67,7 @@ class DatasetUploadController(LoginRequiredResource, View):
 		# TODO: Notify spark with dataset raw data path
 		# and the dataset id so that later Spark callback
 		# can retrieve the user related to this dataset
-		# subprocess.Popen(["bash", absolute_path('test.sh')])
+		subprocess.Popen(["bash", absolute_path('runSpark.sh')])
 
 		return JsonResponse({
 				'status' : "success",

@@ -68,5 +68,5 @@ def process_finished(message):
 	
 	# Send email
 	email.send('submission@perseushub.com', user.email, 'Your dataset has finished processing!',\
-				html = "You can view it at <a href='http://perseushub.com/datasets/%s'> here </a>" % dataset.id)
+				html = "You can view your dataset result at <a href='http://perseushub.com/datasets/%s'> here </a>" % dataset.id)
 	
