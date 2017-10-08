@@ -21,60 +21,63 @@ def process_finished(message):
 		message {Dict} -- Incoming message
 	"""
 
-	print("received message...")
-	start_time = time.time()
-
-	# in form of [userid datasetid dbname graphname edgesname anomallyname...]
-	data = message['data'].split(' ')
+	print("received message... %s" % message['data'])
 	
-	# Extract data from the message
-	dataset = Dataset.objects.get(id = data[1])
-	user = User.objects.get(id = data[0])
-	
-	# Generate node and edges sql file and import
-	db = DATABASES['default']
+	try:
+		start_time = time.time()
+		# in form of [userid datasetid dbname graphname edgesname anomallyname...]
+		data = message['data'].split(' ')
+		
+		# Extract data from the message
+		dataset = Dataset.objects.get(id = data[1])
+		user = User.objects.get(id = data[0])
+		
+		# Generate node and edges sql file and import
+		db = DATABASES['default']
 
-	tmp_nodes_sql_path = absolute_path('data/tmp/') + timestamp(datetime.now()) + "_nodes.sql"
-	tmp_edges_sql_path = absolute_path('data/tmp/') + timestamp(datetime.now()) + "_edges.sql"
+		tmp_nodes_sql_path = absolute_path('data/tmp/') + timestamp(datetime.now()) + "_nodes.sql"
+		tmp_edges_sql_path = absolute_path('data/tmp/') + timestamp(datetime.now()) + "_edges.sql"
 
-	########### Multiprocessing, speed up 2x ###########
+		########### Multiprocessing, speed up 2x ###########
 
-	def create_nodes():
-		create_data_sql(absolute_path(user_processed_dir(dataset, data[2], False)), tmp_nodes_sql_path)
-		os.system("mysql -u%s -p%s %s < \"%s\"" % ( db['USER'], db['PASSWORD'], db['NAME'], tmp_nodes_sql_path ))
+		def create_nodes():
+			create_data_sql(absolute_path(user_processed_dir(dataset, data[2], False)), tmp_nodes_sql_path)
+			os.system("mysql -u%s -p%s %s < \"%s\"" % ( db['USER'], db['PASSWORD'], db['NAME'], tmp_nodes_sql_path ))
 
-	def create_edges():
-		create_edges_sql(absolute_path(user_processed_dir(dataset, data[4], False)), tmp_edges_sql_path)
-		os.system("mysql -u%s -p%s %s < \"%s\"" % ( db['USER'], db['PASSWORD'], db['NAME'], tmp_edges_sql_path ))
+		def create_edges():
+			create_edges_sql(absolute_path(user_processed_dir(dataset, data[4], False)), tmp_edges_sql_path)
+			os.system("mysql -u%s -p%s %s < \"%s\"" % ( db['USER'], db['PASSWORD'], db['NAME'], tmp_edges_sql_path ))
 
-	processes = [ mp.Process(target=create_nodes, args=()), mp.Process(target=create_edges, args=()) ]
+		processes = [ mp.Process(target=create_nodes, args=()), mp.Process(target=create_edges, args=()) ]
 
-	for p in processes:
-		p.start()
+		for p in processes:
+			p.start()
 
-	for p in processes:
-		p.join()
-		print("Finished one")
+		for p in processes:
+			p.join()
+			print("Finished one")
 
-	end_time = time.time()
+		end_time = time.time()
 
-	print("data generation and import took %ss" % str(end_time - start_time))
+		print("data generation and import took %ss" % str(end_time - start_time))
 
-	########### End multiprocessing #########
+		########### End multiprocessing #########
 
-	# Modify dataset
-	dataset.processed = True
-	dataset.analyzed_fulldata_file.name = user_processed_dir(dataset, data[2])
-	dataset.analyzed_graph_file.name = user_processed_dir(dataset, data[3])
+		# Modify dataset
+		dataset.processed = True
+		dataset.analyzed_fulldata_file.name = user_processed_dir(dataset, data[2], False)
+		dataset.analyzed_graph_file.name = user_processed_dir(dataset, data[3], False)
 
-	# TODO... anomally
-	dataset.save()
+		# TODO... anomally
+		dataset.save()
 
-	# remove tmp file
-	os.remove(tmp_edges_sql_path)
-	os.remove(tmp_nodes_sql_path)
-	
-	# Send email
-	email.send('submission@perseushub.com', user.email, 'Your dataset has finished processing!',\
-				html = "You can view your dataset result at <a href='http://perseushub.com/datasets/%s'> here </a>" % dataset.id)
+		# remove tmp file
+		os.remove(tmp_edges_sql_path)
+		os.remove(tmp_nodes_sql_path)
+		
+		# Send email
+		email.send('submission@perseushub.com', user.email, 'Your dataset has finished processing!',\
+					html = "You can view your dataset result at <a href='http://perseushub.com/datasets/%s'> here </a>" % dataset.id)
+	except Exception as e:
+		print e.message
 	
