@@ -65,7 +65,7 @@ class DatasetUploadController(LoginRequiredResource, View):
 		# save the metadata for the dataset 
 		# along with file as Django internally saved it
 		dataset.save()
-		# TODO: Notify spark with dataset raw data path
+		# Notify spark with dataset raw data path
 		# and the dataset id so that later Spark callback
 		# can retrieve the user related to this dataset
 		filename = dataset.raw_data_file.name.split('/')[-1]
@@ -74,5 +74,5 @@ class DatasetUploadController(LoginRequiredResource, View):
 		return JsonResponse({
 				'status' : "success",
 				'message' : "Your dataset has been uploaded and is being processed. \
-							we will send you an email once it's done!"
+							we will send you an email once it's done! Please remember to check your spam folder!"
 			})
