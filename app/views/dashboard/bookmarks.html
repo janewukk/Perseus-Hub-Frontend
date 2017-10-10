@@ -82,7 +82,17 @@
 		  			<button type="button" class="btn btn-primary" onclick="window.location.href='/datasets/{{ bookmark.dataset.id }}/'">View</button>
 		  		</td>
 		  		<td>
-		  			<a href="mailto:{{ bookmark.creator.email }}">{{ bookmark.creator.email }}</a>
+		  			<div class="dropdown">Uploaded by 
+						<a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+							{{ bookmark.creator.email }}
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu user-action-dropdown" aria-labelledby="dLabel">
+					    	<li><a href="/dashboard/?user={{bookmark.creator.id}}">View datasets</a></li>
+					    	<li><a href="/bookmarks/?user={{bookmark.creator.id}}">View bookmarks</a></li>
+					    	<li><a href="mailto:{{bookmark.creator.email}}">Contact this user</a></li>
+					  	</ul>
+					</div>
 		  		</td>
 		  		{% if can_edit %}
 		  		<td>

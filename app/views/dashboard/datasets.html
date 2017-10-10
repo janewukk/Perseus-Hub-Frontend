@@ -1,7 +1,6 @@
 {% extends 'dashboard/base.html' %}
 
 {% block tabstyles %}
-
 {% endblock %}
 
 {% block tabs %}
@@ -43,7 +42,19 @@
 			<img src="http://placehold.it/320x125/EEE" class="">
 			<div class="caption">
 				<h4><a href="/datasets/{{ dataset.id }}">{{ dataset.title }}</a></h4>
-				<p>Uploaded by <a>{{ dataset.uploader.email }}</a></p>
+				<p>
+					<div class="dropdown">Uploaded by 
+						<a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+							{{ dataset.uploader.email }}
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu user-action-dropdown" aria-labelledby="dLabel">
+					    	<li><a href="/dashboard/?user={{dataset.uploader.id}}">View datasets</a></li>
+					    	<li><a href="/bookmarks/?user={{dataset.uploader.id}}">View bookmarks</a></li>
+					    	<li><a href="mailto:{{dataset.uploader.email}}">Contact this user</a></li>
+					  	</ul>
+					</div>
+				</p>
 				<p>Uploaded on {{ dataset.created_at }}</p>
 			</div>
 		</div>

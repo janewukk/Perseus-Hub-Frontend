@@ -188,3 +188,7 @@ a {
     transform: translate(0, 0px);
   }
 }
+/* Action dropdown */
+.user-action-dropdown {
+  margin-left: 20%;
+}
