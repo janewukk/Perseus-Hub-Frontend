@@ -47,6 +47,11 @@
 {% endblock %}
 
 {% block tabdetails %}
+{% if user %}
+<div class="row" style="margin-top: 20px; margin-left: 20px">
+	<h2><strong>{{ user.email }}</strong>'s bookmarks: </h2>
+</div>
+{% endif %}
 
 {% if bookmarks %}
 <div class="row" style="margin-top: 20px">

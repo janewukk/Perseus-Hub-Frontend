@@ -19,6 +19,7 @@ class DashboardViewController(LoginRequiredResource, View):
 		# render the dataset view 
 		# with all publicized datasets or user specific
 		# TODO: Pagination
+		user = None
 		if 'my' in request.GET.keys():
 			datasets = request.user.dataset_set
 		elif 'user' in request.GET.keys():
@@ -27,7 +28,8 @@ class DashboardViewController(LoginRequiredResource, View):
 				flash_session_message(request, "error", "No datasets available")
 				datasets = []
 			else:
-				datasets = users[0].datasets().filter(publicized = True)
+				user = users[0]
+				datasets = user.datasets().filter(publicized = True)
 		else:
 			datasets = Dataset.objects.filter(publicized = True)
 
@@ -38,7 +40,8 @@ class DashboardViewController(LoginRequiredResource, View):
 			print e
 
 		return render(request, 'dashboard/datasets.html', {
-				'datasets' : datasets
+				'datasets' : datasets,
+				'user' : user
 			})
 
 class DatasetViewController(LoginRequiredResource, View):
@@ -80,6 +83,7 @@ class BookmarkViewController(LoginRequiredResource, View):
 		# render the bookmarks view 
 		# with all publicized bookmarks or user specific
 		# TODO: Pagination
+		user = None
 		if 'my' in request.GET.keys():
 			bookmarks = request.user.bookmark_set
 			can_edit = True
@@ -89,6 +93,7 @@ class BookmarkViewController(LoginRequiredResource, View):
 				flash_session_message(request, "error", "No bookmarks available")
 				bookmarks = []
 			else:
+				user = users[0]
 				bookmarks = users[0].bookmarks().filter(publicized = True)
 			can_edit = False
 		else:
