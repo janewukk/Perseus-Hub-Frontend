@@ -60,7 +60,7 @@
 			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 				
 					<ul class="nav navbar-nav navbar-right">
-						{% if user.is_authenticated %}
+						{% if auth_user.is_authenticated %}
 						<form class="navbar-form navbar-left" role="search" id="nav-search-form">
 							<div class="form-group">
 								<input type="text" id="search-field" class="form-control" placeholder="Search datasets" autocomplete="off">

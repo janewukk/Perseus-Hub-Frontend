@@ -29,9 +29,9 @@ class DashboardViewController(LoginRequiredResource, View):
 				datasets = []
 			else:
 				user = users[0]
-				datasets = user.datasets().filter(publicized = True)
+				datasets = user.datasets().filter(publicized = True, processed = True)
 		else:
-			datasets = Dataset.objects.filter(publicized = True)
+			datasets = Dataset.objects.filter(publicized = True, processed = True)
 
 		# sort datasets
 		try:
@@ -41,7 +41,8 @@ class DashboardViewController(LoginRequiredResource, View):
 
 		return render(request, 'dashboard/datasets.html', {
 				'datasets' : datasets,
-				'user' : user
+				'user' : user,
+				'auth_user': request.user
 			})
 
 class DatasetViewController(LoginRequiredResource, View):
