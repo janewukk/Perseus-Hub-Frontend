@@ -73,7 +73,8 @@ class DatasetViewController(LoginRequiredResource, View):
 		return render(request, 'dashboard/dataset-template.html',{
 				'dataset' : dataset,
 				'graph_script' : graph_data['graph_script'],
-				'graph' : graph_data['graph']
+				'graph' : graph_data['graph'],
+				'auth_user': request.user
 			})
 
 class BookmarkViewController(LoginRequiredResource, View):
@@ -110,6 +111,7 @@ class BookmarkViewController(LoginRequiredResource, View):
 
 		return render(request, 'dashboard/bookmarks.html', {
 				'bookmarks' : bookmarks,
-				'can_edit' : can_edit
+				'can_edit' : can_edit,
+				'auth_user': request.user
 			})		
 

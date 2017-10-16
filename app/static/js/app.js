@@ -104,6 +104,8 @@ function View(options) {
 	if (options.data) data = options.data;
 	if (options.computed) computed = options.computed;
 	if (options.methods) methods = options.methods;
+	console.log(data);
+	console.log(el);
 
 	// construct internal view model
 	this.viewModel = data;

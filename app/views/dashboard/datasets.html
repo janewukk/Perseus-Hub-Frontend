@@ -1,6 +1,22 @@
 {% extends 'dashboard/base.html' %}
 
 {% block tabstyles %}
+<style type="text/css">
+	.image-container {
+	    position: relative;
+	}
+	.image-container .overlay {
+	    position: absolute;
+	    top: 0;
+	    left: 0;
+	    width: 100%;
+	    height: 100%;
+	    color: #FFF;
+	    display: block;
+	    background: rgba(0, 0, 0, .6);
+	}
+
+</style>
 {% endblock %}
 
 {% block tabs %}
@@ -46,8 +62,13 @@
 	<div class="col-sm-6 col-md-3">
 		<div class="thumbnail">
 			<div class="caption">
-				<div class="image">
-					<img src="http://placehold.it/320x125/EEE" class="dataset-cover" data-hash="{{ dataset.title }}">
+				<div class="image-container">
+					<img style="width: 100%" src="http://placehold.it/320x125/EEE" class="dataset-cover" data-hash="{{ dataset.title }}">
+					{% if not dataset.processed %}
+					<div class="overlay">
+						<h2 style="color: white; text-align: center; height: 100%; margin-top: 40%">Processing...</h2>
+					</div>
+					{% endif %}
 				</div>
 				<h4>
 					{% if dataset.processed %}
@@ -57,7 +78,7 @@
 					{% endif %}
 				</h4>
 				<p>
-					<div class="dropdown">Uploaded by 
+					<div class="dropdown">By 
 						<a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
 							{{ dataset.uploader.email }}
 							<span class="caret"></span>
@@ -69,10 +90,7 @@
 					  	</ul>
 					</div>
 				</p>
-				<p>Uploaded on {{ dataset.created_at }}</p>
-				{% if not dataset.processed %}
-				<p style="color: red">Still processing...</p>
-				{% endif %}
+				<p>Uploaded on <span class="upload-time" style="font-style: italic;">{{ dataset.created_at|date:"D d M Y" }} {{ dataset.created_at|time:"H:i" }}</span></p>
 			</div>
 		</div>
 	</div>
@@ -90,6 +108,7 @@
 
 {% block scripts %}
 <script src="//cdnjs.cloudflare.com/ajax/libs/identicon.js/2.3.1/identicon.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.1/moment.min.js"></script>
 <script type="text/javascript">
 	// identicon js hash
 	$('.dataset-cover').each(function() {
@@ -105,6 +124,12 @@
 		// create a base64 encoded SVG
 		var data = new Identicon(hash, options).toString();
 		$(this).attr('src', 'data:image/svg+xml;base64,' + data);
-});
+	});
+
+	// convert time from utc to local
+	$('.upload-time').each(function() {
+		var val = $(this).html();
+		$(this).html(moment.utc(val).local().format('MMMM Do YYYY, h:mm a'));
+	});
 </script>
 {% endblock %}

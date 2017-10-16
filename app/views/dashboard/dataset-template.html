@@ -6,6 +6,15 @@
 #priority-selector a {
 	display: inline;
 }
+.tab__disabled {
+	color: gray;
+	opacity: 0.5;
+}
+.tab__disabled a {
+	color: gray !important;
+}
+
+/* Node related */
 .node circle {
 	fill: steelblue;
 }
@@ -82,23 +91,28 @@ path.domain {
 
 {% block tabdetails %}
 <div class="row">
-	<div class="col-sm-10">
+	<div class="col-sm-12">
 		<!-- Search bar -->
 		<div class="form-group" style="margin-top: 20px">
-			Search by Node ID: <input type="text" id="search-node-id" placeholder="Node ID" autocomplete="off" size="35" class="form-control">
+			<label style="display: inline">Search by Node ID:</label> 
+			<input style="width: 60%; display: inline" type="text" id="search-node-id" placeholder="Node ID" autocomplete="off" size="35" class="form-control">
+			<button class="btn btn-primary" id="node-search-btn">Search</button>
 		</div>
 		<!-- Graph -->
 		{{ graph | safe }}
 		<!-- Data browser -->
 		<div class="row" style="margin-top: 20px" id="data-browser">
-			<div class="col-sm-10">
+			<div class="col-sm-12">
 				<ul class="nav nav-tabs" role="tablist" id="tabs">
 					<li role="presentation" class="active"><a href="#info-console" aria-controls="info-console" role="tab" data-toggle="tab">Information console</a></li>
 					<li role="presentation"><a href="#egonet" aria-controls="egonet" role="tab" data-toggle="tab">EgoNet</a></li>
 					<li role="presentation"><a href="#adj-maxtrix" aria-controls="adj-maxtrix" role="tab" data-toggle="tab">Adj Matrix</a></li>
-					<li role="presentation"><a href="#GFADD" aria-controls="GFADD" role="tab" data-toggle="tab">GFADD</a></li>
+					<!-- <li role="presentation"><a href="#GFADD" aria-controls="GFADD" role="tab" data-toggle="tab">GFADD</a></li>
 					<li role="presentation"><a href="#ABOD" aria-controls="ABOD" role="tab" data-toggle="tab">ABOD</a></li>
-					<li role="presentation"><a href="#CombAnScore" aria-controls="CombAnScore" role="tab" data-toggle="tab">Combined Anomaly Score</a></li>
+					<li role="presentation"><a href="#CombAnScore" aria-controls="CombAnScore" role="tab" data-toggle="tab">Combined Anomaly Score</a></li> -->
+					<li role="presentation" class="tab__disabled"><a href="#GFADD" aria-controls="GFADD" role="tab">GFADD (Coming soon)</a></li>
+					<li role="presentation" class="tab__disabled"><a href="#ABOD" aria-controls="ABOD" role="tab">ABOD (Coming soon)</a></li>
+					<li role="presentation" class="tab__disabled"><a href="#CombAnScore" aria-controls="CombAnScore" role="tab">Comb Anomally (Coming soon)</a></li> 
 
 				</ul>
 				<div class="tab-content">
@@ -221,7 +235,7 @@ path.domain {
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				<h4 class="modal-title" id="bookmark-creator">Bookmark the selection</h4>
+				<h4 class="modal-title">Bookmark the selection</h4>
 			</div>
 			<div class="modal-body">
 				<div>
@@ -269,7 +283,7 @@ path.domain {
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-				<h4 class="modal-title" id="bookmark-creator">Bookmark removal</h4>
+				<h4 class="modal-title">Bookmark removal</h4>
 			</div>
 			<div class="modal-body">
 				<div>
@@ -393,38 +407,47 @@ path.domain {
 	});
 
 	// search node by id
+	function searchNodeById(id) {
+		$('#loading-indicator').modal('show');
+		// fetch nodes when clicked
+		$.ajax({
+			type: 'POST',
+			url: '/SearchNodeID/',
+			contentType: "application/json; charset=UTF-8",
+			response: "application/json; charset=UTF-8",
+			data: JSON.stringify({
+				"id": id.toString(),
+				"dataset_id" : datasetId
+			}),
+			success: function (data) {
+				data = JSON.parse(data);
+				createInformationConsole(data)
+				// scroll to bottom
+				$('html, body').animate({
+					scrollTop: $("#data-browser").offset().top
+				}, 1000);
+				// jump to tab 1
+				$('#tabs li:eq(0) a').tab('show');
+				// hide loading indicator
+				$('#loading-indicator').modal('hide');
+			}
+		});
+	}
+
+	$('#node-search-btn').click(function(e) {
+		var id = $('#search-node-id').val();
+		searchNodeById(id);
+	});
+
 	$('#search-node-id').keydown(function(e){
 		// enter pressed
 		if (e.keyCode == 13) {
 			var id = $(this).val();
-			console.log("Searching for Node with id:", id);
-			$('#loading-indicator').modal('show');
-			// fetch nodes when clicked
-			$.ajax({
-				type: 'POST',
-				url: '/SearchNodeID/',
-				contentType: "application/json; charset=UTF-8",
-				response: "application/json; charset=UTF-8",
-				data: JSON.stringify({
-					"id": id.toString(),
-					"dataset_id" : datasetId
-				}),
-				success: function (data) {
-					data = JSON.parse(data);
-					createInformationConsole(data)
-					// scroll to bottom
-					$('html, body').animate({
-						scrollTop: $("#data-browser").offset().top
-					}, 1000);
-					// jump to tab 1
-					$('#tabs li:eq(0) a').tab('show');
-					// hide loading indicator
-					$('#loading-indicator').modal('hide');
-				}
-			});
+			searchNodeById(id);
 		}
 	});
 	
+	// node for deletion
 	var bindedNode = null;
 
 	// create bookmark button clicked
