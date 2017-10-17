@@ -44,3 +44,4 @@ tornado==4.5.1
 Werkzeug==0.12.1
 rq==0.8.2
 django-rq==0.9.6
+django-rq-scheduler==1.0.1
