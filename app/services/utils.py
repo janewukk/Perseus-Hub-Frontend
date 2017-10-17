@@ -1,6 +1,4 @@
-import sys, os
-import time
-import calendar
+import sys, os, time, calendar
 import pandas as pd
 from datetime import datetime
 from django.contrib import messages
@@ -71,16 +69,23 @@ Generate SQL statements for edges to import
 """
 def create_edges_sql(edges_input_filename, edges_sql_filename):
 	data = pd.read_csv(edges_input_filename, sep='\t', skipinitialspace=True, escapechar="\\", header=None)
-
 	edges_sql = open(edges_sql_filename, 'w')
-		
+	
 	edges_sql.write("INSERT INTO app_edge (fromNode, toNode, weight, dataset_id) VALUES")
 	
+	partition = 1000
+	counter = 0
+
 	for (fromNode, toNode, weight, dataset_id) in zip(data[0], data[1], data[2], data[3]):
-		
 		insert_string = "(" + str(fromNode) + "," + str(toNode) + "," + str(weight) + "," + str(dataset_id) + "),\n"
 		edges_sql.write(insert_string)
-	
+		counter += 1
+		if counter == partition:
+			counter = 0
+			edges_sql.seek(-2, os.SEEK_CUR)
+			edges_sql.write(";")
+			edges_sql.write("INSERT INTO app_edge (fromNode, toNode, weight, dataset_id) VALUES")
+
 	edges_sql.seek(-2, os.SEEK_CUR)
 	edges_sql.write(";")
 	edges_sql.close()
@@ -105,12 +110,21 @@ def create_data_sql(data_input_filename, data_sql_filename):
 					data[8], data[9], data[10], data[11], data[12], data[13], data[14], data[15],
 					data[16], data[17], data[18], data[19],data[20], data[21], data[22], data[23],
 					data[24], data[25], data[26], data[27], data[28], data[29])
-				
+	
+	partition = 1000
+	counter = 0
 	for arr in source:
 		vals = "("
 		vals += ",".join(arr)
 		vals += "),\n"
 		data_sql.write(vals)
+		# increment counter
+		counter += 1
+		if counter == partition:
+			counter = 0
+			data_sql.seek(-2, os.SEEK_CUR)
+			data_sql.write(";")
+			data_sql.write("INSERT INTO app_node " + columnNames + " VALUES ");
 	
 	data_sql.seek(-2, os.SEEK_CUR)
 	data_sql.write(";")
