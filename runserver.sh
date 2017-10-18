@@ -1,5 +1,2 @@
-# kill existing uwsgi processes
-sudo kill -9 $(ps aux | grep -e uwsgi | awk '{ print $2 }')
-
-# reload server
-uwsgi --module=web.wsgi  --processes=3 --http=127.0.0.1:8003 --enable-threads --reload-mercy=1 --worker-reload-mercy=1
+# new server based on Gunicorn
+/home/forge/miniconda3/envs/perseus/bin/python /home/forge/miniconda3/envs/perseus/bin/gunicorn --reload -t 120 -w 4 -b :8003 web.wsgi
