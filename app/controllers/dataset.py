@@ -23,7 +23,10 @@ class DatasetSearchController(LoginRequiredResource, View):
 		query = request.POST['query']
 
 		# search for datasets
-		datasets = Dataset.objects.filter(title__icontains = query)	
+		datasets = Dataset.objects.filter(title__icontains = query, \
+										  publicized = True,
+										  processed = True,
+										  trashed = False)	
 
 		if len(datasets) == 0:
 			response = {

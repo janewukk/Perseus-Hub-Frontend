@@ -2,7 +2,7 @@ from django.views import View
 from django.db.models import F
 from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse, Http404
+from django.http import HttpResponse, JsonResponse, Http404, HttpResponseForbidden
 from django.contrib.auth.mixins import LoginRequiredMixin as LoginRequiredResource
 
 from app.models import Dataset, User, Bookmark
@@ -29,9 +29,9 @@ class DashboardViewController(LoginRequiredResource, View):
 				datasets = []
 			else:
 				user = users[0]
-				datasets = user.datasets().filter(publicized = True, processed = True)
+				datasets = user.datasets().filter(publicized = True, processed = True, trashed = False)
 		else:
-			datasets = Dataset.objects.filter(publicized = True, processed = True)
+			datasets = Dataset.objects.filter(publicized = True, processed = True, trashed = False)
 
 		# sort datasets
 		try:
@@ -42,7 +42,8 @@ class DashboardViewController(LoginRequiredResource, View):
 		return render(request, 'dashboard/datasets.html', {
 				'datasets' : datasets,
 				'user' : user,
-				'auth_user': request.user
+				'auth_user': request.user,
+				'user': user
 			})
 
 class DatasetViewController(LoginRequiredResource, View):
@@ -62,6 +63,12 @@ class DatasetViewController(LoginRequiredResource, View):
 		# handle error
 		if dataset is None:
 			raise Http404("Dataset does not exist!")
+
+		if not dataset.processed or dataset.trashed:
+			raise HttpResponseForbidden("Dataset not viewable!")
+
+		if not dataset.publicized and not request.user.datasets().get(id = dataset.id):
+			raise HttpResponseForbidden("Dataset not viewable!")
 
 		# make graph
 		# attempt cache first
@@ -112,6 +119,7 @@ class BookmarkViewController(LoginRequiredResource, View):
 		return render(request, 'dashboard/bookmarks.html', {
 				'bookmarks' : bookmarks,
 				'can_edit' : can_edit,
-				'auth_user': request.user
+				'auth_user': request.user,
+				'user': user
 			})		
 

@@ -60,6 +60,8 @@ class Dataset(models.Model):
 	combined_scores_files = models.CharField(max_length = 512, default = "")
 	# the user who uploads this dataset
 	uploader = models.ForeignKey(User, on_delete = models.CASCADE, default =1)
+	# marked as delete
+	trashed = models.BooleanField(default = False)
 	# timestamps
 	created_at = models.DateTimeField(auto_now_add = True)
 	updated_at = models.DateTimeField(auto_now = True)
