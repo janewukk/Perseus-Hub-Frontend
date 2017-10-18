@@ -1,2 +1,5 @@
 *.pyc
 web/settings.py
+runserver.sh
+runSpark.sh
+app/runSpark.sh
