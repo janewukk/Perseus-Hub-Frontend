@@ -119,18 +119,14 @@
 		e.preventDefault();
 		// progress update
 		var $progressbar = $('.progress');
-		function toggleProgressBar() {
-			if ($progressbar.is(':visible')) {
-				$progressbar.fadeOut('fast');
-			} else {
-				$progressbar.fadeIn('fast');
-			}
-		}
+
 		function updateProgressBar(percentage) {
 			// update progress bar attributes
-			$progressbar.find('.progress-bar').prop('aria-valuenow', percentage * 100);
+			$progressbar.find('.progress-bar').attr('aria-valuenow', percentage);
 			// update inner text
-			$progressbar.find('.progress-bar').html(percentage * 100 + "%");
+			$progressbar.find('.progress-bar').html(percentage + "%");
+			// update bar width
+			$progressbar.find('.progress-bar').css({'width': percentage + "%"})
 		}
 
 		// extract form data
@@ -146,18 +142,21 @@
 				updateProgressBar(percentCompleted);
 			}
 		};
+		// show progress bar
+		$progressbar.fadeIn('fast');
+
+		// upload data
+		setTimeout(function() {
+			$('#upload-btn').addClass('disabled');
+		}, 500);
 		http.post('/upload/', data, config)
 			.then(function(res) {
-				if (res.data['status'] == 'success') {
-					showModal("Great! Your dataset has been uploaded! We will send " +
-						  "you an email when we finished processed the data");
-				} else {
-					showModal(res.data['message']);
-				}
-				
+				showModal(res.data['message']);
+				$('#upload-btn').removeClass('disabled');
 			})
 			.catch(function(err) {
-				showModal("Oops. Please try again later!");
+				showModal(res.data['message']);
+				$('#upload-btn').removeClass('disabled');
 			});
 	});
 </script>

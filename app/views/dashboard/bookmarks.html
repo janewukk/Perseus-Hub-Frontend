@@ -155,7 +155,7 @@
 					<div class="checkbox">
 						<label>
 						<input type="checkbox" data-bind="checked: publicized">
-							Publish status
+							Publicized status
 						</label>
 					</div>
 				</div>
@@ -204,25 +204,23 @@
 
 		// let user confirm
 		if (confirm("Are you sure you want to delete this bookmark?")) {
-
+			$('.loading-indicator').modal('show');
 			// delete the bookmark
 			$.ajax({
 				'url': "/bookmarks/" + $this.attr('data-delete') + "/delete",
 				'method': "POST"
 			}).done(function(res){
-
 				if (res['status'] == 'success') {
 					// deleted successfully, remove the current row
 					console.log($('tr[data-row="' + $this.attr('data-delete') + '"]'));
 					$('tr[data-row="' + $this.attr('data-delete') + '"]').fadeOut();
 				}
-
 				showModal(res['message']);
-
+				$('.loading-indicator').modal('hide');
 			}).fail(function(e){
 				console.log(e);
 				showModal("Failed to delete bookmark!");
-
+				$('.loading-indicator').modal('hide');
 			})
 
 		}
@@ -265,26 +263,21 @@
 		}).done(function(res){
 
 			if (res['status'] == 'success') {
-
 				// update UI priority
 				var priorityTexts = [ "low", "medium", "high" ];
-
 				$('tr[data-row="' + bookmarkId + '"] td.priority').html(priorityTexts[priority]);
-
 				// update UI publicized
 				$('tr[data-row="' + bookmarkId + '"] td.publicized').html(publicized ? "Yes" : "No");
-
 				// hide loading indicator
 				$('#loading-indicator').modal("hide");
 			}
-
 			showModal(res['message']);
-
 		}).fail(function(e) {
 
 			console.log(e);
 			showModal("Failed to update bookmark!");
-
+			// hide loading indicator
+			$('#loading-indicator').modal("hide");
 		});
 
 	});

@@ -57,7 +57,6 @@ class DatasetUploadController(LoginRequiredResource, View):
 		Arguments:
 			request {HTTPRequest} -- Request object
 		"""
-		# TODO: form validation
 		# extract attribute
 		publicized = False if request.POST['is_publicized'] == "false" else True
 		# grab the request data and create dataset
@@ -84,7 +83,7 @@ class DatasetUpdateController(LoginRequiredResource, View):
 	login_url = '/login/'
 	redirect_field_name = 'redirect_to'
 
-	def post(self, request):
+	def post(self, request, *args, **kwargs):
 		"""
 		Handling update of dataset attributes
 		
@@ -114,14 +113,14 @@ class DatasetUpdateController(LoginRequiredResource, View):
 
 		return JsonResponse({
 				'status': "success",
-				'message': "Bookmark updated successfully!"
+				'message': "Dataset updated successfully!"
 			})
 
 class DatasetDeleteController(LoginRequiredResource, View):
 	login_url = '/login/'
 	redirect_field_name = 'redirect_to'
 
-	def post(self, request):
+	def post(self, request, *args, **kwargs):
 		"""
 		Handling deletion of dataset
 		

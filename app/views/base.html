@@ -63,7 +63,7 @@
 						{% if auth_user.is_authenticated %}
 						<form class="navbar-form navbar-left" role="search" id="nav-search-form">
 							<div class="form-group">
-								<input type="text" id="search-field" class="form-control" placeholder="Search datasets" autocomplete="off">
+								<input type="text" id="search-field" class="form-control" placeholder="Search public datasets" autocomplete="off">
 								<ul class="list-group search-dropdown" data-bind="visible: showDropdown, foreach: results">
 									<li class="list-group-item">
 										<a data-bind="attr: { href : url }, text: title"></a>

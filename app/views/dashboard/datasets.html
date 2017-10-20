@@ -25,6 +25,7 @@
 	}
 	.dataset-action-dropdown {
 		margin-left: -40px;
+		min-width: inherit;
 	}
 </style>
 {% endblock %}
@@ -69,7 +70,7 @@
 {% if datasets %}
 <div class="row" style="margin-top:20px" id="dataset-list">
 	{% for dataset in datasets %}
-	<div class="col-sm-6 col-md-3">
+	<div class="col-sm-6 col-md-3 dataset-item" data-dataset-id="{{dataset.id}}" data-dataset-publicized="{{dataset.publicized}}" data-dataset-title="{{dataset.title}}">
 		<div class="thumbnail">
 			<div class="caption">
 				<div class="image-container">
@@ -80,8 +81,8 @@
 							<i class="fa fa-ellipsis-h" aria-hidden="true"></i>
 						</a>
 						<ul class="dropdown-menu dataset-action-dropdown" aria-labelledby="dLabel">
-					    	<li><a>Edit</a></li>
-					    	<li><a>Delete</a></li>
+					    	<li><a data-dataset-id="{{dataset.id}}" class="edit-dataset-btn"><i class="fa fa-pencil"></i> Edit</a></li>
+					    	<li><a data-dataset-id="{{dataset.id}}" class="delete-dataset-btn"><i class="fa fa-trash"></i> <span style="color: red">Delete</span></a></li>
 					  	</ul>
 					</div>
 					{% endif %}
@@ -91,7 +92,7 @@
 					</div>
 					{% endif %}
 				</div>
-				<h4>
+				<h4 class="dataset-title">
 					{% if dataset.processed %}
 					<a href="/datasets/{{ dataset.id }}">{{ dataset.title }}</a>
 					{% else %}
@@ -125,6 +126,40 @@
 </div>
 {% endif %}
 
+<!-- Dataset editor -->
+<div class="modal fade" id="dataset-editor" tabindex="-1" role="dialog" aria-labelledby="dataset-editor">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="dataset-editor">Edit the dataset</h4>
+			</div>
+			<div class="modal-body">
+				<div>
+					<div class="form-group">
+						<div class="input-group">
+							<label>Title</label>
+							<input type="text" class="form-control" name="dataset-title" data-bind="value: title">
+						</div>
+					</div>
+					<div class="checkbox">
+						<label>
+						<input type="checkbox" data-bind="checked: publicized">
+							Publicized status
+						</label>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" id="update-dataset-btn">Update</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% include 'components/modal.html' %}
+{% include 'components/loading-indicator.html' %}
 {% endblock %}
 
 {% block scripts %}
@@ -152,5 +187,89 @@
 		var val = $(this).html();
 		$(this).html(moment.utc(val).local().format('MMMM Do YYYY, h:mm a'));
 	});
+
+	// dataset editor view model
+	var datasetEditorView = new View({
+		el: document.getElementById('dataset-editor'),
+		data: {
+			id: -1,
+			publicized: false,
+			title: ""
+		}
+	});	
+
+	// dataset edit clicked
+	$('.edit-dataset-btn').click(function() {
+		var datasetItem = $(this).closest('.dataset-item');
+		// pass the data to the dataset editor
+		datasetEditorView.data().publicized(
+			datasetItem.attr('data-dataset-publicized') == "True" ? 1 : 0
+		);
+		datasetEditorView.data().title(
+			datasetItem.attr('data-dataset-title')
+		);
+		datasetEditorView.data().id(
+			datasetItem.attr('data-dataset-id')
+		);
+		// show the editor modal
+		$('#dataset-editor').modal('show');
+	});
+
+	// dataset update btn clicked
+	$('#update-dataset-btn').click(function() {
+		var datasetId = datasetEditorView.data().id();
+		$.ajax({
+			url: "/datasets/" + datasetId + "/update",
+			method: "POST",
+			data: {
+				'updates': JSON.stringify({
+					'publicized': datasetEditorView.data().publicized(),
+					'title': datasetEditorView.data().title()
+				})
+			}
+		}).done(function(res){
+			if (res['status'] == 'success') {
+				// update UI title
+				$('.dataset-item[data-dataset-id='+datasetId+'] .dataset-title a').html(
+						datasetEditorView.data().title()
+					);
+				// update attribute data
+				$('.dataset-item[data-dataset-id='+datasetId+']').attr('data-dataset-publicized', datasetEditorView.data().publicized() ? "True":"False");
+				$('.dataset-item[data-dataset-id='+datasetId+']').attr('data-dataset-title', datasetEditorView.data().title());
+				// hide loading indicator
+				$('#loading-indicator').modal("hide");
+			}
+			showModal(res['message']);
+		}).fail(function(e) {
+			console.log(e);
+			showModal("Failed to update dataset!");
+			// hide loading indicator
+			$('#loading-indicator').modal("hide");
+		});
+	});
+
+	// delete dataset btn clicked
+	$('.delete-dataset-btn').click(function() {
+		var datasetId = $(this).attr('data-dataset-id');
+		if (confirm("Are you sure you want to delete this dataset? The action cannot be undone!")) {
+			// show modal
+			$('.loading-indicator').modal('show');
+			// send request
+			$.ajax({
+				url: "/datasets/" + datasetId + "/delete",
+				method: "POST"
+			}).done(function(res) {
+				$('.loading-indicator').modal('hide');
+				if (res['status'] == 'success') {
+					$('.dataset-item[data-dataset-id=' + datasetId + ']').fadeOut();
+				}
+				showModal(res['message']);
+			}).fail(function(res) {
+				$('.loading-indicator').modal('hide');
+				showModal(res['message']);
+			});
+		}
+	});
+
 </script>
 {% endblock %}

@@ -22,7 +22,7 @@ class DashboardViewController(LoginRequiredResource, View):
 		user = None
 		can_edit = False
 		if 'my' in request.GET.keys():
-			datasets = request.user.dataset_set
+			datasets = request.user.dataset_set.filter(trashed = False)
 			can_edit = True
 		elif 'user' in request.GET.keys():
 			users = User.objects.filter(id = request.GET['user'])

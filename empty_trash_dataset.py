@@ -12,6 +12,7 @@ def main():
 	db = MySQLdb.connect(host=host, port=port, user=user, passwd=password, db=db)
 	# delete trashed dataset
 	db.query("DELETE FROM app_dataset WHERE trashed = 1")
+	print "cleared!"
 
 if __name__ == '__main__':
 	"""

@@ -40,7 +40,7 @@ urlpatterns = [
     url(r'^bookmarks/validate', BookmarkValidateController.as_view()),
     url(r'^bookmarks/$', BookmarkViewController.as_view()),
     url(r'^search', DatasetSearchController.as_view()),
-    url(r'^datasets/(?P<id>\d+)/update', DatasetUploadController.as_view()),
+    url(r'^datasets/(?P<id>\d+)/update', DatasetUpdateController.as_view()),
     url(r'^datasets/(?P<id>\d+)/delete', DatasetDeleteController.as_view()),
     url(r'^datasets/(?P<id>\d+)', DatasetViewController.as_view()),
 
