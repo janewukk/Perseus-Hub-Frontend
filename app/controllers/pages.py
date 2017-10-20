@@ -20,8 +20,10 @@ class DashboardViewController(LoginRequiredResource, View):
 		# with all publicized datasets or user specific
 		# TODO: Pagination
 		user = None
+		can_edit = False
 		if 'my' in request.GET.keys():
 			datasets = request.user.dataset_set
+			can_edit = True
 		elif 'user' in request.GET.keys():
 			users = User.objects.filter(id = request.GET['user'])
 			if len(users) == 0:
@@ -43,7 +45,8 @@ class DashboardViewController(LoginRequiredResource, View):
 				'datasets' : datasets,
 				'user' : user,
 				'auth_user': request.user,
-				'user': user
+				'user': user,
+				'can_edit': can_edit
 			})
 
 class DatasetViewController(LoginRequiredResource, View):
@@ -53,7 +56,6 @@ class DatasetViewController(LoginRequiredResource, View):
 	def get(self, request, *args, **kwargs):
 		# extract id
 		dataset_id = kwargs.get('id')
-
 		# fetch the dataset
 		try:
 			dataset = Dataset.objects.get(id = dataset_id)
@@ -93,6 +95,7 @@ class BookmarkViewController(LoginRequiredResource, View):
 		# with all publicized bookmarks or user specific
 		# TODO: Pagination
 		user = None
+		can_edit = False
 		if 'my' in request.GET.keys():
 			bookmarks = request.user.bookmark_set
 			can_edit = True
@@ -104,10 +107,8 @@ class BookmarkViewController(LoginRequiredResource, View):
 			else:
 				user = users[0]
 				bookmarks = users[0].bookmarks().filter(publicized = True)
-			can_edit = False
 		else:
 			bookmarks = Bookmark.objects.filter(publicized = True)
-			can_edit = False
 
 		# sort bookmarks
 		try:

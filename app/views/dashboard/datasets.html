@@ -15,6 +15,17 @@
 	    display: block;
 	    background: rgba(0, 0, 0, .6);
 	}
+	.dataset-options {
+		position: absolute;
+		right: 10px;
+		top: 0px;
+		font-size: 20px;
+		color: black;
+		cursor: pointer;
+	}
+	.dataset-action-dropdown {
+		margin-left: -40px;
+	}
 </style>
 {% endblock %}
 
@@ -63,6 +74,18 @@
 			<div class="caption">
 				<div class="image-container">
 					<img style="width: 100%" src="http://placehold.it/320x125/EEE" class="dataset-cover" data-hash="{{ dataset.title }}">
+					{% if can_edit %}
+					<div class="dropdown dataset-options">
+						<a data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+							<i class="fa fa-ellipsis-h" aria-hidden="true"></i>
+						</a>
+						<ul class="dropdown-menu dataset-action-dropdown" aria-labelledby="dLabel">
+					    	<li><a>View datasets</a></li>
+					    	<li><a>View bookmarks</a></li>
+					    	<li><a>Contact this user</a></li>
+					  	</ul>
+					</div>
+					{% endif %}
 					{% if not dataset.processed %}
 					<div class="overlay">
 						<h2 style="color: white; text-align: center; height: 100%; margin-top: 40%">Processing...</h2>

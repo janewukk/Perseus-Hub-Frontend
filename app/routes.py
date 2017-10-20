@@ -20,7 +20,7 @@ from django.contrib import admin
 from app.controllers.settings import SettingsController
 from app.controllers.auth import LoginController, LogoutController, RegisterController
 from app.controllers.pages import DashboardViewController, DatasetViewController, BookmarkViewController
-from app.controllers.dataset import DatasetSearchController, DatasetUploadController
+from app.controllers.dataset import DatasetSearchController, DatasetUploadController, DatasetUpdateController, DatasetDeleteController
 from app.controllers.bookmark import BookmarkCreateController, BookmarkValidateController, BookmarkDeleteController, BookmarkUpdateController
 
 # Graph apis
@@ -40,6 +40,8 @@ urlpatterns = [
     url(r'^bookmarks/validate', BookmarkValidateController.as_view()),
     url(r'^bookmarks/$', BookmarkViewController.as_view()),
     url(r'^search', DatasetSearchController.as_view()),
+    url(r'^datasets/(?P<id>\d+)/update', DatasetUploadController.as_view()),
+    url(r'^datasets/(?P<id>\d+)/delete', DatasetDeleteController.as_view()),
     url(r'^datasets/(?P<id>\d+)', DatasetViewController.as_view()),
 
     url(r'^ClickPlot',ClickPlot),

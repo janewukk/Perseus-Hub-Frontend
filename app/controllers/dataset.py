@@ -72,10 +72,60 @@ class DatasetUploadController(LoginRequiredResource, View):
 		# and the dataset id so that later Spark callback
 		# can retrieve the user related to this dataset
 		filename = dataset.raw_data_file.name.split('/')[-1]
-		subprocess.Popen(["bash", base_path('runSpark.sh'), filename, str(request.user.id), str(dataset.id)], close_fds=True)
+		subprocess.Popen(["bash", base_path('/runSpark.sh'), filename, str(request.user.id), str(dataset.id)], close_fds=True)
 
 		return JsonResponse({
 				'status' : "success",
 				'message' : "Your dataset has been uploaded and is being processed. \
 							we will send you an email once it's done! Please remember to check your spam folder!"
 			})
+
+class DatasetUpdateController(LoginRequiredResource, View):
+	login_url = '/login/'
+	redirect_field_name = 'redirect_to'
+
+	def post(self, request):
+		"""
+		Handling update of dataset attributes
+		
+		Arguments:
+			request {HTTPRequest} -- Request object
+		"""
+		pass
+
+class DatasetDeleteController(LoginRequiredResource, View):
+	login_url = '/login/'
+	redirect_field_name = 'redirect_to'
+
+	def post(self, request):
+		"""
+		Handling deletion of dataset
+		
+		Basically mark the dataset as trashed, and let worker clean it up later
+		
+		Arguments:
+			request {HTTPRequest} -- Request objects
+		"""
+		# extract dataset id
+		dataset_id = kwargs.get('id')
+
+		dataset = Dataset.objects.get(id = dataset_id)
+
+		if not dataset:
+			return JsonResponse({
+					'status': "error",
+					'message': "Dataset does not exist!"
+				})
+
+		# mark as trashed
+		dataset.trashed = True
+		dataset.save()
+
+		return JsonResponse({
+				'status': "success",
+				'message': "Dataset has been marked as delete!"
+			})
+
+
+
+
