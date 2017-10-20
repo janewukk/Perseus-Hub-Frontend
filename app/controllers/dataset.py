@@ -91,7 +91,31 @@ class DatasetUpdateController(LoginRequiredResource, View):
 		Arguments:
 			request {HTTPRequest} -- Request object
 		"""
-		pass
+		# extract dataset id
+		dataset_id = kwargs.get('id')
+
+		# check if dataset exists
+		dataset = Dataset.objects.get(id = dataset_id)
+
+		if not dataset:
+			return JsonResponse({
+					'status': "error",
+					'message': "Dataset not exists!"
+				})
+
+		# update bookmark
+		updates = json.loads(request.POST['updates'])
+
+		for key, value in updates.items():
+			setattr(dataset, key, value)
+
+		# save updates
+		dataset.save(update_fields=['publicized', 'title'])
+
+		return JsonResponse({
+				'status': "success",
+				'message': "Bookmark updated successfully!"
+			})
 
 class DatasetDeleteController(LoginRequiredResource, View):
 	login_url = '/login/'
@@ -125,7 +149,3 @@ class DatasetDeleteController(LoginRequiredResource, View):
 				'status': "success",
 				'message': "Dataset has been marked as delete!"
 			})
-
-
-
-

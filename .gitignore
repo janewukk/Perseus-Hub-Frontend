@@ -5,3 +5,4 @@ runserver.sh
 runSpark.sh
 app/runSpark.sh
 app/data/*
+dump.rdb
