@@ -7,8 +7,10 @@ from app.services.utils import user_processed_dir, absolute_path, timestamp, cre
 
 def test_popen(message):
 	print("received")
-	subprocess.Popen(["sleep", "100"], close_fds=True)
-	print("instantly")
+	sum = 0
+	for i in range(10000000000):
+		sum += sum * i * i
+	print("after calc")
 
 def test_receive(message):
 	print("received: " + message['data'])

@@ -82,7 +82,7 @@
 		  		<td>{{ bookmark.prop }}</td>
 		  		<td class="priority">{{ bookmark.priority|to_priority_string }}</td>
 		  		<td class="publicized">{{ bookmark.publicized|yesno:"Yes,No" }}</td>
-		  		<td>{{ bookmark.created_at }}</td>
+		  		<td class="upload-time">{{ bookmark.created_at|date:"D d M Y" }} {{ bookmark.created_at|time:"H:i" }}</td>
 		  		<td>
 		  			<button type="button" class="btn btn-primary" onclick="window.location.href='/datasets/{{ bookmark.dataset.id }}/'">View</button>
 		  		</td>
@@ -174,8 +174,15 @@
 {% endblock %}
 
 {% block tabscripts %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.19.1/moment.min.js"></script>
 <script type="text/javascript">
 	
+	// convert time from utc to local
+	$('.upload-time').each(function() {
+		var val = $(this).html();
+		$(this).html(moment.utc(val).local().format('MMMM Do YYYY, h:mm a'));
+	});
+
 	// init bookmark models
 	var bookmarkView = new View({
 		el : document.getElementById('bookmark-editor'),
