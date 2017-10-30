@@ -64,6 +64,7 @@
 		  		<th>Y coordinate</th>
 		  		<th>Property name</th>
 		  		<th>Priority</th>
+		  		<th>Note</th>
 		  		<th>Is publicized</th>
 		  		<th>Created at</th>
 		  		<th>View dataset</th>
@@ -81,6 +82,7 @@
 		  		<td>{{ bookmark.y_coord }}</td>
 		  		<td>{{ bookmark.prop }}</td>
 		  		<td class="priority">{{ bookmark.priority|to_priority_string }}</td>
+		  		<td class="note">{{ bookmark.note }}</td>
 		  		<td class="publicized">{{ bookmark.publicized|yesno:"Yes,No" }}</td>
 		  		<td class="upload-time">{{ bookmark.created_at|date:"D d M Y" }} {{ bookmark.created_at|time:"H:i" }}</td>
 		  		<td>
@@ -102,7 +104,7 @@
 		  		{% if can_edit %}
 		  		<td>
 		  			<a class="delete-btn btn btn-danger" data-delete="{{ bookmark.id }}" class="btn btn-danger"><i class="fa fa-times" aria-hidden="true"></i></a>
-		  			<a class="edit-btn btn btn-primary" data-publicized="{{ bookmark.publicized|yesno:"1,0" }}" data-priority="{{ bookmark.priority }}" data-edit="{{ bookmark.id }}" class="btn btn-primary"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+		  			<a class="edit-btn btn btn-primary" data-publicized="{{ bookmark.publicized|yesno:"1,0" }}" data-priority="{{ bookmark.priority }}" data-note="{{ bookmark.note }}" data-edit="{{ bookmark.id }}" class="btn btn-primary"><i class="fa fa-pencil" aria-hidden="true"></i></a>
 		  		</td>
 		  		{% endif %}
 		  	</tr>
@@ -152,6 +154,9 @@
 							</ul>
 						</div>
 					</div>
+					<div class="form-group">
+						<input class="form-control" placeholder="Enter a brief note if any" data-bind="textInput: note"></input>
+					</div>
 					<div class="checkbox">
 						<label>
 						<input type="checkbox" data-bind="checked: publicized">
@@ -189,7 +194,8 @@
 		data : {
 			priorityVal : 0,
 			publicized : false,
-			id : -1
+			id : -1,
+			note : ''
 		},
 		computed: {
 			priority : function () {
@@ -241,8 +247,10 @@
 		bookmarkView.data().id($(this).attr('data-edit'));
 		bookmarkView.data().priorityVal($(this).attr('data-priority'));
 		bookmarkView.data().publicized(Boolean(parseInt($(this).attr('data-publicized'))));
+		bookmarkView.data().note($(this).attr('data-note'));
+
 		// show editing modal
-		// @notice: current only support updating of priority and publicized status
+		// @notice: current only support updating of priority, publicized status and note
 		$('#bookmark-editor').modal('show');
 
 	});
@@ -257,6 +265,7 @@
 		var bookmarkId = bookmarkView.data().id();
 		var priority = bookmarkView.data().priorityVal();
 		var publicized = bookmarkView.data().publicized();
+		var note = bookmarkView.data().note();
 
 		$.ajax({
 			url: "/bookmarks/" + bookmarkId + "/update",
@@ -264,7 +273,8 @@
 			data: {
 				'updates': JSON.stringify({
 					'publicized': publicized,
-					'priority': priority
+					'priority': priority,
+					'note' : note
 				})
 			}
 		}).done(function(res){
@@ -275,6 +285,8 @@
 				$('tr[data-row="' + bookmarkId + '"] td.priority').html(priorityTexts[priority]);
 				// update UI publicized
 				$('tr[data-row="' + bookmarkId + '"] td.publicized').html(publicized ? "Yes" : "No");
+				// update UI note
+				$('tr[data-row="' + bookmarkId + '"] td.note').html(note);
 				// hide loading indicator
 				$('#loading-indicator').modal("hide");
 			}

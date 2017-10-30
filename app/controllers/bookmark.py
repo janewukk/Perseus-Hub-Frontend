@@ -30,6 +30,7 @@ class BookmarkCreateController(LoginRequiredResource, View):
 							x_coord = request.POST['x_coord'], \
 							y_coord = request.POST['y_coord'], \
 							prop = request.POST['prop'], \
+							note = request.POST['note'], \
 							node_id = request.POST['node_id'], \
 							publicized = publicized, \
 							dataset = Dataset.objects.get(id = request.POST['dataset_id']),
@@ -109,7 +110,7 @@ class BookmarkUpdateController(LoginRequiredResource, View):
 			setattr(bookmark, key, value)
 
 		# save updates
-		bookmark.save(update_fields=['priority', 'x_coord', 'y_coord', 'prop', 'publicized'])
+		bookmark.save(update_fields=['priority', 'x_coord', 'y_coord', 'prop', 'publicized', 'note'])
 
 		return JsonResponse({
 				'status': "success",

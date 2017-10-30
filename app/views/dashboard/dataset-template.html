@@ -262,6 +262,9 @@ path.domain {
 							</ul>
 						</div>
 					</div>
+					<div class="form-group">
+						<input class="form-control" placeholder="Enter a brief note if any" data-bind="value: note"></input>
+					</div>
 					<div class="checkbox">
 						<label>
 						<input type="checkbox" data-bind="checked: publicized"> Do you want to publicize it?
@@ -332,7 +335,8 @@ path.domain {
 			propertyName: "",
 			xCoord: "",
 			yCoord: "",
-			nodeId: ""
+			nodeId: "",
+			note: ""
 		},
 		methods : {
 			selectPriority : function (val, level) {
@@ -466,6 +470,7 @@ path.domain {
 				'prop': bookmarkView.data().propertyName(),
 				'node_id': bookmarkView.data().nodeId(),
 				'is_publicized': bookmarkView.data().publicized(),
+				'note': bookmarkView.data().note(),
 				'dataset_id': datasetId
 			}
 		}).done(function(res) {
