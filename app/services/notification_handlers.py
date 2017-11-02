@@ -26,6 +26,8 @@ def process_finished(message):
 	print("received message... %s" % message['data'])
 	
 	try:
+		print "Start trying..."
+
 		start_time = time.time()
 		# in form of [userid datasetid dbname graphname edgesname anomallyname...]
 		data = message['data'].split(' ')
@@ -36,6 +38,8 @@ def process_finished(message):
 		
 		# Generate node and edges sql file and import
 		db = DATABASES['default']
+
+		print "Creating tmp sql file paths..."
 
 		tmp_nodes_sql_path = absolute_path('data/tmp/') + timestamp(datetime.now()) + "_nodes.sql"
 		tmp_edges_sql_path = absolute_path('data/tmp/') + timestamp(datetime.now()) + "_edges.sql"
@@ -81,7 +85,10 @@ def process_finished(message):
 		# Send email
 		email.send('submission@perseushub.com', user.email, 'Your dataset has finished processing!',\
 					html = "You can view your dataset result at <a href='http://perseushub.com/datasets/%s'> here </a>" % dataset.id)
-	
+		
+		print "All done!"
+
 	except Exception as e:
-		print e.message
+		print "Caught error!"
+		print str(e)
 	
