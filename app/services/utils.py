@@ -64,6 +64,9 @@ def dataset_cache_keys(dataset):
 	}
 
 
+# Batch size for generating MySQL import statements
+batch = 10000
+
 """
 Generate SQL statements for edges to import
 """
@@ -73,7 +76,7 @@ def create_edges_sql(edges_input_filename, edges_sql_filename):
 	
 	edges_sql.write("INSERT INTO app_edge (fromNode, toNode, weight, dataset_id) VALUES")
 	
-	partition = 1000
+	partition = batch
 	counter = 0
 
 	for (fromNode, toNode, weight, dataset_id) in zip(data[0], data[1], data[2], data[3]):
@@ -111,7 +114,7 @@ def create_data_sql(data_input_filename, data_sql_filename):
 					data[16], data[17], data[18], data[19],data[20], data[21], data[22], data[23],
 					data[24], data[25], data[26], data[27], data[28], data[29])
 	
-	partition = 1000
+	partition = batch
 	counter = 0
 	for arr in source:
 		vals = "("

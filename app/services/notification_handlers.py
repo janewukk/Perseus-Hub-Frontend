@@ -52,18 +52,19 @@ def process_finished(message):
 
 		processes = [ mp.Process(target=create_nodes, args=()), mp.Process(target=create_edges, args=()) ]
 
-		for p in processes:
+		for index, p in enumerate(processes):
+			print "Start part %i" % (index + 1)
 			p.start()
 
-		for p in processes:
+		for index, p in enumerate(processes):
 			p.join()
-			print("Finished one")
+			print "Finished part %i" % (index + 1)
 
 		end_time = time.time()
 
-		print("data generation and import took %ss" % str(end_time - start_time))
+		print("Data generation and import took %ss" % str(end_time - start_time))
 
-		########### End multiprocessing #########
+		########### End multiprocessing #############
 
 		# Modify dataset
 		dataset.processed = True
@@ -80,6 +81,7 @@ def process_finished(message):
 		# Send email
 		email.send('submission@perseushub.com', user.email, 'Your dataset has finished processing!',\
 					html = "You can view your dataset result at <a href='http://perseushub.com/datasets/%s'> here </a>" % dataset.id)
+	
 	except Exception as e:
 		print e.message
 	
